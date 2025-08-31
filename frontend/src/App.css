@@ -1,0 +1,141 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+/* Genre filter buttons */
+.genre-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.genre-btn {
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.genre-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .genre-buttons {
+    justify-content: center;
+  }
+}
+/* Genre filter enhancements */
+.genre-categories {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.category-title {
+  color: #495057;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.genre-category {
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  background-color: #f8f9fa;
+}
+
+.genre-category:nth-child(even) {
+  background-color: #e9ecef;
+}
+
+/* Academic genre specific colors */
+.btn-outline-primary[data-genre-type="academic"] {
+  color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.btn-outline-primary[data-genre-type="academic"]:hover {
+  color: #fff;
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.btn-primary[data-genre-type="academic"] {
+  color: #fff;
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+/* Fiction genre specific colors */
+.btn-outline-primary[data-genre-type="fiction"] {
+  color: #dc3545;
+  border-color: #dc3545;
+}
+
+.btn-outline-primary[data-genre-type="fiction"]:hover {
+  color: #fff;
+  background-color: #dc3545;
+  border-color: #dc3545;
+}
+
+.btn-primary[data-genre-type="fiction"] {
+  color: #fff;
+  background-color: #dc3545;
+  border-color: #dc3545;
+}
+
+/* General genre specific colors */
+.btn-outline-primary[data-genre-type="general"] {
+  color: #198754;
+  border-color: #198754;
+}
+
+.btn-outline-primary[data-genre-type="general"]:hover {
+  color: #fff;
+  background-color: #198754;
+  border-color: #198754;
+}
+
+.btn-primary[data-genre-type="general"] {
+  color: #fff;
+  background-color: #198754;
+  border-color: #198754;
+}
