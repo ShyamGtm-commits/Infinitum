@@ -1,14 +1,269 @@
+from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
-from django.db.models import Q
+from django.db.models import Q, Count, Sum
 from .models import Book, UserProfile, Transaction
 from .serializers import BookSerializer, UserSerializer, UserProfileSerializer, TransactionSerializer
 from datetime import datetime, timedelta
 from django.utils import timezone
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+import weasyprint
+from django.shortcuts import render
+from django.views.decorators.csrf import ensure_csrf_cookie
+
+# library/views.py
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def api_status(request):
+    return Response({"status": "API is working!"})
+
+
+def admin_update_book(request, book_id):
+    # Your update logic here
+    return render(request, 'admin/update_book.html', {'book_id': book_id})
+
+
+def test_view(request):
+    return HttpResponse("Test successful!")
+
+
+# Admin - Add new book
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def admin_add_book(request):
+    # Check if user is admin
+    if not request.user.is_staff and not UserProfile.objects.get(user=request.user).user_type == 'admin':
+        return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+
+    # Handle file upload
+    data = request.data.copy()
+    if 'cover_image' in request.FILES:
+        data['cover_image'] = request.FILES['cover_image']
+
+    serializer = BookSerializer(data=data)
+    if serializer.is_valid():
+        book = serializer.save()
+        return Response({
+            'success': 'Book added successfully!',
+            'book': BookSerializer(book).data
+        }, status=status.HTTP_201_CREATED)
+
+    # Return specific validation errors
+    return Response({
+        'error': 'Validation failed',
+        'details': serializer.errors
+    }, status=status.HTTP_400_BAD_REQUEST)
+
+# Admin - Delete book
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def admin_delete_book(request, book_id):
+    if not request.user.is_staff and not UserProfile.objects.get(user=request.user).user_type == 'admin':
+        return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+
+    try:
+        book = Book.objects.get(id=book_id)
+        book.delete()
+        return Response({'success': 'Book deleted successfully'})
+    except Book.DoesNotExist:
+        return Response({'error': 'Book not found'}, status=status.HTTP_404_NOT_FOUND)
+
+# Admin - Generate PDF report
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def admin_generate_pdf_report(request):
+    if not request.user.is_staff and not UserProfile.objects.get(user=request.user).user_type == 'admin':
+        return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+
+    report_type = request.GET.get('type', 'monthly')
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
+    # Get data based on report type
+    if report_type == 'monthly':
+        start_of_month = timezone.now().replace(
+            day=1, hour=0, minute=0, second=0, microsecond=0)
+        transactions = Transaction.objects.filter(
+            issue_date__gte=start_of_month)
+
+        total_borrows = transactions.count()
+        total_returns = transactions.filter(return_date__isnull=False).count()
+        total_fines = transactions.aggregate(Sum('fine_amount'))[
+            'fine_amount__sum'] or 0
+
+        # Generate PDF
+        html_string = render_to_string('monthly_report.html', {
+            'period': start_of_month.strftime('%B %Y'),
+            'total_borrows': total_borrows,
+            'total_returns': total_returns,
+            'total_fines': total_fines,
+            'transactions': transactions
+        })
+
+        pdf_file = weasyprint.HTML(string=html_string).write_pdf()
+        response = HttpResponse(pdf_file, content_type='application/pdf')
+        response[
+            'Content-Disposition'] = f'attachment; filename="monthly_report_{start_of_month.strftime("%Y_%m")}.pdf"'
+        return response
+
+    return Response({'error': 'Invalid report type'}, status=status.HTTP_400_BAD_REQUEST)
+
+# Librarian - View all active transactions
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def librarian_active_transactions(request):
+    user_profile = UserProfile.objects.get(user=request.user)
+    if user_profile.user_type not in ['admin', 'librarian']:
+        return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+
+    transactions = Transaction.objects.filter(
+        return_date__isnull=True
+    ).select_related('book', 'user').order_by('due_date')
+
+    serializer = TransactionSerializer(transactions, many=True)
+    return Response(serializer.data)
+
+# Librarian - Manual book issue
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def librarian_manual_issue(request):
+    user_profile = UserProfile.objects.get(user=request.user)
+    if user_profile.user_type not in ['admin', 'librarian']:
+        return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+
+    book_id = request.data.get('book_id')
+    username = request.data.get('username')
+
+    try:
+        book = Book.objects.get(id=book_id)
+        user = User.objects.get(username=username)
+
+        if book.available_copies <= 0:
+            return Response({'error': 'No copies available'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Create transaction
+        transaction = Transaction.objects.create(
+            book=book,
+            user=user,
+            due_date=timezone.now() + timedelta(weeks=2)
+        )
+
+        # Update available copies
+        book.available_copies -= 1
+        book.save()
+
+        serializer = TransactionSerializer(transaction)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    except Book.DoesNotExist:
+        return Response({'error': 'Book not found'}, status=status.HTTP_404_NOT_FOUND)
+    except User.DoesNotExist:
+        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+# Librarian - Manual book return
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def librarian_manual_return(request, transaction_id):
+    user_profile = UserProfile.objects.get(user=request.user)
+    if user_profile.user_type not in ['admin', 'librarian']:
+        return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+
+    try:
+        transaction = Transaction.objects.get(id=transaction_id)
+
+        if transaction.return_date:
+            return Response({'error': 'Book already returned'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Calculate fine if overdue
+        today = timezone.now().date()
+        due_date = transaction.due_date.date()
+
+        if today > due_date:
+            days_overdue = (today - due_date).days
+            fine_per_day = 5  # ₹5 per day fine
+            transaction.fine_amount = days_overdue * fine_per_day
+
+        # Update transaction
+        transaction.return_date = timezone.now()
+        transaction.save()
+
+        # Update book availability
+        book = transaction.book
+        book.available_copies += 1
+        book.save()
+
+        serializer = TransactionSerializer(transaction)
+        return Response({'success': 'Book returned successfully', 'transaction': serializer.data})
+
+    except Transaction.DoesNotExist:
+        return Response({'error': 'Transaction not found'}, status=status.HTTP_404_NOT_FOUND)
+
+# User profile management
+
+
+@api_view(['GET', 'PUT'])
+@permission_classes([IsAuthenticated])
+def user_profile(request):
+    try:
+        profile = UserProfile.objects.get(user=request.user)
+    except UserProfile.DoesNotExist:
+        return Response({'error': 'Profile not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        serializer = UserProfileSerializer(profile)
+        return Response(serializer.data)
+
+    elif request.method == 'PUT':
+        # Users can only update their own profile
+        if profile.user != request.user:
+            return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+
+        serializer = UserProfileSerializer(
+            profile, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# User reading history
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def user_reading_history(request):
+    transactions = Transaction.objects.filter(
+        user=request.user
+    ).select_related('book').order_by('-issue_date')
+
+    # Create a list of books with reading stats
+    reading_history = []
+    for transaction in transactions:
+        reading_history.append({
+            'book': BookSerializer(transaction.book).data,
+            'issue_date': transaction.issue_date,
+            'return_date': transaction.return_date,
+            'status': 'Returned' if transaction.return_date else 'Borrowed'
+        })
+
+    return Response(reading_history)
 
 
 @api_view(['POST'])
@@ -30,6 +285,11 @@ def register_user(request):
         return Response({'success': 'User created successfully'}, status=status.HTTP_201_CREATED)
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+def get_csrf_token(request):
+    return Response({'detail': 'CSRF cookie set'})
 
 
 @api_view(['POST'])
@@ -60,8 +320,9 @@ def logout_user(request):
     return Response({'success': 'Logout successful'})
 
 
+# For public endpoints (like book list, search)
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])  # Add this for public access
 def book_list(request):
     books = Book.objects.all()
     serializer = BookSerializer(books, many=True)
@@ -113,7 +374,7 @@ def user_transactions(request):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def search_books(request):
     """
     Search books with multiple filters: title, author, genre, year range
@@ -301,8 +562,6 @@ def pay_fine(request, transaction_id):
 
 # Admin Dashboard Statistics
 
-
-c
 
 # Get all users
 
@@ -613,5 +872,41 @@ def admin_generate_report(request):
         })
 
     return Response({'error': 'Invalid report type'}, status=status.HTTP_400_BAD_REQUEST)
+
+# Book recommendations based on genre preferences
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def book_recommendations(request):
+    # Get user's most borrowed genres
+    user_genres = Transaction.objects.filter(
+        user=request.user
+    ).values('book__genre').annotate(count=Count('book__genre')).order_by('-count')[:3]
+
+    recommended_books = []
+
+    if user_genres:
+        # Get top genres
+        top_genres = [item['book__genre'] for item in user_genres]
+
+        # Find books in these genres that the user hasn't borrowed
+        borrowed_book_ids = Transaction.objects.filter(
+            user=request.user
+        ).values_list('book_id', flat=True)
+
+        recommended_books = Book.objects.filter(
+            genre__in=top_genres
+            # Random order for variety
+        ).exclude(id__in=borrowed_book_ids).order_by('?')[:10]
+
+    # If no recommendations based on history, suggest popular books
+    if not recommended_books:
+        recommended_books = Book.objects.annotate(
+            borrow_count=Count('transaction')
+        ).order_by('-borrow_count')[:10]
+
+    serializer = BookSerializer(recommended_books, many=True)
+    return Response(serializer.data)
 
 # Create your views here.

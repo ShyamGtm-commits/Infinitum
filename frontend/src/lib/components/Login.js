@@ -1,10 +1,27 @@
-import React, { useState } from 'react';
+// src/components/Login.js
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 const Login = ({ onLogin }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [csrfToken, setCsrfToken] = useState('');
+
+    // Function to get CSRF token
+    const getCsrfToken = () => {
+        return document.cookie.split('; ')
+            .find(row => row.startsWith('csrftoken='))
+            ?.split('=')[1];
+    };
+
+    useEffect(() => {
+        // Get CSRF token when component mounts
+        const token = getCsrfToken();
+        if (token) {
+            setCsrfToken(token);
+        }
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -15,6 +32,7 @@ const Login = ({ onLogin }) => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken,
                 },
                 credentials: 'include',
                 body: JSON.stringify({ username, password }),

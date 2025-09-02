@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-h=$ayai&uva!#6b95fevn#yq^_z#%jm_vn=1h-_j7w7l0m7-0x
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 
 # Application definition
@@ -128,16 +128,18 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
-        'rest_framework.renderers.JSONRenderer',  # Only return JSON
+        'rest_framework.renderers.JSONRenderer',
     ],
     'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.JSONParser',
+        'rest_framework.parsers.MultiPartParser',  # Add this for file uploads
+        'rest_framework.parsers.FormParser',  # Add this for form data
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',  # Change to IsAuthenticated later
+        'rest_framework.permissions.AllowAny',  # Keep this as AllowAny
     ]
 }
 CORS_ALLOWED_ORIGINS = [
@@ -149,11 +151,18 @@ CORS_ALLOW_CREDENTIALS = True
 
 # Add at the bottom of the file
 # Complete CSRF disable for development
-CSRF_USE_SESSIONS = False
-CSRF_COOKIE_SECURE = False
-CSRF_COOKIE_HTTPONLY = False
-CSRF_COOKIE_SAMESITE = 'Lax'
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
 ]
+
+# Ensure these settings are correct
+CSRF_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_HTTPONLY = False
+SESSION_COOKIE_HTTPONLY = True
+
+# For development, you might need to allow these
+CSRF_USE_SESSIONS = False
+CSRF_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE = False

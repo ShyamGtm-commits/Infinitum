@@ -1,7 +1,11 @@
 from django.urls import path
 from . import views
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
+    path('status/', views.api_status, name='api_status'),
+    path('test/', views.test_view, name='test'),
     path('register/', views.register_user, name='register'),
     path('login/', views.login_user, name='login'),
     path('logout/', views.logout_user, name='logout'),
@@ -20,7 +24,24 @@ urlpatterns = [
          name='admin_transaction_list'),
     path('admin/users/<int:user_id>/update_role/',
          views.admin_update_user_role, name='admin_update_user_role'),
-    path('admin/reports/', views.admin_generate_report,
-         name='admin_generate_report'),
+    path('admin/books/add/', views.admin_add_book, name='admin_add_book'),
+    path('admin/books/<int:book_id>/update/',
+         views.admin_update_book, name='admin_update_book'),
 
-]
+    path('admin/books/<int:book_id>/delete/',
+         views.admin_delete_book, name='admin_delete_book'),
+    path('admin/reports/pdf/', views.admin_generate_pdf_report,
+         name='admin_generate_pdf_report'),
+    path('librarian/transactions/active/', views.librarian_active_transactions,
+         name='librarian_active_transactions'),
+    path('librarian/issue/', views.librarian_manual_issue,
+         name='librarian_manual_issue'),
+    path('librarian/return/<int:transaction_id>/',
+         views.librarian_manual_return, name='librarian_manual_return'),
+    path('profile/', views.user_profile, name='user_profile'),
+    path('profile/history/', views.user_reading_history,
+         name='user_reading_history'),
+    path('recommendations/', views.book_recommendations,
+         name='book_recommendations'),
+    path('csrf/', views.get_csrf_token, name='get_csrf_token'),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

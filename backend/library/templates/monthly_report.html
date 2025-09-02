@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Monthly Library Report - {{ period }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        h1 { color: #2c3e50; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .summary { background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Monthly Library Report - {{ period }}</h1>
+    
+    <div class="summary">
+        <h2>Summary</h2>
+        <p><strong>Total Borrows:</strong> {{ total_borrows }}</p>
+        <p><strong>Total Returns:</strong> {{ total_returns }}</p>
+        <p><strong>Total Fines Collected:</strong> ₹{{ total_fines }}</p>
+    </div>
+    
+    <h2>Transaction Details</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Book Title</th>
+                <th>User</th>
+                <th>Issue Date</th>
+                <th>Due Date</th>
+                <th>Return Date</th>
+                <th>Fine Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for transaction in transactions %}
+            <tr>
+                <td>{{ transaction.book.title }}</td>
+                <td>{{ transaction.user.username }}</td>
+                <td>{{ transaction.issue_date|date:"M d, Y" }}</td>
+                <td>{{ transaction.due_date|date:"M d, Y" }}</td>
+                <td>{{ transaction.return_date|date:"M d, Y"|default:"Not returned" }}</td>
+                <td>₹{{ transaction.fine_amount }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

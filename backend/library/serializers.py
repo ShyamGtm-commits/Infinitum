@@ -18,9 +18,16 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 
 class BookSerializer(serializers.ModelSerializer):
+    cover_image_url = serializers.SerializerMethodField()
+
     class Meta:
         model = Book
         fields = '__all__'
+
+    def get_cover_image_url(self, obj):
+        if obj.cover_image:
+            return obj.cover_image.url
+        return None
 
 
 class TransactionSerializer(serializers.ModelSerializer):

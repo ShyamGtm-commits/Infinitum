@@ -68,9 +68,8 @@ const BookList = ({ user }) => {
     return (
         <div>
             <h2>Book Catalog</h2>
-
             <SearchBooks onSearchResults={handleSearchResults} />
-
+            
             {searchMode && (
                 <div className="alert alert-info d-flex justify-content-between align-items-center">
                     <span>
@@ -92,7 +91,22 @@ const BookList = ({ user }) => {
                 ) : (
                     filteredBooks.map(book => (
                         <div key={book.id} className="col-md-4 mb-4">
-                            <div className="card h-100">
+                            <div className="card h-100 book-card">
+                                {/* Book cover with transparency effect */}
+                                <div 
+                                    className="book-cover"
+                                    style={{
+                                        backgroundImage: book.cover_image_url ? `url(http://localhost:8000${book.cover_image_url})` : 'none',
+                                        backgroundColor: book.cover_image_url ? 'transparent' : '#f8f9fa'
+                                    }}
+                                >
+                                    {!book.cover_image_url && (
+                                        <div className="book-placeholder">
+                                            <i className="fas fa-book"></i>
+                                        </div>
+                                    )}
+                                </div>
+                                
                                 <div className="card-body">
                                     <h5 className="card-title">{book.title}</h5>
                                     <h6 className="card-subtitle mb-2 text-muted">{book.author}</h6>
