@@ -44,4 +44,9 @@ urlpatterns = [
     path('recommendations/', views.book_recommendations,
          name='book_recommendations'),
     path('csrf/', views.get_csrf_token, name='get_csrf_token'),
+    path('user/transactions/', views.user_transactions, name='user_transactions'),
+    path('user/active-borrows/', views.user_active_borrows,
+         name='user_active_borrows'),
+
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

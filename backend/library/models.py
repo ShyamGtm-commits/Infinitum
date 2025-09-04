@@ -23,13 +23,18 @@ class Profile(models.Model):
         return f"Profile({self.user.username})"
 
 
-@receiver(post_save, sender=settings.AUTH_USER_MODEL)
-def create_or_update_profile(sender, instance, created, **kwargs):
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
     if created:
-        Profile.objects.create(user=instance)
-    else:
-        # if profile exists, save it, otherwise create one
-        Profile.objects.get_or_create(user=instance)
+        UserProfile.objects.create(user=instance, user_type='student')
+
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    try:
+        instance.userprofile.save()
+    except UserProfile.DoesNotExist:
+        UserProfile.objects.create(user=instance, user_type='student')
 
 
 class Book(models.Model):
