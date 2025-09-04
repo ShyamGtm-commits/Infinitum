@@ -1,4 +1,3 @@
-// src/components/VintageLandingPage.js
 import React from 'react';
 import { Link } from 'react-router-dom';
 import './VintageLandingPage.css';
@@ -7,21 +6,32 @@ const VintageLandingPage = () => {
   return (
     <div className="vintage-landing">
       {/* Hero Section with Vintage Appeal */}
-      <section className="vintage-hero">
-        <div className="vintage-overlay">
-          <div className="container">
-            <div className="hero-content">
-              <div className="vintage-border">
-                <h1 className="vintage-title">Infinitum Library</h1>
-                <p className="vintage-subtitle">Where Timeless Knowledge Meets Modern Access</p>
-                <div className="ornamental-divider">
-                  <span className="flourish">❦</span>
-                </div>
-                <p className="vintage-tagline">
-                  Step into a world of literary elegance and digital convenience
-                </p>
-                <Link to="/register" className="vintage-cta-btn">Begin Your Journey</Link>
+      <section
+        className="vintage-hero"
+        style={{
+          backgroundImage: `url(https://images.unsplash.com/photo-1507842217343-583bb7270b66?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80)`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          position: 'relative'
+        }}
+      >
+        <div className="vintage-overlay"></div>
+
+        <div className="container">
+          <div className="hero-content">
+            <div className="vintage-border">
+              <h1 className="vintage-title">Infinitum Library</h1>
+              <p className="vintage-subtitle">Where Timeless Knowledge Meets Modern Access</p>
+              <div className="ornamental-divider">
+                <span className="flourish">❦</span>
               </div>
+              <p className="vintage-tagline">
+                Step into a world of literary elegance and digital convenience
+              </p>
+              <Link to="/register" className="vintage-cta-btn">Begin Your Journey</Link>
             </div>
           </div>
         </div>
@@ -36,7 +46,7 @@ const VintageLandingPage = () => {
               <span className="flourish">✻</span>
             </div>
           </div>
-          
+
           <div className="features-grid">
             <div className="feature-card">
               <div className="feature-icon">
@@ -45,7 +55,7 @@ const VintageLandingPage = () => {
               <h3>Curated Collections</h3>
               <p>Discover carefully selected titles across genres, from classic literature to modern works</p>
             </div>
-            
+
             <div className="feature-card">
               <div className="feature-icon">
                 <i className="fas fa-feather-alt"></i>
@@ -53,49 +63,13 @@ const VintageLandingPage = () => {
               <h3>Elegant Experience</h3>
               <p>Enjoy a browsing experience that honors the tradition of reading with modern convenience</p>
             </div>
-            
+
             <div className="feature-card">
               <div className="feature-icon">
                 <i className="fas fa-clock"></i>
               </div>
               <h3>Timeless Access</h3>
               <p>Your personal library available anytime, anywhere with our digital platform</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials with Vintage Appeal */}
-      <section className="vintage-testimonials">
-        <div className="container">
-          <div className="section-header">
-            <h2>Words From Our Readers</h2>
-            <div className="ornamental-divider">
-              <span className="flourish">❧</span>
-            </div>
-          </div>
-          
-          <div className="testimonial-cards">
-            <div className="testimonial-card">
-              <div className="testimonial-content">
-                <div className="quote-mark">"</div>
-                <p>Infinitum has rekindled my love for reading. The elegant interface makes browsing a pleasure.</p>
-                <div className="testimonial-author">
-                  <h4>Eleanor W.</h4>
-                  <p>Literature Professor</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="testimonial-card">
-              <div className="testimonial-content">
-                <div className="quote-mark">"</div>
-                <p>I've discovered more books in one month with Infinitum than in years of visiting physical libraries.</p>
-                <div className="testimonial-author">
-                  <h4>James T.</h4>
-                  <p>History Enthusiast</p>
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -110,6 +84,12 @@ const VintageLandingPage = () => {
             <div className="cta-buttons">
               <Link to="/register" className="cta-primary">Create Account</Link>
               <Link to="/login" className="cta-secondary">Sign In</Link>
+            </div>
+            {/* Add Our Team link below the buttons */}
+            <div className="mt-3">
+              <Link to="/team" style={{color: '#d4b483', textDecoration: 'underline'}}>
+                Meet Our Team
+              </Link>
             </div>
           </div>
         </div>

@@ -37,25 +37,28 @@ const BookList = ({ user }) => {
         setSearchMode(true);
     };
 
-    const handleBorrow = async (bookId) => {
-        try {
-            const response = await fetch(`http://localhost:8000/api/books/${bookId}/borrow/`, {
-                method: 'POST',
-                credentials: 'include',
-            });
+   const handleBorrow = async (bookId) => {
+  try {
+    const response = await fetch(`http://localhost:8000/api/books/${bookId}/borrow/`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
-            if (response.ok) {
-                alert('Book borrowed successfully!');
-                fetchBooks(); // Refresh the book list
-            } else {
-                const data = await response.json();
-                alert(data.error || 'Failed to borrow book');
-            }
-        } catch (error) {
-            console.error('Borrow error:', error);
-            alert('Error borrowing book');
-        }
-    };
+    if (response.ok) {
+      alert('Book borrowed successfully!');
+      fetchBooks(); // Refresh the book list
+    } else {
+      const data = await response.json();
+      alert(data.error || 'Failed to borrow book. Please try again.');
+    }
+  } catch (error) {
+    console.error('Borrow error:', error);
+    alert('Error borrowing book. Please try again.');
+  }
+};
 
     const clearSearch = () => {
         setFilteredBooks(books);
