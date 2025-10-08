@@ -336,74 +336,75 @@ body {
 
 /* Book card styling */
 .book-card {
-    overflow: hidden;
-    transition: transform 0.3s, box-shadow 0.3s;
+  overflow: hidden;
+  transition: transform 0.3s, box-shadow 0.3s;
 }
 
 .book-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  transform: translateY(-5px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
 }
 
 /* Book cover styling */
 .book-cover {
-    height: 200px;
-    background-size: cover;
-    background-position: center;
-    position: relative;
-    overflow: hidden;
-    opacity: 0.9; /* Slight transparency */
-    transition: opacity 0.3s;
+  height: 200px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  overflow: hidden;
+  opacity: 0.9;
+  /* Slight transparency */
+  transition: opacity 0.3s;
 }
 
 .book-card:hover .book-cover {
-    opacity: 1; /* Full opacity on hover */
+  opacity: 1;
+  /* Full opacity on hover */
 }
 
 .book-cover::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(
-        to bottom,
-        rgba(255, 255, 255, 0.2) 0%,
-        rgba(255, 255, 255, 0.1) 100%
-    );
-    z-index: 1;
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom,
+      rgba(255, 255, 255, 0.2) 0%,
+      rgba(255, 255, 255, 0.1) 100%);
+  z-index: 1;
 }
 
 .book-placeholder {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    color: #6c757d;
-    font-size: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #6c757d;
+  font-size: 3rem;
 }
 
 /* Book card content adjustments */
 .book-card .card-body {
-    padding: 1rem;
+  padding: 1rem;
 }
 
 .book-card .card-footer {
-    background-color: rgba(248, 249, 250, 0.7);
-    border-top: 1px solid rgba(0, 0, 0, 0.1);
+  background-color: rgba(248, 249, 250, 0.7);
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-    .book-cover {
-        height: 150px;
-    }
-    
-    .book-placeholder {
-        font-size: 2rem;
-    }
+  .book-cover {
+    height: 150px;
+  }
+
+  .book-placeholder {
+    font-size: 2rem;
+  }
 }
+
 /* ===========================
    TEAM SECTION STYLING
    =========================== */
@@ -413,6 +414,7 @@ body {
   position: relative;
   overflow: hidden;
 }
+
 .hero-section h1,
 .hero-section p {
   animation: fadeInUp 1s ease forwards;
@@ -423,13 +425,16 @@ body {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   border-radius: 1rem;
 }
+
 .team-member:hover {
   transform: translateY(-8px);
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
 }
+
 .team-member img {
   transition: transform 0.4s ease;
 }
+
 .team-member:hover img {
   transform: scale(1.05);
 }
@@ -444,6 +449,7 @@ body {
   justify-content: center;
   transition: all 0.3s ease;
 }
+
 .team-member .btn:hover {
   transform: scale(1.1);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
@@ -454,6 +460,7 @@ body {
   border-radius: 1rem;
   transition: background 0.3s ease;
 }
+
 .contact-info:hover {
   background: #222;
 }
@@ -464,8 +471,77 @@ body {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
+/* Multi-Step Registration Form Styles */
+.progress {
+  background-color: #e9ecef;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  transition: width 0.3s ease;
+  background-color: #4e73df;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: #4e73df;
+  margin-bottom: 0.5rem;
+}
+
+.card {
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+
+.card-header {
+  background: linear-gradient(120deg, #2c3e50, #4a6572);
+  color: white;
+  border-radius: 15px 15px 0 0 !important;
+  border: none;
+}
+
+.card-header h3 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+/* this part is for notification alerts enhancing */
+/* Add to your main CSS file or create notifications.css */
+.notification-item {
+    transition: all 0.3s ease;
+    border-left: 4px solid transparent;
+}
+
+.notification-item.unread {
+    border-left-color: #007bff;
+    background-color: #f8f9fa;
+}
+
+.notification-item.read {
+    opacity: 0.7;
+    background-color: #ffffff;
+}
+
+.notification-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Different border colors for notification types */
+.notification-item.system { border-left-color: #6c757d; }
+.notification-item.due_reminder { border-left-color: #ffc107; }
+.notification-item.overdue { border-left-color: #dc3545; }
+.notification-item.achievement { border-left-color: #28a745; }
+.notification-item.book_available { border-left-color: #17a2b8; }

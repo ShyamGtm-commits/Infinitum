@@ -325,3 +325,34 @@
         grid-template-columns: 1fr;
     }
 }
+.insights-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+
+.insight-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
+
+.insight-icon {
+    font-size: 1.5rem;
+    margin-right: 1rem;
+    color: #6c757d;
+}
+
+.insight-content h4 {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.insight-content p {
+    margin: 0.25rem 0 0;
+    font-weight: 600;
+    color: #495057;
+}

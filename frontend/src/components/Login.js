@@ -66,7 +66,7 @@ const Login = ({ onLogin }) => {
                     <h3>Welcome Back</h3>
                     <p>Sign in to your account to continue</p>
                 </div>
-                
+
                 <div className="auth-body">
                     {error && <div className="alert alert-danger">{error}</div>}
                     <form onSubmit={handleSubmit}>
@@ -94,8 +94,8 @@ const Login = ({ onLogin }) => {
                                 placeholder="Enter your password"
                             />
                         </div>
-                        <button 
-                            type="submit" 
+                        <button
+                            type="submit"
                             className="btn btn-primary w-100 auth-submit-btn"
                             disabled={loading}
                         >
@@ -109,7 +109,7 @@ const Login = ({ onLogin }) => {
                             )}
                         </button>
                     </form>
-                    
+
                     <div className="auth-footer">
                         <p className="text-center">
                             <Link to="/forgot-password" className="text-link">Forgot your password?</Link>
@@ -117,7 +117,7 @@ const Login = ({ onLogin }) => {
                     </div>
                 </div>
             </div>
-            
+
             <div className="auth-background">
                 <div className="auth-background-overlay"></div>
             </div>

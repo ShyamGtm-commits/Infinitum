@@ -1,7 +1,8 @@
-// Navbar.js (Updated for proper sidebar behavior)
+// Navbar.js (Updated - hide user-specific links for admins)
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import './Navbar.css';
+import NotificationBell from './NotificationBell';
 
 const Navbar = ({ user, onLogout }) => {
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
@@ -28,7 +29,16 @@ const Navbar = ({ user, onLogout }) => {
               <span className="brand-text">Infinitum Library</span>
             </Link>
           </div>
-
+          
+          {user && (
+            <div className="nav-user-section">
+              <NotificationBell user={user} />
+              <div className="user-info">
+                {/* ... existing user info code ... */}
+              </div>
+            </div>
+          )}
+          
           {/* Auth options - only shown when not logged in */}
           {!user && (
             <div className="nav-auth-options">
@@ -51,23 +61,28 @@ const Navbar = ({ user, onLogout }) => {
                   <i className="fas fa-user"></i>
                 </div>
 
-                <li className="nav-item">
-                  <Link to="/my-transactions" className="nav-link" onClick={closeSidebar}>
-                    <i className="fas fa-history"></i>
-                    <span>My Transactions</span>
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link to="/my-borrows" className="nav-link" onClick={closeSidebar}>
-                    <i className="fas fa-book"></i>
-                    <span>My Borrows</span>
-                  </Link>
-                </li>
+                {/* Only show user-specific links for non-admin users */}
+                {user.user_type !== 'admin' && (
+                  <>
+                    <li className="nav-item">
+                      <Link to="/my-transactions" className="nav-link" onClick={closeSidebar}>
+                        <i className="fas fa-history"></i>
+                        <span>My Transactions</span>
+                      </Link>
+                    </li>
+                    <li className="nav-item">
+                      <Link to="/my-borrows" className="nav-link" onClick={closeSidebar}>
+                        <i className="fas fa-book"></i>
+                        <span>My Borrows</span>
+                      </Link>
+                    </li>
+                  </>
+                )}
+
                 <div className="user-details">
                   <span className="username">{user.username}</span>
                   <span className="user-role">{user.user_type}</span>
                 </div>
-
               </div>
             </div>
           )}
@@ -117,6 +132,15 @@ const Navbar = ({ user, onLogout }) => {
                     <span>Browse Books</span>
                   </Link>
                 </li>
+                {/* Librarian Links */}
+                {user && (user.user_type === 'admin' || user.user_type === 'librarian') && (
+                  <li className="nav-item">
+                    <Link to="/librarian" className="nav-link" onClick={closeSidebar}>
+                      <i className="fas fa-clipboard-list me-2"></i>
+                      <span>Librarian Dashboard</span>
+                    </Link>
+                  </li>
+                )}
                 {user.user_type === 'admin' && (
                   <li className="nav-item">
                     <Link to="/admin" className="nav-link" onClick={closeSidebar}>
@@ -125,24 +149,54 @@ const Navbar = ({ user, onLogout }) => {
                     </Link>
                   </li>
                 )}
-                <li className="nav-item">
-                  <Link to="/fines" className="nav-link" onClick={closeSidebar}>
-                    <i className="fas fa-coins"></i>
-                    <span>Fines & Payments</span>
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link to="/history" className="nav-link" onClick={closeSidebar}>
-                    <i className="fas fa-history"></i>
-                    <span>Reading History</span>
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link to="/recommendations" className="nav-link" onClick={closeSidebar}>
-                    <i className="fas fa-star"></i>
-                    <span>Recommendations</span>
-                  </Link>
-                </li>
+
+                {/* Only show user-specific links for non-admin users */}
+                {user.user_type !== 'admin' && (
+                  <>
+                    <li className="nav-item">
+                      <Link to="/fines" className="nav-link" onClick={closeSidebar}>
+                        <i className="fas fa-coins"></i>
+                        <span>Fines & Payments</span>
+                      </Link>
+                    </li>
+                    <li className="nav-item">
+                      <Link to="/history" className="nav-link" onClick={closeSidebar}>
+                        <i className="fas fa-history"></i>
+                        <span>Reading History</span>
+                      </Link>
+                    </li>
+                    <li className="nav-item">
+                      <Link to="/recommendations" className="nav-link" onClick={closeSidebar}>
+                        <i className="fas fa-star"></i>
+                        <span>Recommendations</span>
+                      </Link>
+                    </li>
+                    <li className="nav-item">
+                      <Link to="/my-transactions" className="nav-link" onClick={closeSidebar}>
+                        <i className="fas fa-history"></i>
+                        <span>My Transactions</span>
+                      </Link>
+                    </li>
+                    <li className="nav-item">
+                      <Link to="/my-borrows" className="nav-link" onClick={closeSidebar}>
+                        <i className="fas fa-book"></i>
+                        <span>My Borrows</span>
+                      </Link>
+                    </li>
+                    <li className="nav-item">
+                      <Link to="/popular-books" className="nav-link" onClick={closeSidebar}>
+                        <i className="fas fa-fire me-2"></i>
+                        <span>Popular Books</span>
+                      </Link>
+                    </li>
+                    <li className="nav-item">
+                      <Link to="/reading-dashboard" className="nav-link" onClick={closeSidebar}>
+                        <i className="fas fa-chart-line me-2"></i>
+                        <span>Reading Dashboard</span>
+                      </Link>
+                    </li>
+                  </>
+                )}
               </>
             ) : (
               <li className="nav-item">
@@ -171,8 +225,6 @@ const Navbar = ({ user, onLogout }) => {
         className={`sidebar-overlay ${isSidebarVisible ? 'visible' : ''}`}
         onClick={closeSidebar}
       ></div>
-
-
     </>
   );
 };

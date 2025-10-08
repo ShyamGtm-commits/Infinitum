@@ -9,8 +9,9 @@ const GenreFilter = ({ genres, selectedGenre, onGenreSelect, onClearGenre }) => 
             'Medical & Health Sciences', 'Engineering', 'Education', 'Arts & Architecture'
         ],
         'Fiction': [
-            'Mystery/Thriller', 'Fantasy', 'Science Fiction', 'Romance',
-            'Historical Fiction', 'Graphic Novels/Manga'
+            'Mystery/Thriller', 'Fantasy', 'Science Fiction', 'Romance', 'Tragic Play / Drama','Epic / Mythology', 'Existential Fiction',
+            'Historical Fiction','Gothic Fiction', 'Literary Fiction', 'Graphic Novels/Manga',
+            'Satire/Adventure','Psychological Fiction','Coming-of-Age','Tragedy','Horror','Poetry','Epic Poetry'
         ],
         'General': [
             'Biography/Autobiography', 'History', 'Philosophy',

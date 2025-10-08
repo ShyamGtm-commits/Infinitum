@@ -7,14 +7,23 @@ import Team from './components/Team';
 import VintageLandingPage from './components/VintageLandingPage';
 import Navbar from './components/Navbar';
 import Login from './components/Login';
-import Register from './components/Register';
+
 import Dashboard from './components/Dashboard';
 import BookList from './components/BookList';
 import Fines from './components/Fines';
 import AdminDashboard from './components/AdminDashboard';
 import UserTransactions from './components/UserTransactions';
-
 import ActiveBorrows from './components/ActiveBorrows';
+import Recommendations from './components/Recommendations'; // Import the Recommendations component
+import LibrarianDashboard from './components/LibrarianDashboard';
+import BookDetail from './components/BookDetail';
+import MultiStepRegister from './components/MultiStepRegister';
+import ForgotPassword from './components/ForgotPassword';
+import ResetPassword from './components/ResetPassword';
+import PopularBooks from './components/PopularBooks';
+import ReadingDashboard from './components/ReadingDashboard';
+import NotificationsPage from './components/NotificationsPage';
+import NotificationPreferences from './components/NotificationPreferences';
 
 // Create a wrapper component to access the location
 function AppContent() {
@@ -66,7 +75,7 @@ function AppContent() {
   return (
     <div className="App">
       {showNavbar && <Navbar user={user} onLogout={handleLogout} />}
-      
+
       <Routes>
         <Route path="/" element={<VintageLandingPage />} />
         <Route
@@ -77,10 +86,7 @@ function AppContent() {
           path="/login"
           element={user ? <Navigate to="/dashboard" /> : <Login onLogin={handleLogin} />}
         />
-        <Route
-          path="/register"
-          element={user ? <Navigate to="/dashboard" /> : <Register />}
-        />
+
         <Route
           path="/books"
           element={user ? <BookList user={user} /> : <Navigate to="/login" />}
@@ -103,8 +109,52 @@ function AppContent() {
           path="/team"
           element={<Team />}
         />
-        <Route path="/my-borrows" element={<ActiveBorrows user={user} />} />
-        <Route path="/my-transactions" element={<UserTransactions user={user} />} />
+        <Route
+          path="/my-borrows"
+          element={user ? <ActiveBorrows user={user} /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/my-transactions"
+          element={user ? <UserTransactions user={user} /> : <Navigate to="/login" />}
+        />
+        {/* Add the Recommendations route */}
+        <Route
+          path="/recommendations"
+          element={user ? <Recommendations user={user} /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/librarian"
+          element={
+            user && (user.user_type === 'admin' || user.user_type === 'librarian') ? (
+              <LibrarianDashboard user={user} />
+            ) : (
+              <Navigate to="/" />
+            )
+          }
+        />
+        <Route
+          path="/books/:id"
+          element={user ? <BookDetail user={user} /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/register"
+          element={user ? <Navigate to="/dashboard" /> : <MultiStepRegister />}
+        />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/popular-books" element={<PopularBooks user={user} />} />
+        <Route
+          path="/reading-dashboard"
+          element={user ? <ReadingDashboard user={user} /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/notifications"
+          element={user ? <NotificationsPage user={user} /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/notifications/preferences"
+          element={user ? <NotificationPreferences user={user} /> : <Navigate to="/login" />}
+        />
       </Routes>
     </div>
   );

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import './Dashboard.css';
+import UserQRStatus from './UserQRStatus';
 
 const Dashboard = ({ user }) => {
     const [stats, setStats] = useState({
@@ -15,9 +17,15 @@ const Dashboard = ({ user }) => {
         avg_reading_time: '0 hrs/week'
     });
     const [loading, setLoading] = useState(true);
+    const [recommendationInsights, setRecommendationInsights] = useState({
+        favoriteGenre: '',
+        favoriteAuthor: '',
+        recommendationCount: 0
+    });
 
     useEffect(() => {
         fetchUserData();
+        fetchRecommendationInsights();
     }, []);
 
     const fetchUserData = async () => {
@@ -29,7 +37,7 @@ const Dashboard = ({ user }) => {
 
             if (transactionsResponse.ok) {
                 const transactionsData = await transactionsResponse.json();
-                
+
                 // Calculate stats
                 const totalBorrowed = transactionsData.length;
                 const currentlyBorrowed = transactionsData.filter(t => !t.return_date).length;
@@ -37,7 +45,7 @@ const Dashboard = ({ user }) => {
                 const outstandingFines = transactionsData
                     .filter(t => !t.fine_paid)
                     .reduce((sum, t) => sum + parseFloat(t.fine_amount || 0), 0);
-                
+
                 setStats({
                     total_borrowed: totalBorrowed,
                     currently_borrowed: currentlyBorrowed,
@@ -64,6 +72,21 @@ const Dashboard = ({ user }) => {
             console.error('Error fetching user data', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchRecommendationInsights = async () => {
+        try {
+            const response = await fetch('http://localhost:8000/api/recommendations/insights/', {
+                credentials: 'include',
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                setRecommendationInsights(data);
+            }
+        } catch (error) {
+            console.error('Error fetching recommendation insights:', error);
         }
     };
 
@@ -198,7 +221,7 @@ const Dashboard = ({ user }) => {
                                                     </td>
                                                     <td>
                                                         {book.status === 'active' && (
-                                                            <button 
+                                                            <button
                                                                 className="btn btn-return"
                                                                 onClick={() => handleReturnBook(book.id, book.id)}
                                                             >
@@ -212,6 +235,44 @@ const Dashboard = ({ user }) => {
                                     </table>
                                 </div>
                             )}
+                        </div>
+                    </div>
+
+                    {/* Recommendation Insights Card */}
+                    <div className="content-card">
+                        <div className="card-header">
+                            <h3>Your Reading Insights</h3>
+                        </div>
+                        <div className="card-body">
+                            <div className="insights-grid">
+                                <div className="insight-item">
+                                    <div className="insight-icon">
+                                        <i className="fas fa-heart"></i>
+                                    </div>
+                                    <div className="insight-content">
+                                        <h4>Favorite Genre</h4>
+                                        <p>{recommendationInsights.favoriteGenre || 'Not enough data'}</p>
+                                    </div>
+                                </div>
+                                <div className="insight-item">
+                                    <div className="insight-icon">
+                                        <i className="fas fa-user-edit"></i>
+                                    </div>
+                                    <div className="insight-content">
+                                        <h4>Favorite Author</h4>
+                                        <p>{recommendationInsights.favoriteAuthor || 'Not enough data'}</p>
+                                    </div>
+                                </div>
+                                <div className="insight-item">
+                                    <div className="insight-icon">
+                                        <i className="fas fa-lightbulb"></i>
+                                    </div>
+                                    <div className="insight-content">
+                                        <h4>Personalized Recommendations</h4>
+                                        <p>{recommendationInsights.recommendationCount} books suggested for you</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -233,7 +294,7 @@ const Dashboard = ({ user }) => {
                                     <p>Explore our collection</p>
                                 </div>
                             </div>
-                            
+
                             <div className="quick-action-item">
                                 <div className="action-icon">
                                     <i className="fas fa-money-bill-wave"></i>
@@ -243,7 +304,7 @@ const Dashboard = ({ user }) => {
                                     <p>Clear your dues</p>
                                 </div>
                             </div>
-                            
+
                             <div className="sidebar-section">
                                 <h5>Quick Links</h5>
                                 <div className="quick-link">
@@ -256,7 +317,9 @@ const Dashboard = ({ user }) => {
                                 </div>
                                 <div className="quick-link">
                                     <i className="fas fa-star"></i>
-                                    <span>Recommended Books</span>
+                                    <Link to="/recommendations" style={{ textDecoration: 'none', color: 'inherit' }}>
+                                        <span>Recommended Books</span>
+                                    </Link>
                                 </div>
                             </div>
                         </div>
@@ -282,6 +345,15 @@ const Dashboard = ({ user }) => {
                                     <div className="stat-label">Avg. Reading Time</div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                    {/* Automatic Status Updates */}
+                    <div className="content-card">
+                        <div className="card-header">
+                            <h3>Pending Actions</h3>
+                        </div>
+                        <div className="card-body">
+                            <UserQRStatus user={user} />
                         </div>
                     </div>
                 </div>

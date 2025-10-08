@@ -15,6 +15,61 @@ const AdminBookManagement = ({ user }) => {
   const [message, setMessage] = useState('');
   const [errorDetails, setErrorDetails] = useState('');
   const [imagePreview, setImagePreview] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  // All available genres from your models.py
+  const ALL_GENRES = [
+    // Academic Disciplines
+    'Sciences',
+    'Social Sciences',
+    'Humanities',
+    'Business & Economics',
+    'Law & Legal Studies',
+    'Technology & Computer Science',
+    'Medical & Health Sciences',
+    'Engineering',
+    'Education',
+    'Arts & Architecture',
+
+    // Fiction Categories
+    'Mystery/Thriller',
+    'Fantasy',
+    'Science Fiction',
+    'Romance',
+    'Tragic Play / Drama',
+    'Epic / Mythology',
+    'Existential Fiction',
+    'Historical Fiction',
+    'Gothic Fiction',
+    'Literary Fiction',
+    'Satire/Adventure',
+    'Psychological Fiction',
+    'Coming-of-Age',
+    'Tragedy',
+    'Horror',
+    'Poetry',
+    'Epic Poetry',
+
+    'Graphic Novels/Manga',
+
+    // General Categories
+    'Biography/Autobiography',
+    'History',
+    'Philosophy',
+    'Religion/Spirituality',
+    'Self-Help',
+    'Travel',
+    'Cookbooks',
+    'Other'
+  ];
+
+  // Get CSRF token from cookies
+  const getCsrfToken = () => {
+    return document.cookie
+      .split('; ')
+      .find(row => row.startsWith('csrftoken='))
+      ?.split('=')[1];
+  };
 
   // Add this useEffect for validation
   useEffect(() => {
@@ -48,6 +103,7 @@ const AdminBookManagement = ({ user }) => {
     e.preventDefault();
     setMessage('');
     setErrorDetails('');
+    setLoading(true);
 
     try {
       const formData = new FormData();
@@ -59,35 +115,53 @@ const AdminBookManagement = ({ user }) => {
         }
       });
 
+      const csrfToken = getCsrfToken();
+
       const response = await fetch('http://localhost:8000/api/admin/books/add/', {
         method: 'POST',
         credentials: 'include',
+        headers: {
+          'X-CSRFToken': csrfToken || '',
+        },
         body: formData,
       });
 
-      const responseData = await response.json();
+      // Check content type to ensure it's JSON
+      const contentType = response.headers.get('content-type');
 
-      if (response.ok) {
-        setMessage(responseData.success || 'Book added successfully!');
-        // Reset form
-        setBookData({
-          title: '',
-          author: '',
-          isbn: '',
-          genre: '',
-          publication_year: '',
-          description: '',
-          total_copies: 1,
-          available_copies: 1,
-          cover_image: null
-        });
-        setImagePreview(null);
+      if (contentType && contentType.includes('application/json')) {
+        const responseData = await response.json();
+
+        if (response.ok) {
+          setMessage(responseData.success || 'Book added successfully!');
+          // Reset form
+          setBookData({
+            title: '',
+            author: '',
+            isbn: '',
+            genre: '',
+            publication_year: '',
+            description: '',
+            total_copies: 1,
+            available_copies: 1,
+            cover_image: null
+          });
+          setImagePreview(null);
+        } else {
+          setMessage(responseData.error || 'Failed to add book');
+          setErrorDetails(responseData.details ? JSON.stringify(responseData.details) : '');
+        }
       } else {
-        setMessage(responseData.error || 'Failed to add book');
-        setErrorDetails(responseData.details ? JSON.stringify(responseData.details) : '');
+        // Handle non-JSON response (HTML error page)
+        const textResponse = await response.text();
+        setMessage('Server error: Received HTML response instead of JSON. Please check server logs.');
+        console.error('Non-JSON response received:', textResponse.substring(0, 200));
       }
     } catch (error) {
-      setMessage('Error adding book: ' + error.message);
+      setMessage('Network error: ' + error.message);
+      console.error('Network error:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -115,21 +189,47 @@ const AdminBookManagement = ({ user }) => {
     }
   };
 
+  const clearForm = () => {
+    setBookData({
+      title: '',
+      author: '',
+      isbn: '',
+      genre: '',
+      publication_year: '',
+      description: '',
+      total_copies: 1,
+      available_copies: 1,
+      cover_image: null
+    });
+    setImagePreview(null);
+    setMessage('');
+    setErrorDetails('');
+  };
+
   return (
     <div className="card">
-      <div className="card-header">
+      <div className="card-header d-flex justify-content-between align-items-center">
         <h4>Add New Book</h4>
+        <button
+          className="btn btn-outline-secondary btn-sm"
+          onClick={clearForm}
+          disabled={loading}
+        >
+          Clear Form
+        </button>
       </div>
       <div className="card-body">
         {message && (
-          <div className={`alert ${message.includes('Error') ? 'alert-danger' : 'alert-success'}`}>
+          <div className={`alert ${message.includes('successfully') ? 'alert-success' : 'alert-danger'}`}>
             {message}
-          </div>
-        )}
-
-        {errorDetails && (
-          <div className="alert alert-warning">
-            <strong>Details:</strong> {errorDetails}
+            {errorDetails && (
+              <div className="mt-2">
+                <strong>Details:</strong>
+                <pre className="mt-2 p-2 bg-light border rounded" style={{ fontSize: '0.8rem' }}>
+                  {errorDetails}
+                </pre>
+              </div>
+            )}
           </div>
         )}
 
@@ -145,6 +245,7 @@ const AdminBookManagement = ({ user }) => {
                   value={bookData.title}
                   onChange={handleChange}
                   required
+                  disabled={loading}
                 />
               </div>
               <div className="mb-3">
@@ -156,6 +257,7 @@ const AdminBookManagement = ({ user }) => {
                   value={bookData.author}
                   onChange={handleChange}
                   required
+                  disabled={loading}
                 />
               </div>
               <div className="mb-3">
@@ -167,6 +269,7 @@ const AdminBookManagement = ({ user }) => {
                   value={bookData.isbn}
                   onChange={handleChange}
                   required
+                  disabled={loading}
                 />
               </div>
               <div className="mb-3">
@@ -177,6 +280,7 @@ const AdminBookManagement = ({ user }) => {
                   name="cover_image"
                   onChange={handleImageChange}
                   accept="image/*"
+                  disabled={loading}
                 />
                 {imagePreview && (
                   <div className="mt-2">
@@ -199,18 +303,14 @@ const AdminBookManagement = ({ user }) => {
                   value={bookData.genre}
                   onChange={handleChange}
                   required
+                  disabled={loading}
                 >
                   <option value="">Select Genre</option>
-                  <option value="Sciences">Sciences</option>
-                  <option value="Social Sciences">Social Sciences</option>
-                  <option value="Humanities">Humanities</option>
-                  <option value="Technology & Computer Science">Technology & Computer Science</option>
-                  <option value="Fantasy">Fantasy</option>
-                  <option value="Mystery/Thriller">Mystery/Thriller</option>
-                  <option value="Biography/Autobiography">Biography/Autobiography</option>
-                  <option value="History">History</option>
-                  <option value="Philosophy">Philosophy</option>
-                  <option value="Other">Other</option>
+                  {ALL_GENRES.map(genre => (
+                    <option key={genre} value={genre}>
+                      {genre}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div className="mb-3">
@@ -223,6 +323,7 @@ const AdminBookManagement = ({ user }) => {
                   onChange={handleChange}
                   min="1000"
                   max="2030"
+                  disabled={loading}
                 />
               </div>
               <div className="mb-3">
@@ -235,6 +336,7 @@ const AdminBookManagement = ({ user }) => {
                   onChange={handleChange}
                   min="1"
                   required
+                  disabled={loading}
                 />
               </div>
               <div className="mb-3">
@@ -248,6 +350,7 @@ const AdminBookManagement = ({ user }) => {
                   min="0"
                   max={bookData.total_copies}
                   required
+                  disabled={loading}
                 />
                 <small className="form-text text-muted">
                   Available copies cannot exceed total copies
@@ -264,9 +367,23 @@ const AdminBookManagement = ({ user }) => {
               onChange={handleChange}
               rows="4"
               placeholder="Enter a brief description of the book..."
+              disabled={loading}
             ></textarea>
           </div>
-          <button type="submit" className="btn btn-primary">Add Book</button>
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={loading}
+          >
+            {loading ? (
+              <>
+                <span className="spinner-border spinner-border-sm me-2" role="status"></span>
+                Adding Book...
+              </>
+            ) : (
+              'Add Book'
+            )}
+          </button>
         </form>
       </div>
     </div>
