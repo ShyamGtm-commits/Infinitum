@@ -53,6 +53,8 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'library.middleware.DisableCSRFMiddleware',
     'corsheaders.middleware.CorsMiddleware',  # ← This should be FIRST
+    'library.security_middleware.SecurityHeadersMiddleware',  # ← ADD
+    'library.security_middleware.AuditMiddleware',            # ← ADD
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -182,6 +184,21 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
 ]
+
+# Security settings
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = 'DENY'
+
+# Session security
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_COOKIE_AGE = 1209600  # 2 weeks in seconds
+
+# CSRF settings
+CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_SECURE = False  # Set to True in production
 
 # Ensure these settings are correct
 CSRF_COOKIE_SAMESITE = 'Lax'

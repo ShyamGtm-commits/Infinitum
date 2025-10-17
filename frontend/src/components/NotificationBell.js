@@ -6,6 +6,7 @@ const NotificationBell = ({ user }) => {
     const [notifications, setNotifications] = useState([]);
     const [showDropdown, setShowDropdown] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [prevUnreadCount, setPrevUnreadCount] = useState(0);
     const navigate = useNavigate();
 
     const fetchUnreadCount = async () => {
@@ -93,6 +94,26 @@ const NotificationBell = ({ user }) => {
             return () => clearInterval(interval);
         }
     }, [user]);
+    // TEMPORARY: Add this to test the sound on component mount
+    useEffect(() => {
+        // Test sound after 2 seconds (remove this later)
+        const testSound = setTimeout(() => {
+            console.log('Testing notification sound...');
+            playNotificationSound();
+        }, 2000);
+
+        return () => clearTimeout(testSound);
+    }, []);
+
+    useEffect(() => {
+        // Play sound when new notifications arrive
+        if (unreadCount > prevUnreadCount) {
+            console.log('New notification! Playing sound...');
+            playNotificationSound();
+        }
+        // Update previous count
+        setPrevUnreadCount(unreadCount);
+    }, [unreadCount, prevUnreadCount]);
 
     const toggleDropdown = () => {
         console.log('Toggle dropdown, current state:', showDropdown);
@@ -117,10 +138,61 @@ const NotificationBell = ({ user }) => {
         }
     };
 
+    const playNotificationSound = () => {
+        console.log('Attempting to play notification sound...');
+
+        try {
+            // Method 1: Web Audio API (most reliable)
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.frequency.value = 800;
+            oscillator.type = 'sine';
+            gainNode.gain.value = 0.1;
+
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.1);
+
+            console.log('✅ Web Audio beep played successfully!');
+            return;
+        } catch (error) {
+            console.log('❌ Web Audio failed:', error);
+        }
+
+        // If we get here, try online sound
+        try {
+            const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/273/273-preview.mp3');
+            audio.volume = 0.3;
+            audio.play().then(() => {
+                console.log('✅ Online sound played successfully!');
+            }).catch(e => {
+                console.log('❌ Online sound blocked:', e);
+            });
+        } catch (error) {
+            console.log('❌ Online sound failed:', error);
+        }
+    };
+
+    // Add this fallback function too:
+    const playFallbackSound = () => {
+        try {
+            // Create a very short beep using base64 encoded sound
+            const audio = new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==");
+            audio.volume = 0.1;
+            audio.play().catch(e => console.log('Fallback sound failed:', e));
+        } catch (error) {
+            console.log('All sound methods failed');
+        }
+    };
+
     return (
         <div className="notification-bell position-relative">
             <button
-                className="btn btn-outline-secondary position-relative"
+                className={`btn btn-outline-secondary position-relative ${unreadCount > prevUnreadCount ? 'sound-playing' : ''}`}
                 onClick={toggleDropdown}
                 aria-label="Notifications"
             >
@@ -194,6 +266,7 @@ const NotificationBell = ({ user }) => {
                     </div>
 
                     <div className="dropdown-footer p-2 border-top text-center">
+
                         <button
                             className="btn btn-sm btn-outline-primary w-100"
                             onClick={() => {

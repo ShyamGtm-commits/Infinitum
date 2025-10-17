@@ -3,6 +3,9 @@ import AdminBookManagement from './AdminBookManagement';
 import UserManagement from './UserManagement';
 import TransactionManagement from './TransactionManagement';
 import ReportGeneration from './ReportGeneration';
+import AdminAnalytics from './AdminAnalytics';
+import { Link } from 'react-router-dom';
+
 
 const AdminDashboard = ({ user }) => {
   const [stats, setStats] = useState({});
@@ -31,15 +34,15 @@ const AdminDashboard = ({ user }) => {
   useEffect(() => {
     let isMounted = true;
     const abortController = new AbortController();
-    
+
     const loadData = async () => {
       await fetchAdminStats();
     };
-    
+
     if (isMounted) {
       loadData();
     }
-    
+
     return () => {
       isMounted = false;
       abortController.abort();
@@ -65,6 +68,15 @@ const AdminDashboard = ({ user }) => {
             onClick={() => setActiveTab('overview')}
           >
             <i className="fas fa-chart-bar me-2"></i>Overview
+          </button>
+        </li>
+        
+        <li className="nav-item">
+          <button
+            className={`nav-link ${activeTab === 'analytics' ? 'active' : ''}`}
+            onClick={() => setActiveTab('analytics')}
+          >
+            <i className="fas fa-chart-line me-2"></i>Analytics
           </button>
         </li>
         <li className="nav-item">
@@ -98,6 +110,16 @@ const AdminDashboard = ({ user }) => {
           >
             <i className="fas fa-file-pdf me-2"></i>Reports
           </button>
+        </li>
+        {/* Add Security Dashboard Tab */}
+        <li className="nav-item">
+          <Link
+            to="/admin/security"
+            className="nav-link"
+          >
+            <i className="fas fa-shield-alt me-2"></i>
+            Security Dashboard
+          </Link>
         </li>
       </ul>
 
@@ -245,6 +267,9 @@ const AdminDashboard = ({ user }) => {
       )}
 
       {/* User Management Tab */}
+
+      {activeTab === 'analytics' && <AdminAnalytics user={user} />}
+
       {activeTab === 'users' && <UserManagement />}
 
       {/* Book Management Tab */}

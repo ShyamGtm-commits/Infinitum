@@ -4,6 +4,9 @@ from django.utils import timezone
 from datetime import timedelta
 from .models import Transaction
 from .notification_utils import NotificationManager
+import logging
+
+logger = logging.getLogger(__name__)
 
 @background(schedule=60)  # Run every 60 minutes
 def cleanup_expired_qrs_task():

@@ -6,6 +6,8 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 
 logger = logging.getLogger(__name__)
 
@@ -180,19 +182,4 @@ class NotificationManager:
             action_url=f"/reading-dashboard"
         )
 
-    @staticmethod
-    def create_book_available_notification(user, book):
-        """
-        Create notification when a previously unavailable book becomes available
-        """
-        title = f"Book Available: {book.title}"
-        message = f"Great news! '{book.title}' by {book.author} is now available for borrowing."
-
-        return NotificationManager.create_notification(
-            user=user,
-            notification_type='book_available',
-            title=title,
-            message=message,
-            related_book=book,
-            action_url=f"/books/{book.id}"
-        )
+ 

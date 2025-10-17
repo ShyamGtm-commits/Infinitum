@@ -1,8 +1,9 @@
-// Navbar.js (Updated - hide user-specific links for admins)
+// Navbar.js (Updated with PermissionWrapper)
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import './Navbar.css';
 import NotificationBell from './NotificationBell';
+import PermissionWrapper from './Security/PermissionWrapper';
 
 const Navbar = ({ user, onLogout }) => {
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
@@ -29,7 +30,7 @@ const Navbar = ({ user, onLogout }) => {
               <span className="brand-text">Infinitum Library</span>
             </Link>
           </div>
-          
+
           {user && (
             <div className="nav-user-section">
               <NotificationBell user={user} />
@@ -38,7 +39,7 @@ const Navbar = ({ user, onLogout }) => {
               </div>
             </div>
           )}
-          
+
           {/* Auth options - only shown when not logged in */}
           {!user && (
             <div className="nav-auth-options">
@@ -132,24 +133,24 @@ const Navbar = ({ user, onLogout }) => {
                     <span>Browse Books</span>
                   </Link>
                 </li>
-                {/* Librarian Links */}
-                {user && (user.user_type === 'admin' || user.user_type === 'librarian') && (
-                  <li className="nav-item">
-                    <Link to="/librarian" className="nav-link" onClick={closeSidebar}>
-                      <i className="fas fa-clipboard-list me-2"></i>
-                      <span>Librarian Dashboard</span>
-                    </Link>
-                  </li>
-                )}
-                {user.user_type === 'admin' && (
-                  <li className="nav-item">
-                    <Link to="/admin" className="nav-link" onClick={closeSidebar}>
-                      <i className="fas fa-crown"></i>
-                      <span>Admin Panel</span>
-                    </Link>
-                  </li>
-                )}
 
+                <PermissionWrapper requiredRole="admin" fallback={null}>
+                  <li className="nav-item">
+                    <Link className="nav-link" to="/admin">
+                      <i className="fas fa-cog me-2"></i>
+                      Admin Panel
+                    </Link>
+                  </li>
+                </PermissionWrapper>
+
+                <PermissionWrapper requiredRole="librarian" fallback={null}>
+                  <li className="nav-item">
+                    <Link className="nav-link" to="/librarian">
+                      <i className="fas fa-book me-2"></i>
+                      Librarian Tools
+                    </Link>
+                  </li>
+                </PermissionWrapper>
                 {/* Only show user-specific links for non-admin users */}
                 {user.user_type !== 'admin' && (
                   <>

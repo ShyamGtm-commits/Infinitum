@@ -8,6 +8,7 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
 from django.db import transaction
 from django.db import IntegrityError
+from django.db.models.functions import TruncDate, TruncMonth
 from django.db.models import Q, Count, Sum, Avg, F, Case, When, Value, IntegerField, Max
 from datetime import datetime, timedelta
 from django.utils import timezone
@@ -20,6 +21,8 @@ from django.contrib.auth.hashers import make_password
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.utils.timesince import timesince
 from django.core.cache import cache
+from .permissions import IsAdminUser, IsLibrarianUser
+from .utils import generate_base64_qr, add_to_waitlist, estimate_wait_time
 import re
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
@@ -31,12 +34,12 @@ import weasyprint
 
 # Local imports - COMBINED into ONE import statement
 from .models import (
-    Book, UserProfile, Transaction, PendingRegistration, 
-    PasswordResetToken, BookRating, BookReview, ReadingGoal, 
+    Book, UserProfile, Transaction, PendingRegistration,
+    PasswordResetToken, BookRating, BookReview, ReadingGoal,
     UserAchievement, Achievement, Notification, UserNotificationPreference
 )
 from .serializers import (
-    BookSerializer, UserSerializer, UserProfileSerializer, 
+    BookSerializer, UserSerializer, UserProfileSerializer,
     TransactionSerializer, BookRatingSerializer, BookReviewSerializer
 )
 from .utils import generate_otp, send_otp_email
@@ -203,39 +206,65 @@ def search_books(request):
 @permission_classes([AllowAny])
 def login_user(request):
     """
-    Authenticates a user and logs them in.
+    Secure login with rate limiting
     """
-    username = request.data.get('username')
-    password = request.data.get('password')
+    try:
+        from .login_security import LoginSecurity
+        from .audit_utils import AuditLogger
 
-    print(f"🔍 Login attempt: {username}")
+        username = request.data.get('username')
+        password = request.data.get('password')
 
-    # Try authenticating with username OR email
-    user = authenticate(request, username=username, password=password)
+        # Check login attempts
+        allowed, message = LoginSecurity.check_login_attempts(username)
+        if not allowed:
+            return Response({'error': message}, status=status.HTTP_429_TOO_MANY_REQUESTS)
 
-    # If username auth fails, try email auth
-    if user is None and '@' in username:
-        try:
-            user_obj = User.objects.get(email=username)
-            user = authenticate(
-                request, username=user_obj.username, password=password)
-        except User.DoesNotExist:
-            pass
+        # Authentication logic
+        user = authenticate(request, username=username, password=password)
 
-    if user is not None:
-        login(request, user)
-        user_profile = UserProfile.objects.get(user=user)
-        user_data = {
-            'id': user.id,
-            'username': user.username,
-            'email': user.email,
-            'user_type': user_profile.user_type
-        }
-        print(f"🔍 Login successful: {user.username}")
-        return Response({'success': 'Login successful', 'user': user_data})
-    else:
-        print(f"🔍 Login failed for: {username}")
-        return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+        if user is not None:
+            # Successful login
+            login(request, user)
+            LoginSecurity.clear_login_attempts(username)
+
+            # Log successful login
+            AuditLogger.log_security_event(
+                request, 'login', f"User logged in successfully")
+
+            user_profile = UserProfile.objects.get(user=user)
+            user_data = {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'user_type': user_profile.user_type
+            }
+
+            return Response({'success': 'Login successful', 'user': user_data})
+        else:
+            # Failed login
+            attempts = LoginSecurity.record_failed_attempt(username)
+            remaining_attempts = 5 - attempts
+
+            # Log failed attempt
+            AuditLogger.log_security_event(
+                request,
+                'permission_denied',
+                f"Failed login attempt for user: {username}"
+            )
+
+            if remaining_attempts > 0:
+                return Response({
+                    'error': f'Invalid credentials. {remaining_attempts} attempts remaining.'
+                }, status=status.HTTP_401_UNAUTHORIZED)
+            else:
+                return Response({
+                    'error': 'Too many failed attempts. Account locked for 30 minutes.'
+                }, status=status.HTTP_429_TOO_MANY_REQUESTS)
+
+    except Exception as e:
+        logger.error(f"Login error: {e}")
+        return Response({'error': 'Login failed'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['POST'])
@@ -249,29 +278,181 @@ def logout_user(request):
 # --- User Endpoints ---
 
 
-@api_view(['GET', 'PUT'])
+@api_view(['PUT'])
 @permission_classes([IsAuthenticated])
 def user_profile(request):
     """
-    Retrieves or updates the authenticated user's profile.
+    Securely update user profile with validation
     """
     try:
-        profile = UserProfile.objects.get(user=request.user)
-    except UserProfile.DoesNotExist:
-        return Response({'error': 'Profile not found'}, status=status.HTTP_404_NOT_FOUND)
+        from .validation_utils import InputValidator
 
-    if request.method == 'GET':
-        serializer = UserProfileSerializer(profile)
-        return Response(serializer.data)
-    elif request.method == 'PUT':
-        if profile.user != request.user:
-            return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+        profile = UserProfile.objects.get(user=request.user)
+        data = request.data.copy()
+
+        # Validate and sanitize inputs
+        if 'phone' in data:
+            data['phone'] = InputValidator.validate_phone(data['phone'])
+
+        if 'first_name' in data:
+            data['first_name'] = InputValidator.sanitize_string(
+                data['first_name'])
+
+        if 'last_name' in data:
+            data['last_name'] = InputValidator.sanitize_string(
+                data['last_name'])
+
+        # Users cannot change their own role
+        if 'user_type' in data:
+            return Response({
+                'error': 'You cannot change your own role'
+            }, status=status.HTTP_403_FORBIDDEN)
+
         serializer = UserProfileSerializer(
-            profile, data=request.data, partial=True)
+            profile,
+            data=data,
+            partial=True,
+            context={'request': request}
+        )
+
         if serializer.is_valid():
             serializer.save()
+
+            # Log profile update
+            from .audit_utils import AuditLogger
+            AuditLogger.log_security_event(
+                request,
+                'user_modified',
+                f"User updated their profile"
+            )
+
             return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    except ValidationError as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    except UserProfile.DoesNotExist:
+        return Response({'error': 'Profile not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        logger.error(f"Error updating user profile: {e}")
+        return Response({'error': 'Failed to update profile'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def security_audit_logs(request):
+    """
+    Get security audit logs for admin review
+    """
+    try:
+        from .models import AuditLog
+
+        # Pagination
+        page = int(request.GET.get('page', 1))
+        limit = int(request.GET.get('limit', 50))
+
+        logs = AuditLog.objects.all().order_by('-timestamp')
+
+        # Basic filtering
+        action_type = request.GET.get('action_type')
+        if action_type:
+            logs = logs.filter(action_type=action_type)
+
+        user_id = request.GET.get('user_id')
+        if user_id:
+            logs = logs.filter(user_id=user_id)
+
+        # Paginate
+        start_index = (page - 1) * limit
+        paginated_logs = logs[start_index:start_index + limit]
+
+        # Serialize
+        log_data = []
+        for log in paginated_logs:
+            log_data.append({
+                'id': log.id,
+                'user': log.user.username if log.user else 'System',
+                'action_type': log.get_action_type_display(),
+                'description': log.description,
+                'ip_address': log.ip_address,
+                'timestamp': log.timestamp,
+                'metadata': log.metadata
+            })
+
+        return Response({
+            'success': True,
+            'logs': log_data,
+            'pagination': {
+                'page': page,
+                'limit': limit,
+                'total': logs.count(),
+                'has_more': start_index + limit < logs.count()
+            }
+        })
+
+    except Exception as e:
+        logger.error(f"Error fetching audit logs: {e}")
+        return Response({'error': 'Failed to fetch audit logs'}, status=500)
+
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def security_dashboard(request):
+    """
+    Get security overview for admin dashboard
+    """
+    try:
+        from .models import AuditLog
+        from django.utils import timezone
+        from datetime import timedelta
+
+        # Time ranges
+        today = timezone.now().date()
+        week_ago = today - timedelta(days=7)
+
+        # Security metrics
+        total_events = AuditLog.objects.count()
+        recent_events = AuditLog.objects.filter(
+            timestamp__date__gte=week_ago).count()
+        permission_denials = AuditLog.objects.filter(
+            action_type='permission_denied',
+            timestamp__date__gte=week_ago
+        ).count()
+        role_changes = AuditLog.objects.filter(
+            action_type='role_change',
+            timestamp__date__gte=week_ago
+        ).count()
+
+        # Recent security events
+        recent_security_events = AuditLog.objects.filter(
+            timestamp__date__gte=week_ago
+        ).order_by('-timestamp')[:10]
+
+        recent_events_data = []
+        for event in recent_security_events:
+            recent_events_data.append({
+                'user': event.user.username if event.user else 'System',
+                'action': event.get_action_type_display(),
+                'description': event.description,
+                'timestamp': event.timestamp,
+                'ip': event.ip_address
+            })
+
+        return Response({
+            'success': True,
+            'metrics': {
+                'total_events': total_events,
+                'recent_events': recent_events,
+                'permission_denials': permission_denials,
+                'role_changes': role_changes,
+            },
+            'recent_events': recent_events_data
+        })
+
+    except Exception as e:
+        logger.error(f"Error generating security dashboard: {e}")
+        return Response({'error': 'Failed to generate security dashboard'}, status=500)
 
 
 @api_view(['GET'])
@@ -406,7 +587,22 @@ def borrow_book(request, book_id):
         book.available_copies -= 1
         book.save()
 
-         # ✅ OPTIONAL: Check for "first book borrowed" type achievements
+        from .notification_utils import NotificationManager
+        # Notification for successful borrow
+        NotificationManager.create_notification(
+            user=request.user,
+            notification_type='system',
+            title='📚 Book Borrowed Successfully!',
+            message=f'You borrowed "{book.title}" by {book.author}. Due date: {due_date.strftime("%B %d, %Y")}',
+            related_book=book,
+            related_transaction=transaction,
+            action_url='/my-borrows'
+        )
+
+        # Also create a due date reminder (7 days before)
+        NotificationManager.create_due_date_reminder(transaction)
+
+        # ✅ OPTIONAL: Check for "first book borrowed" type achievements
         try:
             from .reading_utils import check_and_award_achievements
             awarded = check_and_award_achievements(request.user)
@@ -414,7 +610,6 @@ def borrow_book(request, book_id):
                 print(f"🎉 Achievements after borrow: {awarded}")
         except Exception as e:
             logger.error(f"Error in achievement check after borrow: {e}")
-            
 
         serializer = TransactionSerializer(transaction)
         return Response({
@@ -461,12 +656,44 @@ def return_book(request, transaction_id):
         book.available_copies += 1
         book.save()
 
+        # ADD THIS NOTIFICATION CODE:
+        from .notification_utils import NotificationManager
+
+        # Notification for successful return
+        notification_title = '📖 Book Returned'
+        notification_message = f'You returned "{book.title}"'
+
+        if transaction.fine_amount > 0:
+            notification_message += f'. Fine applied: ₹{transaction.fine_amount}'
+            # Also send fine notification
+            NotificationManager.create_notification(
+                user=request.user,
+                notification_type='fine',
+                title='💰 Fine Applied',
+                message=f'Fine of ₹{transaction.fine_amount} applied for overdue return of "{book.title}"',
+                related_book=book,
+                related_transaction=transaction,
+                action_url='/fines'
+            )
+
+        NotificationManager.create_notification(
+            user=request.user,
+            notification_type='system',
+            title=notification_title,
+            message=notification_message,
+            related_book=book,
+            related_transaction=transaction,
+            action_url='/my-transactions'
+        )
+
         # ✅ ADD THIS: Automatically check achievements after book return
         try:
             from .reading_utils import check_achievements_on_book_return
-            awarded_achievements = check_achievements_on_book_return(request.user, book)
+            awarded_achievements = check_achievements_on_book_return(
+                request.user, book)
             if awarded_achievements:
-                print(f"🎉 Auto-awarded achievements for {request.user.username}: {awarded_achievements}")
+                print(
+                    f"🎉 Auto-awarded achievements for {request.user.username}: {awarded_achievements}")
         except Exception as e:
             logger.error(f"Error in achievement check after return: {e}")
 
@@ -474,6 +701,7 @@ def return_book(request, transaction_id):
         return Response({'success': 'Book returned successfully', 'transaction': serializer.data})
     except Transaction.DoesNotExist:
         return Response({'error': 'Transaction not found'}, status=status.HTTP_404_NOT_FOUND)
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -552,6 +780,7 @@ def pay_all_fines(request):
 
 # --- Recommendation Helper Functions ---
 
+
 def get_popular_books_queryset(borrowed_book_ids, limit=10):
     """Get popular books excluding those already borrowed - helper function"""
     borrowed_ids_list = list(borrowed_book_ids)
@@ -564,89 +793,96 @@ def get_popular_books_queryset(borrowed_book_ids, limit=10):
         borrow_count=Count('transaction')
     ).order_by('-borrow_count')[:limit]
 
+
 def get_enhanced_user_preferences(user):
     """
     More sophisticated user preference analysis with weighted scores
     """
     transactions = Transaction.objects.filter(user=user).select_related('book')
-    
+
     if not transactions.exists():
         return {'genres': {}, 'authors': {}, 'recent_genres': set()}
-    
+
     preferences = {
         'genres': defaultdict(int),
         'authors': defaultdict(int),
         'recent_genres': set()
     }
-    
+
     # Recent transactions (last 30 days) get higher weight
     thirty_days_ago = timezone.now() - timedelta(days=30)
-    
+
     for transaction in transactions:
         book = transaction.book
         # Higher weight for recent books
         weight = 3 if transaction.issue_date >= thirty_days_ago else 1
-        
+
         preferences['genres'][book.genre] += weight
         preferences['authors'][book.author] += weight
-        
+
         if transaction.issue_date >= thirty_days_ago:
             preferences['recent_genres'].add(book.genre)
-    
+
     # Convert to relative scores (0-1)
     if preferences['genres']:
         max_genre = max(preferences['genres'].values())
-        preferences['genres'] = {k: v/max_genre for k, v in preferences['genres'].items()}
-    
+        preferences['genres'] = {k: v/max_genre for k,
+                                 v in preferences['genres'].items()}
+
     if preferences['authors']:
         max_author = max(preferences['authors'].values())
-        preferences['authors'] = {k: v/max_author for k, v in preferences['authors'].items()}
-    
+        preferences['authors'] = {
+            k: v/max_author for k, v in preferences['authors'].items()}
+
     print(f"📊 User {user.username} preferences: {dict(preferences['genres'])}")
     return preferences
+
 
 def get_enhanced_content_based_recommendations(user, borrowed_book_ids, limit=8):
     """
     Enhanced content-based filtering with multiple similarity factors
     """
     user_preferences = get_enhanced_user_preferences(user)
-    
+
     if not user_preferences['genres'] and not user_preferences['authors']:
         return get_popular_books_queryset(borrowed_book_ids, limit)
-    
+
     # Get all available books excluding borrowed ones
-    books = Book.objects.filter(available_copies__gt=0).exclude(id__in=borrowed_book_ids)
-    
+    books = Book.objects.filter(available_copies__gt=0).exclude(
+        id__in=borrowed_book_ids)
+
     scored_books = []
     for book in books:
         score = 0
-        
+
         # Genre matching (highest weight)
         genre_score = user_preferences['genres'].get(book.genre, 0)
         score += 3 * genre_score
-        
+
         # Author matching (medium weight)
         author_score = user_preferences['authors'].get(book.author, 0)
         score += 2 * author_score
-        
+
         # Recent interest boost
         if book.genre in user_preferences['recent_genres']:
             score += 1.5
-        
+
         # Popularity boost (low weight)
         borrow_count = Transaction.objects.filter(book=book).count()
         score += 0.1 * min(borrow_count, 20)  # Cap at 20
-        
+
         # Only include books with some relevance
         if score > 0:
             scored_books.append((book, score))
-    
+
     # Sort by score and return top books
     scored_books.sort(key=lambda x: x[1], reverse=True)
     result = [book for book, score in scored_books[:limit]]
-    
-    print(f"🎯 Content-based recommendations: {len(result)} books with scores {[score for _, score in scored_books[:3]]}")
+
+    print(
+        f"🎯 Content-based recommendations: {len(result)} books with scores {[score for _, score in scored_books[:3]]}")
     return result
+
 
 def get_enhanced_collaborative_recommendations(user, borrowed_book_ids, limit=5):
     """
@@ -654,25 +890,25 @@ def get_enhanced_collaborative_recommendations(user, borrowed_book_ids, limit=5)
     """
     user_prefs = get_enhanced_user_preferences(user)
     user_genres = set(user_prefs['genres'].keys())
-    
+
     if not user_genres:
         return Book.objects.none()
-    
+
     # Find users with substantial overlap
     similar_users = User.objects.filter(
         transaction__book__genre__in=user_genres
     ).exclude(id=user.id).annotate(
-        common_genres=Count('transaction__book__genre', 
-                          filter=Q(transaction__book__genre__in=user_genres)),
+        common_genres=Count('transaction__book__genre',
+                            filter=Q(transaction__book__genre__in=user_genres)),
         total_books=Count('transaction')
     ).filter(
         common_genres__gte=1,  # At least 1 genre in common
         total_books__gte=2     # At least 2 books read
     ).order_by('-common_genres')[:8]  # Get top 8 similar users
-    
+
     if not similar_users:
         return Book.objects.none()
-    
+
     # Get books borrowed by similar users
     recommended_books = Book.objects.filter(
         transaction__user__in=similar_users,
@@ -683,9 +919,11 @@ def get_enhanced_collaborative_recommendations(user, borrowed_book_ids, limit=5)
         borrow_count=Count('transaction'),
         similar_user_count=Count('transaction__user', distinct=True)
     ).order_by('-similar_user_count', '-borrow_count')[:limit]
-    
-    print(f"👥 Collaborative recommendations: {recommended_books.count()} from {len(similar_users)} similar users")
+
+    print(
+        f"👥 Collaborative recommendations: {recommended_books.count()} from {len(similar_users)} similar users")
     return recommended_books
+
 
 def get_cached_recommendations(user, borrowed_book_ids):
     """
@@ -693,26 +931,28 @@ def get_cached_recommendations(user, borrowed_book_ids):
     """
     cache_key = f"user_{user.id}_recommendations"
     cached_recommendations = cache.get(cache_key)
-    
+
     if cached_recommendations is not None:
         print(f"🎯 Using cached recommendations for user {user.username}")
         return cached_recommendations
-    
+
     print(f"🔍 Generating fresh recommendations for user {user.username}")
-    
+
     # Generate fresh recommendations using your existing functions
-    content_based = get_enhanced_content_based_recommendations(user, borrowed_book_ids)
-    collaborative = get_enhanced_collaborative_recommendations(user, borrowed_book_ids)
-    
+    content_based = get_enhanced_content_based_recommendations(
+        user, borrowed_book_ids)
+    collaborative = get_enhanced_collaborative_recommendations(
+        user, borrowed_book_ids)
+
     # Combine and deduplicate
     all_recommendations = list(content_based)
     seen_ids = set(book.id for book in all_recommendations)
-    
+
     for book in collaborative:
         if book.id not in seen_ids and len(all_recommendations) < 10:
             all_recommendations.append(book)
             seen_ids.add(book.id)
-    
+
     # If still not enough, add popular books
     if len(all_recommendations) < 10:
         popular_books = get_popular_books_queryset(borrowed_book_ids)
@@ -720,10 +960,11 @@ def get_cached_recommendations(user, borrowed_book_ids):
             if book.id not in seen_ids and len(all_recommendations) < 10:
                 all_recommendations.append(book)
                 seen_ids.add(book.id)
-    
+
     # Cache for 1 hour
     cache.set(cache_key, all_recommendations, 3600)
     return all_recommendations
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -731,10 +972,12 @@ def recommendation_insights(request):
     """Provide insights about why books are recommended"""
     try:
         user_prefs = get_enhanced_user_preferences(request.user)
-        
-        top_genres = sorted(user_prefs['genres'].items(), key=lambda x: x[1], reverse=True)[:3]
-        top_authors = sorted(user_prefs['authors'].items(), key=lambda x: x[1], reverse=True)[:2]
-        
+
+        top_genres = sorted(user_prefs['genres'].items(
+        ), key=lambda x: x[1], reverse=True)[:3]
+        top_authors = sorted(user_prefs['authors'].items(
+        ), key=lambda x: x[1], reverse=True)[:2]
+
         # Determine reading level
         genre_count = len(user_prefs['genres'])
         if genre_count == 0:
@@ -743,7 +986,7 @@ def recommendation_insights(request):
             reading_level = "genre-explorer"
         else:
             reading_level = "diverse-reader"
-        
+
         return Response({
             'success': True,
             'user_insights': {
@@ -754,10 +997,11 @@ def recommendation_insights(request):
                 'total_genres_explored': genre_count
             }
         })
-        
+
     except Exception as e:
         logger.error(f"Error generating insights: {e}")
         return Response({'success': False, 'error': 'Could not generate insights'}, status=500)
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -766,12 +1010,14 @@ def book_recommendations(request):
     try:
         # Get user's borrowing history
         user_transactions = Transaction.objects.filter(user=request.user)
-        borrowed_book_ids = list(user_transactions.values_list('book_id', flat=True))
+        borrowed_book_ids = list(
+            user_transactions.values_list('book_id', flat=True))
 
         # If user has no borrowing history, return popular books
         if not user_transactions.exists():
             popular_books = get_popular_books_queryset(borrowed_book_ids)
-            serializer = BookSerializer(popular_books, many=True, context={'request': request})
+            serializer = BookSerializer(
+                popular_books, many=True, context={'request': request})
             return Response({
                 'success': True,
                 'recommendations': serializer.data,
@@ -781,16 +1027,18 @@ def book_recommendations(request):
             })
 
         # Use cached recommendations
-        all_recommendations = get_cached_recommendations(request.user, borrowed_book_ids)
-        
+        all_recommendations = get_cached_recommendations(
+            request.user, borrowed_book_ids)
+
         # Get recommendation strategy info
         strategy = "enhanced-hybrid"
         if len(all_recommendations) == 0:
             all_recommendations = get_popular_books_queryset(borrowed_book_ids)
             strategy = "fallback-popular"
 
-        serializer = BookSerializer(all_recommendations, many=True, context={'request': request})
-        
+        serializer = BookSerializer(
+            all_recommendations, many=True, context={'request': request})
+
         return Response({
             'success': True,
             'recommendations': serializer.data,
@@ -798,12 +1046,13 @@ def book_recommendations(request):
             'total_recommendations': len(all_recommendations),
             'message': 'Personalized recommendations based on your reading preferences'
         })
-        
+
     except Exception as e:
         logger.error(f"Error generating recommendations: {str(e)}")
         # Fallback to popular books
         fallback_books = get_popular_books_queryset([], limit=10)
-        serializer = BookSerializer(fallback_books, many=True, context={'request': request})
+        serializer = BookSerializer(
+            fallback_books, many=True, context={'request': request})
         return Response({
             'success': False,
             'recommendations': serializer.data,
@@ -835,7 +1084,7 @@ def _check_admin_permission(request):
 
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminUser])
 @csrf_exempt
 def admin_add_book(request):
     """
@@ -876,7 +1125,7 @@ def admin_add_book(request):
 
 
 @api_view(['DELETE'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminUser])
 def admin_delete_book(request, book_id):
     """
     Allows an admin to delete a book from the library.
@@ -893,7 +1142,7 @@ def admin_delete_book(request, book_id):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminUser])
 def librarian_active_transactions(request):
     """
     Allows librarians/admins to view all active (not yet returned) transactions.
@@ -910,7 +1159,7 @@ def librarian_active_transactions(request):
 
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminUser])
 def librarian_manual_issue(request):
     """
     Allows librarians/admins to manually issue a book to a user.
@@ -980,7 +1229,7 @@ def librarian_manual_return(request, transaction_id):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminUser])
 def admin_dashboard_stats(request):
     """
     Provides various statistics for the admin dashboard, such as total books, users,
@@ -1018,7 +1267,7 @@ def admin_dashboard_stats(request):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminUser])
 def admin_user_list(request):
     """
     Retrieves a list of all users with their profile details and borrowing statistics.
@@ -1089,27 +1338,62 @@ def admin_transaction_list(request):
 
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminUser])
 def admin_update_user_role(request, user_id):
     """
-    Allows an admin to update the role of a specific user (student, librarian, admin).
+    Securely update user role with validation and auditing
     """
-    if not _check_admin_permission(request):
-        return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
-
     try:
-        user = User.objects.get(id=user_id)
-        profile = UserProfile.objects.get(user=user)
+        from .audit_utils import AuditLogger
+
+        target_user = User.objects.get(id=user_id)
+        target_profile = UserProfile.objects.get(user=target_user)
 
         new_role = request.data.get('user_type')
-        if new_role in ['student', 'librarian', 'admin']:
-            profile.user_type = new_role
-            profile.save()
-            return Response({'success': f'User role updated to {new_role}'})
-        else:
-            return Response({'error': 'Invalid role'}, status=status.HTTP_400_BAD_REQUEST)
+        old_role = target_profile.user_type
+
+        # SECURITY CHECKS
+        # 1. Cannot change your own role
+        if target_user.id == request.user.id:
+            return Response({
+                'error': 'You cannot change your own role'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # 2. Validate role exists
+        valid_roles = ['student', 'teacher', 'librarian', 'admin']
+        if new_role not in valid_roles:
+            return Response({
+                'error': f'Invalid role. Must be one of: {", ".join(valid_roles)}'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # 3. Only superusers can assign admin role
+        if new_role == 'admin' and not request.user.is_superuser:
+            return Response({
+                'error': 'Only superusers can assign admin role'
+            }, status=status.HTTP_403_FORBIDDEN)
+
+        # Update role
+        target_profile.user_type = new_role
+        target_profile.save()
+
+        # Log the role change
+        AuditLogger.log_role_change(request, target_user, old_role, new_role)
+
+        return Response({
+            'success': f'User role updated from {old_role} to {new_role}',
+            'user_id': target_user.id,
+            'username': target_user.username,
+            'old_role': old_role,
+            'new_role': new_role
+        })
+
     except User.DoesNotExist:
         return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+    except UserProfile.DoesNotExist:
+        return Response({'error': 'User profile not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        logger.error(f"Error updating user role: {e}")
+        return Response({'error': 'Failed to update user role'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['GET'])
@@ -1205,6 +1489,149 @@ def test_view(request):
     (Note: This is a Django render view, not a DRF API view)
     """
     return HttpResponse("Test successful!")
+
+# Add to library/views.py
+
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def admin_advanced_analytics(request):
+    """
+    Advanced analytics for admin dashboard
+    """
+    if not _check_admin_permission(request):
+        return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+
+    try:
+        # Time periods
+        today = timezone.now().date()
+        seven_days_ago = today - timedelta(days=7)
+        thirty_days_ago = today - timedelta(days=30)
+
+        # 📊 Library Health Metrics
+        library_health = {
+            'books_borrowed_today': Transaction.objects.filter(
+                issue_date__date=today
+            ).count(),
+            'books_returned_today': Transaction.objects.filter(
+                return_date__date=today
+            ).count(),
+            'overdue_books_count': Transaction.objects.filter(
+                return_date__isnull=True,
+                due_date__lt=timezone.now()
+            ).count(),
+            'active_users_today': User.objects.filter(
+                last_login__date=today
+            ).count(),
+            'pending_qr_requests': Transaction.objects.filter(
+                status='pending'
+            ).count()
+        }
+
+        # 📈 Popularity Analytics
+        popularity_analytics = {
+            'most_borrowed_books': list(Book.objects.annotate(
+                borrow_count=Count('transaction')
+            ).order_by('-borrow_count')[:5].values('id', 'title', 'author', 'borrow_count')),
+            'popular_genres': list(Book.objects.values('genre').annotate(
+                count=Count('id'),
+                borrow_count=Count('transaction')
+            ).order_by('-borrow_count')[:5]),
+            'active_readers': list(User.objects.annotate(
+                books_borrowed=Count('transaction')
+            ).order_by('-books_borrowed')[:5].values('id', 'username', 'books_borrowed'))
+        }
+
+        # 💰 Financial Analytics
+        financial_analytics = {
+            'total_fines_collected': float(Transaction.objects.filter(
+                fine_paid=True
+            ).aggregate(Sum('fine_amount'))['fine_amount__sum'] or 0),
+            'outstanding_fines': float(Transaction.objects.filter(
+                fine_amount__gt=0,
+                fine_paid=False
+            ).aggregate(Sum('fine_amount'))['fine_amount__sum'] or 0),
+            'fines_today': float(Transaction.objects.filter(
+                fine_paid_date__date=today
+            ).aggregate(Sum('fine_amount'))['fine_amount__sum'] or 0)
+        }
+
+        # 📅 Trends & Growth
+        trends_analytics = {
+            'borrow_trend_7_days': get_borrow_trend(7),
+            'user_growth_30_days': get_user_growth(30),
+            'genre_popularity_trend': get_genre_trends()
+        }
+
+        return Response({
+            'success': True,
+            'analytics': {
+                'library_health': library_health,
+                'popularity': popularity_analytics,
+                'financial': financial_analytics,
+                'trends': trends_analytics,
+                'last_updated': timezone.now()
+            }
+        })
+
+    except Exception as e:
+        logger.error(f"Error generating analytics: {e}")
+        return Response({'error': 'Failed to generate analytics'}, status=500)
+
+
+def get_borrow_trend(days=7):
+    """Get borrowing trends for the last N days"""
+    end_date = timezone.now().date()
+    start_date = end_date - timedelta(days=days-1)
+
+    # Simple approach without TruncDate
+    trends = []
+    for i in range(days):
+        current_date = start_date + timedelta(days=i)
+        count = Transaction.objects.filter(
+            issue_date__date=current_date
+        ).count()
+        trends.append({
+            'date': current_date.strftime('%Y-%m-%d'),
+            'borrows': count
+        })
+
+    return trends
+
+
+def get_user_growth(days=30):
+    """Get user growth over the last N days"""
+    end_date = timezone.now().date()
+    start_date = end_date - timedelta(days=days-1)
+
+    growth_data = []
+    cumulative = 0
+
+    for i in range(days):
+        current_date = start_date + timedelta(days=i)
+        new_users = User.objects.filter(
+            date_joined__date=current_date
+        ).count()
+        cumulative += new_users
+
+        growth_data.append({
+            'date': current_date.strftime('%Y-%m-%d'),
+            'new_users': new_users,
+            'total_users': cumulative
+        })
+
+    return growth_data
+
+
+def get_genre_trends():
+    """Get genre popularity trends"""
+    genres = list(Book.objects.values('genre').annotate(
+        total_books=Count('id'),
+        total_borrows=Count('transaction')
+    ).filter(total_borrows__gt=0).order_by('-total_borrows')[:10])
+
+    return genres
+
 # Add to views.py
 # In views.py - Update the generate_borrow_qr function
 
@@ -1213,73 +1640,118 @@ def test_view(request):
 @permission_classes([IsAuthenticated])
 def generate_borrow_qr(request, book_id):
     """
-    Generates a QR code for borrowing a specific book
+    IMPROVED: Generate QR for borrowing with waitlist support
     """
     try:
         book = Book.objects.get(id=book_id)
+        user = request.user
 
-        # Check if book is available
-        if book.available_copies <= 0:
-            return Response({'error': 'No copies available'}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Check if user already has a pending transaction for this book
-        existing_pending = Transaction.objects.filter(
+        # Check if user already has active QR for this book
+        existing_qr = Transaction.objects.filter(
             book=book,
-            user=request.user,
+            user=user,
             status='pending',
             qr_generated_at__gte=timezone.now() - timedelta(hours=24)
-        ).exists()
+        ).first()
 
-        if existing_pending:
+        if existing_qr:
+            # If QR data is missing, generate it
+            if not existing_qr.qr_data:
+                qr_payload = f"BORROW:{existing_qr.id}:{book.id}:{user.id}"
+                existing_qr.qr_data = generate_base64_qr(qr_payload)
+                existing_qr.save()
+
+            # Return existing QR with PROPER DATE FORMAT
             return Response({
-                'error': 'You already have a pending QR for this book',
-                'has_existing': True
-            }, status=status.HTTP_400_BAD_REQUEST)
+                'success': 'Using existing QR code',
+                'qr_data': existing_qr.qr_data,
+                'transaction_id': existing_qr.id,
+                'expires_at': existing_qr.get_qr_expiry_time().isoformat() if existing_qr.get_qr_expiry_time() else None,
+                'type': 'qr'
+            })
 
-        # Create transaction with pending status
-        user_profile = UserProfile.objects.get(user=request.user)
-        due_date = timezone.now() + timedelta(days=user_profile.borrowing_period)
+        # Check book availability
+        if book.available_copies > 0:
+            # BOOK AVAILABLE - Generate QR immediately
+            user_profile = UserProfile.objects.get(user=user)
+            due_date = timezone.now() + timedelta(days=user_profile.borrowing_period)
 
-        transaction = Transaction.objects.create(
-            book=book,
-            user=request.user,
-            due_date=due_date,
-            status='pending',
-            qr_generated_at=timezone.now()
-        )
+            # Create transaction
+            transaction = Transaction.objects.create(
+                book=book,
+                user=user,
+                due_date=due_date,
+                status='pending'
+            )
 
-        # Generate QR code for the transaction
-        qr = qrcode.QRCode(
-            version=1,
-            error_correction=qrcode.constants.ERROR_CORRECT_L,
-            box_size=10,
-            border=4,
-        )
-        qr.add_data(f"BORROW:{transaction.id}")
-        qr.make(fit=True)
+            # Generate QR data
+            qr_payload = f"BORROW:{transaction.id}:{book.id}:{user.id}"
+            qr_data = generate_base64_qr(qr_payload)
 
-        img = qr.make_image(fill_color="black", back_color="white")
-        buffer = BytesIO()
-        img.save(buffer, format='PNG')
+            # Save QR data to transaction
+            transaction.qr_data = qr_data
+            transaction.save()
 
-        # Save QR code
-        file_name = f'borrow_qr_{transaction.id}.png'
-        transaction.qr_code.save(file_name, File(buffer), save=True)
+            # Reduce available copies
+            book.available_copies -= 1
+            book.save()
 
-        # Return the QR code URL
-        qr_code_url = request.build_absolute_uri(transaction.qr_code.url)
+            return Response({
+                'success': 'QR code generated successfully!',
+                'qr_data': qr_data,
+                'transaction_id': transaction.id,
+                'expires_at': transaction.get_qr_expiry_time().isoformat(),
+                'type': 'qr'
+            })
 
-        return Response({
-            'success': 'QR code generated successfully',
-            'qr_code_url': qr_code_url,
-            'transaction_id': transaction.id,
-            'expires_at': transaction.qr_generated_at + timedelta(hours=24)
-        })
+        else:
+            # BOOK UNAVAILABLE - Add to waitlist
+            waitlist_entry = add_to_waitlist(user, book)
+
+            return Response({
+                'success': f'Added to waitlist. Position: #{waitlist_entry.position}',
+                'waitlist_position': waitlist_entry.position,
+                'estimated_wait': estimate_wait_time(waitlist_entry.position),
+                'type': 'waitlist'
+            })
 
     except Book.DoesNotExist:
-        return Response({'error': 'Book not found'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'error': 'Book not found'}, status=404)
     except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        logger.error(f"QR generation error: {e}")
+        return Response({'error': str(e)}, status=400)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def fix_missing_qr(request, transaction_id):
+    """
+    Fix missing QR data for existing transaction
+    """
+    try:
+        transaction = Transaction.objects.get(
+            id=transaction_id,
+            user=request.user
+        )
+
+        # Generate QR data
+        qr_payload = f"BORROW:{transaction.id}:{transaction.book.id}:{request.user.id}"
+        qr_data = generate_base64_qr(qr_payload)
+
+        # Update transaction
+        transaction.qr_data = qr_data
+        transaction.save()
+
+        return Response({
+            'success': 'QR data added to existing transaction',
+            'qr_data': qr_data,
+            'transaction_id': transaction.id,
+            'expires_at': transaction.get_qr_expiry_time()
+        })
+
+    except Transaction.DoesNotExist:
+        return Response({'error': 'Transaction not found'}, status=404)
+
 # In views.py - Add this endpoint
 
 
@@ -1343,6 +1815,74 @@ def get_existing_qr(request, book_id):
 
 
 @api_view(['POST'])
+@permission_classes([IsLibrarianUser])  # Only librarians can access
+def validate_borrow_qr(request):
+    """
+    Validate a scanned borrow QR code
+    """
+    try:
+        scanned_data = request.data.get('qr_data')
+
+        if not scanned_data:
+            return Response({'error': 'No QR data provided'}, status=400)
+
+        # Parse QR data (format: "BORROW:transaction_id:book_id:user_id")
+        parts = scanned_data.split(':')
+
+        if len(parts) != 4 or parts[0] != 'BORROW':
+            return Response({'valid': False, 'error': 'Invalid QR format'})
+
+        transaction_id = parts[1]
+        book_id = parts[2]
+        user_id = parts[3]
+
+        # Get transaction
+        transaction = Transaction.objects.select_related('book', 'user').get(
+            id=transaction_id,
+            status='pending'
+        )
+
+        # Check if QR is expired
+        if not transaction.is_qr_valid():
+            transaction.status = 'expired'
+            transaction.save()
+            return Response({
+                'valid': False,
+                'error': 'QR code has expired (24 hours limit)'
+            })
+
+        # Check if book is still available
+        if transaction.book.available_copies <= 0:
+            return Response({
+                'valid': False,
+                'error': 'Book is no longer available'
+            })
+
+        # All checks passed - return transaction details
+        user_profile = UserProfile.objects.get(user=transaction.user)
+
+        return Response({
+            'valid': True,
+            'transaction': {
+                'id': transaction.id,
+                'user_name': transaction.user.username,
+                'user_email': transaction.user.email,
+                'user_roll': user_profile.roll_number or 'N/A',
+                'book_title': transaction.book.title,
+                'book_author': transaction.book.author,
+                'due_date': transaction.due_date.strftime('%Y-%m-%d'),
+                'qr_generated_at': transaction.qr_generated_at.strftime('%Y-%m-%d %H:%M')
+            }
+        })
+
+    except Transaction.DoesNotExist:
+        return Response({'valid': False, 'error': 'Invalid transaction'})
+    except Exception as e:
+        logger.error(f"QR validation error: {e}")
+        return Response({'valid': False, 'error': 'Validation failed'})
+
+
+@api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def validate_borrow_transaction(request, transaction_id):
     """
@@ -1389,36 +1929,162 @@ def validate_borrow_transaction(request, transaction_id):
         return Response({'valid': False, 'error': 'Transaction not found'})
 
 
+@api_view(['POST'])
+@permission_classes([IsLibrarianUser])
+def decode_qr_image(request):
+    """
+    Decode QR code from uploaded image file - UPDATED FOR BOTH BORROW & RETURN
+    """
+    try:
+        import qrcode
+        from pyzbar.pyzbar import decode
+        from PIL import Image
+        import io
+        
+        qr_image = request.FILES.get('qr_image')
+        if not qr_image:
+            return Response({'error': 'No image file provided'}, status=400)
+        
+        # Validate file type
+        allowed_types = ['image/png', 'image/jpeg', 'image/jpg']
+        if qr_image.content_type not in allowed_types:
+            return Response({'error': 'Only PNG and JPG images are supported'}, status=400)
+        
+        # Read and process image
+        image_data = qr_image.read()
+        image = Image.open(io.BytesIO(image_data))
+        
+        # Convert to RGB if necessary
+        if image.mode != 'RGB':
+            image = image.convert('RGB')
+        
+        # Decode QR code
+        decoded_objects = decode(image)
+        
+        if decoded_objects:
+            qr_data = decoded_objects[0].data.decode('utf-8')
+            
+            # FIX: Accept both BORROW and RETURN formats
+            if (qr_data.startswith('BORROW:') or qr_data.startswith('RETURN:')) and len(qr_data.split(':')) == 4:
+                return Response({
+                    'success': True,
+                    'decoded_text': qr_data,
+                    'message': 'QR code decoded successfully',
+                    'type': 'borrow' if qr_data.startswith('BORROW:') else 'return'
+                })
+            else:
+                return Response({
+                    'success': False,
+                    'error': 'Invalid QR format. Not a library borrow/return QR.'
+                }, status=400)
+        else:
+            return Response({
+                'success': False,
+                'error': 'No QR code found in the image. Please ensure the QR is clear and centered.'
+            }, status=400)
+            
+    except ImportError:
+        return Response({
+            'error': 'QR decoding library not available. Please install pyzbar and pillow.'
+        }, status=500)
+    except Exception as e:
+        logger.error(f"QR image decoding error: {e}")
+        return Response({
+            'error': 'Failed to decode QR image. Please try another image.'
+        }, status=400)
+
+# LIBRARIAN ISSUED BOOKS ENDPOINT - FIXED VERSION
+
+
+@api_view(['GET'])
+@permission_classes([IsLibrarianUser])
+def librarian_issued_books(request):
+    """
+    Get books issued by librarian with filtering
+    """
+    try:
+        filter_type = request.GET.get('filter', 'today')
+
+        # Base queryset - include both borrowed and returned books
+        transactions = Transaction.objects.filter(
+            status__in=['borrowed', 'returned'],
+            issued_at__isnull=False  # Only books that were actually issued
+        ).select_related('book', 'user').order_by('-issued_at')
+
+        # Apply date filters
+        now = timezone.now()
+        if filter_type == 'today':
+            today_start = now.replace(
+                hour=0, minute=0, second=0, microsecond=0)
+            transactions = transactions.filter(issued_at__gte=today_start)
+        elif filter_type == 'week':
+            week_ago = now - timedelta(days=7)
+            transactions = transactions.filter(issued_at__gte=week_ago)
+        # 'all' returns all transactions without date filter
+
+        issued_books = []
+        for transaction in transactions:
+            try:
+                user_profile = UserProfile.objects.get(user=transaction.user)
+                user_roll = user_profile.roll_number or 'N/A'
+            except UserProfile.DoesNotExist:
+                user_roll = 'N/A'
+
+            issued_books.append({
+                'id': transaction.id,
+                'book_title': transaction.book.title,
+                'book_author': transaction.book.author,
+                'user_name': transaction.user.username,
+                'user_roll': user_roll,
+                'issued_at': transaction.issued_at,
+                'due_date': transaction.due_date,
+                'return_date': transaction.return_date
+            })
+
+        return Response(issued_books)
+
+    except Exception as e:
+        logger.error(f"Error fetching issued books: {e}")
+        return Response({'error': 'Failed to fetch issued books'}, status=500)
+
+# USER PENDING TRANSACTIONS ENDPOINT
+
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def user_pending_transactions(request):
     """
-    Get all pending QR transactions for the user
+    Get user's pending QR transactions
     """
-    pending_transactions = Transaction.objects.filter(
-        user=request.user,
-        status='pending'
-    ).select_related('book')
+    try:
+        pending_transactions = Transaction.objects.filter(
+            user=request.user,
+            status='pending',
+            qr_generated_at__gte=timezone.now() - timedelta(hours=24)
+        ).select_related('book')
 
-    transactions_data = []
-    for transaction in pending_transactions:
-        expiry_time = transaction.qr_generated_at + \
-            timedelta(hours=transaction.qr_expiry_hours)
-        time_remaining = expiry_time - timezone.now()
-        hours_remaining = max(0, time_remaining.total_seconds() / 3600)
+        transactions_data = []
+        for transaction in pending_transactions:
+            expiry_time = transaction.get_qr_expiry_time()
+            time_remaining = expiry_time - timezone.now() if expiry_time else timedelta(0)
+            hours_remaining = max(0, time_remaining.total_seconds() / 3600)
 
-        transactions_data.append({
-            'id': transaction.id,
-            'book_title': transaction.book.title,
-            'book_author': transaction.book.author,
-            'qr_generated_at': transaction.qr_generated_at,
-            'expiry_time': expiry_time,
-            'hours_remaining': round(hours_remaining, 1),
-            'is_expired': hours_remaining <= 0,
-            'qr_code_url': request.build_absolute_uri(transaction.qr_code.url) if transaction.qr_code else None
-        })
+            transactions_data.append({
+                'id': transaction.id,
+                'book_title': transaction.book.title,
+                'book_author': transaction.book.author,
+                'qr_generated_at': transaction.qr_generated_at,
+                'expiry_time': expiry_time,
+                'hours_remaining': round(hours_remaining, 1),
+                'is_expired': hours_remaining <= 0,
+                'qr_data': transaction.qr_data
+            })
 
-    return Response(transactions_data)
+        return Response(transactions_data)
+
+    except Exception as e:
+        logger.error(f"Error fetching pending transactions: {e}")
+        return Response({'error': 'Failed to load pending transactions'}, status=500)
 
 # In views.py - Add this endpoint
 
@@ -1455,42 +2121,57 @@ def get_my_qr(request, book_id):
 
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def issue_book_via_qr(request, transaction_id):
+@permission_classes([IsLibrarianUser])
+def issue_book_via_qr(request):
     """
-    Issues a book after QR validation.
+    Issue book after QR validation
     """
     try:
-        if not _check_admin_or_librarian_permission(request):
-            return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+        transaction_id = request.data.get('transaction_id')
 
-        transaction = Transaction.objects.get(id=transaction_id)
+        if not transaction_id:
+            return Response({'error': 'Transaction ID required'}, status=400)
 
-        # Check if transaction is still valid
-        if transaction.return_date is not None:
-            return Response({'error': 'Transaction already processed'})
+        transaction = Transaction.objects.select_related('book', 'user').get(
+            id=transaction_id,
+            status='pending'
+        )
 
-        # Check if book is still available
+        # Final validation
+        if not transaction.is_qr_valid():
+            return Response({'error': 'QR expired'}, status=400)
+
         if transaction.book.available_copies <= 0:
-            return Response({'error': 'Book no longer available'})
+            return Response({'error': 'Book no longer available'}, status=400)
 
-        # Update book available copies
-        book = transaction.book
-        book.available_copies -= 1
-        book.save()
+        # Update transaction status
+        transaction.status = 'borrowed'
+        transaction.issued_at = timezone.now()
+        transaction.save()
 
-        # Set issue date if not set
-        if not transaction.issue_date:
-            transaction.issue_date = timezone.now()
-            transaction.save()
+        # Send notification to user
+        from .notification_utils import NotificationManager
+        NotificationManager.create_notification(
+            user=transaction.user,
+            notification_type='system',
+            title='📚 Book Issued Successfully!',
+            message=f'Your book "{transaction.book.title}" has been issued. Due date: {transaction.due_date.strftime("%B %d, %Y")}',
+            related_book=transaction.book,
+            related_transaction=transaction,
+            action_url='/my-borrows'
+        )
 
         return Response({
-            'success': 'Book issued successfully',
-            'due_date': transaction.due_date.strftime('%Y-%m-%d')
+            'success': f'Book issued to {transaction.user.username}',
+            'due_date': transaction.due_date.strftime('%Y-%m-%d'),
+            'transaction_id': transaction.id
         })
 
     except Transaction.DoesNotExist:
-        return Response({'error': 'Transaction not found'})
+        return Response({'error': 'Transaction not found'}, status=404)
+    except Exception as e:
+        logger.error(f"Book issuance error: {e}")
+        return Response({'error': 'Failed to issue book'}, status=400)
 
 
 @api_view(['GET'])
@@ -1570,6 +2251,173 @@ def return_book_via_qr(request, transaction_id):
 
     except Transaction.DoesNotExist:
         return Response({'error': 'Transaction not found'})
+    
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def generate_return_qr(request, transaction_id):
+    """
+    Generate QR code for returning a borrowed book
+    """
+    try:
+        # Get the active borrow transaction
+        transaction = Transaction.objects.get(
+            id=transaction_id,
+            user=request.user,
+            status='borrowed',
+            return_date__isnull=True
+        )
+        
+        # Generate return QR data
+        qr_payload = f"RETURN:{transaction.id}:{transaction.book.id}:{request.user.id}"
+        qr_data = generate_base64_qr(qr_payload)
+        
+        return Response({
+            'success': 'Return QR generated successfully',
+            'qr_data': qr_data,
+            'transaction_id': transaction.id,
+            'book_title': transaction.book.title,
+            'due_date': transaction.due_date.strftime('%Y-%m-%d')
+        })
+        
+    except Transaction.DoesNotExist:
+        return Response({'error': 'No active borrow found for return'}, status=404)
+    except Exception as e:
+        logger.error(f"Return QR generation error: {e}")
+        return Response({'error': 'Failed to generate return QR'}, status=400)
+    
+@api_view(['POST'])
+@permission_classes([IsLibrarianUser])
+def validate_return_qr(request):
+    """
+    Validate a scanned return QR code
+    """
+    try:
+        scanned_data = request.data.get('qr_data')
+        
+        if not scanned_data:
+            return Response({'error': 'No QR data provided'}, status=400)
+        
+        # Parse QR data (format: "RETURN:transaction_id:book_id:user_id")
+        parts = scanned_data.split(':')
+        
+        if len(parts) != 4 or parts[0] != 'RETURN':
+            return Response({'valid': False, 'error': 'Invalid return QR format'})
+        
+        transaction_id = parts[1]
+        book_id = parts[2]
+        user_id = parts[3]
+        
+        # Get transaction
+        transaction = Transaction.objects.select_related('book', 'user').get(
+            id=transaction_id,
+            status='borrowed',
+            return_date__isnull=True
+        )
+        
+        # Calculate fine if overdue
+        today = timezone.now().date()
+        due_date = transaction.due_date.date()
+        fine_amount = 0
+        
+        if today > due_date:
+            days_overdue = (today - due_date).days
+            fine_per_day = 5  # ₹5 per day fine
+            fine_amount = days_overdue * fine_per_day
+        
+        user_profile = UserProfile.objects.get(user=transaction.user)
+        
+        return Response({
+            'valid': True,
+            'transaction': {
+                'id': transaction.id,
+                'user_name': transaction.user.username,
+                'user_email': transaction.user.email,
+                'user_roll': user_profile.roll_number or 'N/A',
+                'book_title': transaction.book.title,
+                'book_author': transaction.book.author,
+                'issue_date': transaction.issue_date.strftime('%Y-%m-%d'),
+                'due_date': transaction.due_date.strftime('%Y-%m-%d'),
+                'days_overdue': max(0, (today - due_date).days),
+                'fine_amount': fine_amount
+            }
+        })
+        
+    except Transaction.DoesNotExist:
+        return Response({'valid': False, 'error': 'Invalid return transaction'})
+    except Exception as e:
+        logger.error(f"Return validation error: {e}")
+        return Response({'valid': False, 'error': 'Return validation failed'})
+    
+@api_view(['POST'])
+@permission_classes([IsLibrarianUser])
+def process_book_return(request):
+    """
+    Process book return after QR validation
+    """
+    try:
+        transaction_id = request.data.get('transaction_id')
+        
+        if not transaction_id:
+            return Response({'error': 'Transaction ID required'}, status=400)
+        
+        transaction = Transaction.objects.select_related('book', 'user').get(
+            id=transaction_id,
+            status='borrowed',
+            return_date__isnull=True
+        )
+        
+        # Calculate fine
+        today = timezone.now().date()
+        due_date = transaction.due_date.date()
+        fine_amount = 0
+        
+        if today > due_date:
+            days_overdue = (today - due_date).days
+            fine_per_day = 5
+            fine_amount = days_overdue * fine_per_day
+            transaction.fine_amount = fine_amount
+        
+        # Update transaction
+        transaction.return_date = timezone.now()
+        transaction.status = 'returned'
+        transaction.save()
+        
+        # Update book availability
+        book = transaction.book
+        book.available_copies += 1
+        book.save()
+        
+        # Send notifications
+        from .notification_utils import NotificationManager
+        
+        # User notification
+        NotificationManager.create_notification(
+            user=transaction.user,
+            notification_type='system',
+            title='📚 Book Returned Successfully!',
+            message=f'You returned "{transaction.book.title}". ' + 
+                   (f'Fine applied: ₹{fine_amount}' if fine_amount > 0 else 'No fines applied.'),
+            related_book=transaction.book,
+            related_transaction=transaction,
+            action_url='/my-transactions'
+        )
+        
+        # Check waitlist and notify next user if any
+        from .utils import notify_waitlist_users
+        notify_waitlist_users(transaction.book)
+        
+        return Response({
+            'success': f'Book returned by {transaction.user.username}',
+            'fine_amount': fine_amount,
+            'days_overdue': max(0, (today - due_date).days),
+            'book_available_copies': book.available_copies
+        })
+        
+    except Transaction.DoesNotExist:
+        return Response({'error': 'Transaction not found or already returned'}, status=404)
+    except Exception as e:
+        logger.error(f"Return processing error: {e}")
+        return Response({'error': 'Failed to process return'}, status=400)
 
 # views.py
 
@@ -1843,12 +2691,51 @@ def verify_registration_otp(request):
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-# Complete registration
+# Add to views.py
+class PasswordValidator:
+    """
+    Enforce strong password policies
+    """
+    @staticmethod
+    def validate_password(password):
+        """
+        Validate password meets security requirements
+        """
+        if len(password) < 8:
+            raise ValidationError(
+                "Password must be at least 8 characters long")
+
+        if not re.search(r'[A-Z]', password):
+            raise ValidationError(
+                "Password must contain at least one uppercase letter")
+
+        if not re.search(r'[a-z]', password):
+            raise ValidationError(
+                "Password must contain at least one lowercase letter")
+
+        if not re.search(r'[0-9]', password):
+            raise ValidationError("Password must contain at least one number")
+
+        if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+            raise ValidationError(
+                "Password must contain at least one special character")
+
+        # Check for common passwords (basic list)
+        common_passwords = ['password', '12345678',
+                            'qwerty', 'admin', 'library']
+        if password.lower() in common_passwords:
+            raise ValidationError("Password is too common")
+
+        return password
+
+# Update complete_registration function
+
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def complete_registration(request):
     """
-    Robust registration that works with signals
+    Complete registration with password validation
     """
     import logging
     logger = logging.getLogger(__name__)
@@ -1856,18 +2743,19 @@ def complete_registration(request):
     pending_reg = None
 
     try:
+        from .validation_utils import InputValidator
+
         data = request.data
         email = data.get('email', '').strip().lower()
         password = data.get('password', '')
 
         logger.info(f"Registration attempt for: {email}")
 
-        # Validation
+        # ===== PASSWORD VALIDATION =====
+        PasswordValidator.validate_password(password)
+
         if not email or not password:
             return Response({'error': 'Email and password are required.'}, status=400)
-
-        if len(password) < 8:
-            return Response({'error': 'Password must be at least 8 characters.'}, status=400)
 
         # Find pending registration
         try:
@@ -1972,6 +2860,8 @@ def complete_registration(request):
             logger.error(f"Error during registration: {e}")
             return Response({'error': 'Registration process failed. Please contact support.'}, status=500)
 
+    except ValidationError as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         logger.error(f"Unexpected error in registration: {e}")
         return Response({'error': 'An unexpected error occurred. Please try again later.'}, status=500)
@@ -2227,7 +3117,8 @@ def handle_book_review(request, book_id):
         book = Book.objects.get(id=book_id)
     except Book.DoesNotExist:
         return Response({'error': 'Book not found'}, status=404)
-    
+
+
 @api_view(['POST', 'PUT', 'DELETE'])
 @permission_classes([IsAuthenticated])
 def handle_book_review(request, book_id):
@@ -2260,7 +3151,8 @@ def handle_book_review(request, book_id):
             from .reading_utils import check_achievements_on_review
             awarded_achievements = check_achievements_on_review(request.user)
             if awarded_achievements:
-                print(f"🎉 Auto-awarded review achievements for {request.user.username}: {awarded_achievements}")
+                print(
+                    f"🎉 Auto-awarded review achievements for {request.user.username}: {awarded_achievements}")
         except Exception as e:
             logger.error(f"Error in achievement check after review: {e}")
 
@@ -2278,6 +3170,7 @@ def handle_book_review(request, book_id):
             return Response({'success': 'Review deleted successfully'})
         except BookReview.DoesNotExist:
             return Response({'error': 'Review not found'}, status=status.HTTP_404_NOT_FOUND)
+
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -2331,11 +3224,11 @@ def user_reading_dashboard(request):
         from django.utils import timezone
         today = timezone.now().date()
         active_goals = ReadingGoal.objects.filter(
-            user=user, 
-            start_date__lte=today, 
+            user=user,
+            start_date__lte=today,
             end_date__gte=today
         )
-        
+
         goals_data = []
         for goal in active_goals:
             progress = goal.progress()
@@ -2402,6 +3295,7 @@ def user_reading_dashboard(request):
     except Exception as e:
         logger.error(f"Error generating reading dashboard: {e}")
         return Response({'error': 'Failed to load dashboard data'}, status=500)
+
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -2512,30 +3406,68 @@ def check_new_achievements(request):
         logger.error(f"Error checking achievements: {e}")
         return Response({'error': 'Failed to check achievements'}, status=500)
 
+
 # Add to library/views.py - Notification Endpoints
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_user_notifications(request):
     """
-    Get all notifications for the current user
+    Get all notifications for the current user - UPDATED WITH FILTERS
     """
     try:
+        # Get page parameters for infinite scroll
+        page = int(request.GET.get('page', 1))
+        page_size = int(request.GET.get('page_size', 20))
+
+        # Get filter parameters
+        status_filter = request.GET.get('status', 'all')
+        category_filter = request.GET.get('category', 'all')
+        date_filter = request.GET.get('date_range', 'all')
+
+        # Start building the query
         notifications = Notification.objects.filter(user=request.user)
-        
-        # Pagination
-        page = request.GET.get('page', 1)
-        page_size = request.GET.get('page_size', 20)
-        
-        paginator = Paginator(notifications, page_size)
-        try:
-            notifications_page = paginator.page(page)
-        except PageNotAnInteger:
-            notifications_page = paginator.page(1)
-        except EmptyPage:
-            notifications_page = paginator.page(paginator.num_pages)
-        
+
+        # Apply status filter
+        if status_filter == 'unread':
+            notifications = notifications.filter(is_read=False)
+        elif status_filter == 'read':
+            notifications = notifications.filter(is_read=True)
+
+        # Apply category filter
+        if category_filter and category_filter != 'all':
+            notifications = notifications.filter(
+                notification_type=category_filter)
+
+        # Apply date filter
+        if date_filter != 'all':
+            today = timezone.now().date()
+            if date_filter == 'today':
+                notifications = notifications.filter(created_at__date=today)
+            elif date_filter == 'week':
+                week_ago = today - timedelta(days=7)
+                notifications = notifications.filter(
+                    created_at__date__gte=week_ago)
+            elif date_filter == 'month':
+                month_ago = today - timedelta(days=30)
+                notifications = notifications.filter(
+                    created_at__date__gte=month_ago)
+
+        # Order by newest first
+        notifications = notifications.order_by('-created_at')
+
+        # Calculate pagination for infinite scroll
+        total_count = notifications.count()
+        total_pages = (total_count + page_size - 1) // page_size
+
+        # Get current page
+        start_index = (page - 1) * page_size
+        end_index = start_index + page_size
+
+        paginated_notifications = notifications[start_index:end_index]
+
+        # Serialize notifications
         notifications_data = []
-        for notification in notifications_page:
+        for notification in paginated_notifications:
             notifications_data.append({
                 'id': notification.id,
                 'type': notification.notification_type,
@@ -2545,20 +3477,31 @@ def get_user_notifications(request):
                 'created_at': notification.created_at,
                 'related_book_id': notification.related_book.id if notification.related_book else None,
                 'related_book_title': notification.related_book.title if notification.related_book else None,
+                'related_book_cover': request.build_absolute_uri(notification.related_book.cover_image.url) if notification.related_book and notification.related_book.cover_image else None,
                 'action_url': notification.action_url,
                 'time_ago': timesince(notification.created_at)
             })
-        
+
         return Response({
             'notifications': notifications_data,
-            'total_pages': paginator.num_pages,
-            'current_page': notifications_page.number,
-            'total_count': paginator.count
+            'pagination': {
+                'current_page': page,
+                'page_size': page_size,
+                'total_count': total_count,
+                'total_pages': total_pages,
+                'has_next': page < total_pages
+            },
+            'filters': {
+                'status': status_filter,
+                'category': category_filter,
+                'date_range': date_filter
+            }
         })
-        
+
     except Exception as e:
         logger.error(f"Error fetching notifications: {e}")
         return Response({'error': 'Failed to load notifications'}, status=500)
+
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -2567,17 +3510,19 @@ def mark_notification_read(request, notification_id):
     Mark a notification as read
     """
     try:
-        notification = Notification.objects.get(id=notification_id, user=request.user)
+        notification = Notification.objects.get(
+            id=notification_id, user=request.user)
         notification.is_read = True
         notification.save()
-        
+
         return Response({'success': 'Notification marked as read'})
-        
+
     except Notification.DoesNotExist:
         return Response({'error': 'Notification not found'}, status=404)
     except Exception as e:
         logger.error(f"Error marking notification as read: {e}")
         return Response({'error': 'Failed to update notification'}, status=500)
+
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -2587,17 +3532,18 @@ def mark_all_notifications_read(request):
     """
     try:
         updated_count = Notification.objects.filter(
-            user=request.user, 
+            user=request.user,
             is_read=False
         ).update(is_read=True)
-        
+
         return Response({
             'success': f'Marked {updated_count} notifications as read'
         })
-        
+
     except Exception as e:
         logger.error(f"Error marking all notifications as read: {e}")
         return Response({'error': 'Failed to update notifications'}, status=500)
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -2607,15 +3553,16 @@ def get_unread_notification_count(request):
     """
     try:
         count = Notification.objects.filter(
-            user=request.user, 
+            user=request.user,
             is_read=False
         ).count()
-        
+
         return Response({'unread_count': count})
-        
+
     except Exception as e:
         logger.error(f"Error counting unread notifications: {e}")
         return Response({'error': 'Failed to get notification count'}, status=500)
+
 
 @api_view(['GET', 'PUT'])
 @permission_classes([IsAuthenticated])
@@ -2627,7 +3574,7 @@ def notification_preferences(request):
         preferences, created = UserNotificationPreference.objects.get_or_create(
             user=request.user
         )
-        
+
         if request.method == 'GET':
             return Response({
                 'email_due_reminders': preferences.email_due_reminders,
@@ -2638,20 +3585,111 @@ def notification_preferences(request):
                 'push_due_reminders': preferences.push_due_reminders,
                 'push_overdue_alerts': preferences.push_overdue_alerts,
             })
-            
+
         elif request.method == 'PUT':
             data = request.data
-            preferences.email_due_reminders = data.get('email_due_reminders', preferences.email_due_reminders)
-            preferences.email_overdue_alerts = data.get('email_overdue_alerts', preferences.email_overdue_alerts)
-            preferences.email_fine_notifications = data.get('email_fine_notifications', preferences.email_fine_notifications)
-            preferences.email_achievements = data.get('email_achievements', preferences.email_achievements)
-            preferences.email_book_available = data.get('email_book_available', preferences.email_book_available)
-            preferences.push_due_reminders = data.get('push_due_reminders', preferences.push_due_reminders)
-            preferences.push_overdue_alerts = data.get('push_overdue_alerts', preferences.push_overdue_alerts)
+            preferences.email_due_reminders = data.get(
+                'email_due_reminders', preferences.email_due_reminders)
+            preferences.email_overdue_alerts = data.get(
+                'email_overdue_alerts', preferences.email_overdue_alerts)
+            preferences.email_fine_notifications = data.get(
+                'email_fine_notifications', preferences.email_fine_notifications)
+            preferences.email_achievements = data.get(
+                'email_achievements', preferences.email_achievements)
+            preferences.email_book_available = data.get(
+                'email_book_available', preferences.email_book_available)
+            preferences.push_due_reminders = data.get(
+                'push_due_reminders', preferences.push_due_reminders)
+            preferences.push_overdue_alerts = data.get(
+                'push_overdue_alerts', preferences.push_overdue_alerts)
             preferences.save()
-            
+
             return Response({'success': 'Notification preferences updated'})
-            
+
     except Exception as e:
         logger.error(f"Error with notification preferences: {e}")
         return Response({'error': 'Failed to process preferences'}, status=500)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def bulk_mark_notifications_read(request):
+    """
+    Mark multiple notifications as read
+    """
+    try:
+        notification_ids = request.data.get('notification_ids', [])
+
+        if not notification_ids:
+            return Response({'error': 'No notification IDs provided'}, status=400)
+
+        # Update notifications
+        updated_count = Notification.objects.filter(
+            id__in=notification_ids,
+            user=request.user
+        ).update(is_read=True)
+
+        return Response({
+            'success': f'Marked {updated_count} notifications as read',
+            'updated_count': updated_count
+        })
+
+    except Exception as e:
+        logger.error(f"Error in bulk mark read: {e}")
+        return Response({'error': 'Failed to update notifications'}, status=500)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def bulk_delete_notifications(request):
+    """
+    Delete multiple notifications
+    """
+    try:
+        notification_ids = request.data.get('notification_ids', [])
+
+        if not notification_ids:
+            return Response({'error': 'No notification IDs provided'}, status=400)
+
+        # Delete notifications
+        deleted_count, _ = Notification.objects.filter(
+            id__in=notification_ids,
+            user=request.user
+        ).delete()
+
+        return Response({
+            'success': f'Deleted {deleted_count} notifications',
+            'deleted_count': deleted_count
+        })
+
+    except Exception as e:
+        logger.error(f"Error in bulk delete: {e}")
+        return Response({'error': 'Failed to delete notifications'}, status=500)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def bulk_archive_notifications(request):
+    """
+    Archive multiple notifications (soft delete)
+    """
+    try:
+        notification_ids = request.data.get('notification_ids', [])
+
+        if not notification_ids:
+            return Response({'error': 'No notification IDs provided'}, status=400)
+
+        # For now, we'll mark them as read. You can add an 'archived' field later
+        updated_count = Notification.objects.filter(
+            id__in=notification_ids,
+            user=request.user
+        ).update(is_read=True)
+
+        return Response({
+            'success': f'Archived {updated_count} notifications',
+            'archived_count': updated_count
+        })
+
+    except Exception as e:
+        logger.error(f"Error in bulk archive: {e}")
+        return Response({'error': 'Failed to archive notifications'}, status=500)

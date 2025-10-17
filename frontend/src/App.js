@@ -24,6 +24,11 @@ import PopularBooks from './components/PopularBooks';
 import ReadingDashboard from './components/ReadingDashboard';
 import NotificationsPage from './components/NotificationsPage';
 import NotificationPreferences from './components/NotificationPreferences';
+import RouteGuard from './components/Security/RouteGuard';
+import SecurityDashboard from './components/Admin/SecurityDashboard';
+
+// import PermissionWrapper from './components/Security/PermissionWrapper';
+
 
 // Create a wrapper component to access the location
 function AppContent() {
@@ -154,6 +159,31 @@ function AppContent() {
         <Route
           path="/notifications/preferences"
           element={user ? <NotificationPreferences user={user} /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/admin"
+          element={
+            <RouteGuard requiredRole="admin">
+              <AdminDashboard user={user} />
+            </RouteGuard>
+          }
+        />
+
+        <Route
+          path="/librarian"
+          element={
+            <RouteGuard requiredRole="librarian">
+              <LibrarianDashboard user={user} />
+            </RouteGuard>
+          }
+        />
+        <Route
+          path="/admin/security"
+          element={
+            <RouteGuard requiredRole="admin">
+              <SecurityDashboard user={user} />
+            </RouteGuard>
+          }
         />
       </Routes>
     </div>

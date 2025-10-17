@@ -229,20 +229,25 @@ const BookDetail = ({ user }) => {
             const data = await response.json();
 
             if (response.ok) {
-                setExistingQRInfo({
-                    qr_url: data.qr_code_url,
-                    generated_at: data.expiry_time,
-                    expires_at: data.expiry_time,
-                    hours_remaining: data.hours_remaining
-                });
-            } else if (data.error && data.has_existing) {
-                fetchMyQR();
+                if (data.type === 'qr') {
+                    // QR generated successfully
+                    setExistingQRInfo({
+                        qr_data: data.qr_data,
+                        transaction_id: data.transaction_id,
+                        expires_at: data.expires_at
+                    });
+                } else if (data.type === 'waitlist') {
+                    // Added to waitlist
+                    setExistingQRInfo({
+                        waitlist_position: data.waitlist_position,
+                        estimated_wait: data.estimated_wait
+                    });
+                }
             } else {
                 setErrorMessage(data.error || 'Failed to generate QR code');
                 setShowErrorModal(true);
             }
         } catch (error) {
-            console.error('QR Generation error:', error);
             setErrorMessage('Error generating QR code');
             setShowErrorModal(true);
         } finally {
@@ -288,8 +293,8 @@ const BookDetail = ({ user }) => {
                         {/* NEW: Rating Section */}
                         <div className="rating-section mb-3">
                             <div className="d-flex align-items-center mb-2">
-                                <StarRating 
-                                    rating={averageRating} 
+                                <StarRating
+                                    rating={averageRating}
                                     editable={false}
                                     size="lg"
                                 />
@@ -297,15 +302,15 @@ const BookDetail = ({ user }) => {
                                     ({averageRating > 0 ? averageRating.toFixed(1) : 'No'} rating{ratingCount !== 1 ? 's' : ''})
                                 </span>
                             </div>
-                            
+
                             {user && (
                                 <div className="user-rating-section">
                                     <p className="mb-1">
                                         <strong>Your Rating:</strong>
                                     </p>
                                     <div className="d-flex align-items-center">
-                                        <StarRating 
-                                            rating={userRating} 
+                                        <StarRating
+                                            rating={userRating}
                                             onRatingChange={handleRatingChange}
                                             editable={!ratingLoading}
                                             size="md"
@@ -370,7 +375,7 @@ const BookDetail = ({ user }) => {
                                 </button>
                             </div>
 
-                            {/* QR Code Section */}
+                            {/* QR Code Section - UPDATED */}
                             <div className="qr-section mt-3 p-3 border rounded">
                                 <h6 className="mb-2">📋 Library Pickup</h6>
 
@@ -380,27 +385,59 @@ const BookDetail = ({ user }) => {
                                             <span className="visually-hidden">Loading QR info...</span>
                                         </div>
                                     </div>
-                                ) : existingQRInfo ? (
-                                    <div className="existing-qr">
-                                        <p className="mb-1">
-                                            <small>Generated: {new Date(existingQRInfo.generated_at).toLocaleString()}</small>
-                                        </p>
-                                        <p className="mb-2">
-                                            <small>Expires: {new Date(existingQRInfo.expires_at).toLocaleString()}</small>
-                                        </p>
-                                        <button
-                                            className="btn btn-success btn-sm"
-                                            onClick={() => window.open(existingQRInfo.qr_url, '_blank')}
-                                        >
-                                            <i className="fas fa-eye me-1"></i> View My QR Code
-                                        </button>
+                                ) : existingQRInfo && existingQRInfo.qr_data ? (
+                                    <div className="existing-qr text-center">
+                                        {/* QR Image Display */}
+                                        <img
+                                            src={`data:image/png;base64,${existingQRInfo.qr_data}`}
+                                            alt="Borrow QR Code"
+                                            className="qr-image img-fluid mb-3"
+                                            style={{ maxWidth: '200px', border: '2px solid #dee2e6', borderRadius: '8px' }}
+                                        />
+
+                                        {/* QR Details */}
+                                        <div className="qr-details">
+                                            <p className="mb-1">
+                                                <small><strong>Generated:</strong> {new Date().toLocaleString()}</small>
+                                            </p>
+                                            <p className="mb-2">
+                                                <small><strong>Expires:</strong> {new Date(existingQRInfo.expires_at).toLocaleString()}</small>
+                                            </p>
+                                            <small className="text-muted d-block mb-2">
+                                                Show this QR code to librarian to borrow the book
+                                            </small>
+
+                                            {/* Download Button */}
+                                            <button
+                                                className="btn btn-success btn-sm me-2"
+                                                onClick={() => {
+                                                    const link = document.createElement('a');
+                                                    link.href = `data:image/png;base64,${existingQRInfo.qr_data}`;
+                                                    link.download = `borrow_qr_${book.id}.png`;
+                                                    link.click();
+                                                }}
+                                            >
+                                                <i className="fas fa-download me-1"></i> Download QR
+                                            </button>
+                                        </div>
+                                    </div>
+                                ) : existingQRInfo && existingQRInfo.waitlist_position ? (
+                                    <div className="waitlist-info text-center">
+                                        <div className="alert alert-info">
+                                            <h6>📚 You're on the Waitlist!</h6>
+                                            <p className="mb-1"><strong>Position:</strong> #{existingQRInfo.waitlist_position}</p>
+                                            <p className="mb-0"><strong>Estimated Wait:</strong> {existingQRInfo.estimated_wait}</p>
+                                        </div>
+                                        <small className="text-muted">
+                                            You'll be notified when the book becomes available
+                                        </small>
                                     </div>
                                 ) : book.available_copies === 0 ? (
                                     <div className="text-center text-muted">
                                         <small>No copies available for QR generation</small>
                                     </div>
                                 ) : (
-                                    <div>
+                                    <div className="text-center">
                                         <button
                                             className="btn btn-outline-primary btn-sm"
                                             onClick={handleGenerateQR}
