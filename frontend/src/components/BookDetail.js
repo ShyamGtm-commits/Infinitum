@@ -180,12 +180,12 @@ const BookDetail = ({ user }) => {
                     setShowErrorModal(true);
                 }
             } else if (data.success) {
-                alert('Book borrowed successfully!');
+                alert('Book reserved successfully!');
                 setHasBorrowed(true);
                 fetchBookDetails();
             }
         } catch (error) {
-            setErrorMessage('Error borrowing book. Please try again.');
+            setErrorMessage('Error reserving book. Please try again.');
             setShowErrorModal(true);
         }
     };
@@ -204,7 +204,7 @@ const BookDetail = ({ user }) => {
             const data = await response.json();
 
             if (data.success) {
-                alert('Book borrowed successfully!');
+                alert('Book reserved successfully!');
                 setHasBorrowed(true);
                 setShowConfirmation(false);
                 fetchBookDetails();
@@ -213,7 +213,7 @@ const BookDetail = ({ user }) => {
                 setShowErrorModal(true);
             }
         } catch (error) {
-            setErrorMessage('Error confirming borrow. Please try again.');
+            setErrorMessage('Error confirming reservation. Please try again.');
             setShowErrorModal(true);
         }
     };
@@ -229,7 +229,7 @@ const BookDetail = ({ user }) => {
             const data = await response.json();
 
             if (response.ok) {
-                if (data.type === 'qr') {
+                if (data.type === 'qr_pending') {
                     // QR generated successfully
                     setExistingQRInfo({
                         qr_data: data.qr_data,
@@ -348,7 +348,7 @@ const BookDetail = ({ user }) => {
                         <div className="availability-status mb-3">
                             <strong>Availability: </strong>
                             <span className={hasBorrowed ? 'text-success' : book.available_copies === 0 ? 'text-danger' : 'text-primary'}>
-                                {hasBorrowed ? 'Already Borrowed' :
+                                {hasBorrowed ? 'Already Reserved' :
                                     book.available_copies === 0 ? 'Out of Stock' :
                                         `${book.available_copies} of ${book.total_copies} available`}
                             </span>
@@ -370,14 +370,14 @@ const BookDetail = ({ user }) => {
                                     disabled={book.available_copies === 0 || hasBorrowed}
                                     style={{ minWidth: '120px' }}
                                 >
-                                    {hasBorrowed ? '✓ Borrowed' :
-                                        book.available_copies === 0 ? 'Out of Stock' : 'Borrow Digitally'}
+                                    {hasBorrowed ? '✓ Reserved for Pickup' :
+                                        book.available_copies === 0 ? 'Out of Stock' : 'Reserve for Pickup'}
                                 </button>
                             </div>
 
                             {/* QR Code Section - UPDATED */}
                             <div className="qr-section mt-3 p-3 border rounded">
-                                <h6 className="mb-2">📋 Library Pickup</h6>
+                                <h6 className="mb-2">📋 Library Pickup Reservation</h6>
 
                                 {qrLoading ? (
                                     <div className="text-center">
@@ -404,7 +404,7 @@ const BookDetail = ({ user }) => {
                                                 <small><strong>Expires:</strong> {new Date(existingQRInfo.expires_at).toLocaleString()}</small>
                                             </p>
                                             <small className="text-muted d-block mb-2">
-                                                Show this QR code to librarian to borrow the book
+                                                Show this QR code to librarian to complete book pickup
                                             </small>
 
                                             {/* Download Button */}
@@ -443,10 +443,10 @@ const BookDetail = ({ user }) => {
                                             onClick={handleGenerateQR}
                                             disabled={book.available_copies === 0}
                                         >
-                                            <i className="fas fa-qrcode me-1"></i> Get QR Code
+                                            <i className="fas fa-qrcode me-1"></i> Get  QR Code {/* CHANGED */}
                                         </button>
                                         <small className="text-muted d-block mt-1">
-                                            For physical library pickup
+                                            Reserve for physical library pickup
                                         </small>
                                     </div>
                                 )}
@@ -464,10 +464,10 @@ const BookDetail = ({ user }) => {
             {/* Modals */}
             <ConfirmationModal
                 show={showConfirmation}
-                title="Confirm Borrow"
+                title="Confirm Book Reservation"
                 message={confirmBorrow?.message}
                 details={confirmBorrow?.bookDetails || {}}
-                confirmText="Yes, Borrow Book"
+                confirmText="Yes, Reserve for Pickup"
                 cancelText="Cancel"
                 onConfirm={handleConfirmBorrow}
                 onCancel={() => setShowConfirmation(false)}

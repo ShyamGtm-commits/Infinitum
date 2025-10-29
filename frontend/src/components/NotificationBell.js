@@ -1,295 +1,311 @@
-import React, { useState, useEffect } from 'react';
+// frontend/src/components/NotificationBell.js
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const NotificationBell = ({ user }) => {
-    const [unreadCount, setUnreadCount] = useState(0);
-    const [notifications, setNotifications] = useState([]);
-    const [showDropdown, setShowDropdown] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [prevUnreadCount, setPrevUnreadCount] = useState(0);
-    const navigate = useNavigate();
+const NotificationBell = () => {
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const dropdownRef = useRef(null);
+  const navigate = useNavigate();
+  const audioRef = useRef(null);
 
-    const fetchUnreadCount = async () => {
-        try {
-            console.log('Fetching unread count...');
-            const response = await fetch('http://localhost:8000/api/notifications/unread-count/', {
-                credentials: 'include',
-            });
-            if (response.ok) {
-                const data = await response.json();
-                console.log('Unread count response:', data);
-                setUnreadCount(data.unread_count);
-            } else {
-                console.error('Failed to fetch unread count');
-            }
-        } catch (error) {
-            console.error('Error fetching unread count:', error);
-        }
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
     };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
-    const fetchNotifications = async () => {
-        setLoading(true);
-        try {
-            console.log('Fetching notifications for dropdown...');
-            const response = await fetch('http://localhost:8000/api/notifications/?page_size=5', {
-                credentials: 'include',
-            });
-            if (response.ok) {
-                const data = await response.json();
-                console.log('Notifications response:', data);
-                setNotifications(data.notifications);
-            } else {
-                console.error('Failed to fetch notifications');
-            }
-        } catch (error) {
-            console.error('Error fetching notifications:', error);
-        } finally {
-            setLoading(false);
-        }
+  // Fetch notifications
+  const fetchNotifications = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('http://localhost:8000/api/notifications/?limit=5', {
+        credentials: 'include',
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setNotifications(data.notifications || []);
+        
+        // Calculate unread count
+        const unread = data.notifications.filter(n => !n.is_read).length;
+        setUnreadCount(unread);
+      }
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+    
+    // Refresh notifications every 30 seconds
+    const interval = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const markAsRead = async (notificationId) => {
+    try {
+      const response = await fetch(`http://localhost:8000/api/notifications/${notificationId}/read/`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+      
+      if (response.ok) {
+        // Update local state
+        setNotifications(prev => 
+          prev.map(n => 
+            n.id === notificationId ? { ...n, is_read: true } : n
+          )
+        );
+        setUnreadCount(prev => Math.max(0, prev - 1));
+      }
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+    }
+  };
+
+  const markAllAsRead = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/notifications/read-all/', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      
+      if (response.ok) {
+        setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+        setUnreadCount(0);
+      }
+    } catch (error) {
+      console.error('Error marking all as read:', error);
+    }
+  };
+
+  // NEW: Get appropriate icon for each notification type
+  const getNotificationIcon = (type) => {
+    switch (type) {
+      // Reservation notifications
+      case 'reservation_confirmation':
+        return '📋';
+      case 'reservation_ready':
+        return '✅';
+      case 'reservation_expiring':
+        return '⏰';
+      case 'pickup_reminder':
+        return '📚';
+      
+      // Existing notifications
+      case 'book_available':
+        return '🎉';
+      case 'due_reminder':
+        return '📅';
+      case 'overdue':
+        return '⚠️';
+      case 'fine':
+        return '💰';
+      case 'achievement':
+        return '🏆';
+      case 'system':
+        return '🔔';
+      case 'welcome':
+        return '👋';
+      default:
+        return '📢';
+    }
+  };
+
+  // NEW: Get color class for notification type
+  const getNotificationColor = (type) => {
+    const colors = {
+      // Reservation notifications
+      reservation_confirmation: 'text-success',
+      reservation_ready: 'text-success',
+      reservation_expiring: 'text-warning',
+      pickup_reminder: 'text-info',
+      
+      // Existing notifications
+      book_available: 'text-success',
+      due_reminder: 'text-warning',
+      overdue: 'text-danger',
+      fine: 'text-danger',
+      achievement: 'text-success',
+      system: 'text-primary',
+      welcome: 'text-info'
     };
+    return colors[type] || 'text-secondary';
+  };
 
-    const markAsRead = async (notificationId) => {
-        try {
-            const response = await fetch(`http://localhost:8000/api/notifications/${notificationId}/read/`, {
-                method: 'POST',
-                credentials: 'include',
-            });
-            if (response.ok) {
-                // Update local state
-                setNotifications(prev =>
-                    prev.map(notif =>
-                        notif.id === notificationId ? { ...notif, is_read: true } : notif
-                    )
-                );
-                setUnreadCount(prev => Math.max(0, prev - 1));
-            }
-        } catch (error) {
-            console.error('Error marking notification as read:', error);
+  // NEW: Handle notification click with appropriate actions
+  const handleNotificationClick = async (notification) => {
+    // Mark as read first
+    if (!notification.is_read) {
+      await markAsRead(notification.id);
+    }
+
+    // Handle different actions based on notification type
+    switch (notification.type) {
+      case 'reservation_confirmation':
+      case 'reservation_ready':
+      case 'pickup_reminder':
+        // Navigate to book detail to generate/show QR
+        if (notification.related_book_id) {
+          navigate(`/books/${notification.related_book_id}`);
+        } else {
+          navigate('/my-reservations');
         }
-    };
-
-    const markAllAsRead = async () => {
-        try {
-            const response = await fetch('http://localhost:8000/api/notifications/read-all/', {
-                method: 'POST',
-                credentials: 'include',
-            });
-            if (response.ok) {
-                setNotifications(prev =>
-                    prev.map(notif => ({ ...notif, is_read: true }))
-                );
-                setUnreadCount(0);
-            }
-        } catch (error) {
-            console.error('Error marking all as read:', error);
+        break;
+      
+      case 'reservation_expiring':
+        // Navigate to book detail to renew QR
+        if (notification.related_book_id) {
+          navigate(`/books/${notification.related_book_id}`);
         }
-    };
-
-    useEffect(() => {
-        if (user) {
-            console.log('NotificationBell user:', user);
-            fetchUnreadCount();
-            // Poll for new notifications every 30 seconds
-            const interval = setInterval(fetchUnreadCount, 30000);
-            return () => clearInterval(interval);
+        break;
+      
+      case 'book_available':
+        // Navigate to book detail to reserve
+        if (notification.related_book_id) {
+          navigate(`/books/${notification.related_book_id}`);
         }
-    }, [user]);
-    // TEMPORARY: Add this to test the sound on component mount
-    useEffect(() => {
-        // Test sound after 2 seconds (remove this later)
-        const testSound = setTimeout(() => {
-            console.log('Testing notification sound...');
-            playNotificationSound();
-        }, 2000);
-
-        return () => clearTimeout(testSound);
-    }, []);
-
-    useEffect(() => {
-        // Play sound when new notifications arrive
-        if (unreadCount > prevUnreadCount) {
-            console.log('New notification! Playing sound...');
-            playNotificationSound();
+        break;
+      
+      case 'due_reminder':
+      case 'overdue':
+        navigate('/my-borrows');
+        break;
+      
+      case 'fine':
+        navigate('/fines');
+        break;
+      
+      case 'achievement':
+        navigate('/achievements');
+        break;
+      
+      default:
+        // Use action_url if provided, otherwise do nothing
+        if (notification.action_url) {
+          navigate(notification.action_url);
         }
-        // Update previous count
-        setPrevUnreadCount(unreadCount);
-    }, [unreadCount, prevUnreadCount]);
+    }
+    
+    setShowDropdown(false);
+  };
 
-    const toggleDropdown = () => {
-        console.log('Toggle dropdown, current state:', showDropdown);
-        if (!showDropdown) {
-            fetchNotifications();
-        }
-        setShowDropdown(!showDropdown);
-    };
+  // Format time ago
+  const formatTimeAgo = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now - date) / 1000);
+    
+    if (diffInSeconds < 60) return 'Just now';
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+    return `${Math.floor(diffInSeconds / 86400)}d ago`;
+  };
 
-    const getNotificationIcon = (type) => {
-        switch (type) {
-            case 'due_reminder':
-                return 'fas fa-clock text-warning';
-            case 'overdue':
-                return 'fas fa-exclamation-triangle text-danger';
-            case 'achievement':
-                return 'fas fa-trophy text-warning';
-            case 'book_available':
-                return 'fas fa-book text-success';
-            default:
-                return 'fas fa-bell text-info';
-        }
-    };
+  return (
+    <div className="notification-bell position-relative" ref={dropdownRef}>
+      {/* Bell Icon */}
+      <button
+        className="btn btn-outline-secondary position-relative"
+        onClick={() => setShowDropdown(!showDropdown)}
+        aria-label="Notifications"
+      >
+        <i className="fas fa-bell"></i>
+        {unreadCount > 0 && (
+          <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+            {unreadCount > 9 ? '9+' : unreadCount}
+          </span>
+        )}
+      </button>
 
-    const playNotificationSound = () => {
-        console.log('Attempting to play notification sound...');
+      {/* Dropdown Menu */}
+      {showDropdown && (
+        <div className="notification-dropdown position-absolute end-0 mt-2 bg-white rounded shadow-lg border">
+          <div className="dropdown-header p-3 border-bottom">
+            <div className="d-flex justify-content-between align-items-center">
+              <h6 className="mb-0">Notifications</h6>
+              {unreadCount > 0 && (
+                <button
+                  className="btn btn-sm btn-outline-primary"
+                  onClick={markAllAsRead}
+                >
+                  Mark all read
+                </button>
+              )}
+            </div>
+          </div>
 
-        try {
-            // Method 1: Web Audio API (most reliable)
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-
-            oscillator.frequency.value = 800;
-            oscillator.type = 'sine';
-            gainNode.gain.value = 0.1;
-
-            oscillator.start();
-            oscillator.stop(audioContext.currentTime + 0.1);
-
-            console.log('✅ Web Audio beep played successfully!');
-            return;
-        } catch (error) {
-            console.log('❌ Web Audio failed:', error);
-        }
-
-        // If we get here, try online sound
-        try {
-            const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/273/273-preview.mp3');
-            audio.volume = 0.3;
-            audio.play().then(() => {
-                console.log('✅ Online sound played successfully!');
-            }).catch(e => {
-                console.log('❌ Online sound blocked:', e);
-            });
-        } catch (error) {
-            console.log('❌ Online sound failed:', error);
-        }
-    };
-
-    // Add this fallback function too:
-    const playFallbackSound = () => {
-        try {
-            // Create a very short beep using base64 encoded sound
-            const audio = new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==");
-            audio.volume = 0.1;
-            audio.play().catch(e => console.log('Fallback sound failed:', e));
-        } catch (error) {
-            console.log('All sound methods failed');
-        }
-    };
-
-    return (
-        <div className="notification-bell position-relative">
-            <button
-                className={`btn btn-outline-secondary position-relative ${unreadCount > prevUnreadCount ? 'sound-playing' : ''}`}
-                onClick={toggleDropdown}
-                aria-label="Notifications"
-            >
-                <i className="fas fa-bell"></i>
-                {unreadCount > 0 && (
-                    <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                        {unreadCount > 9 ? '9+' : unreadCount}
-                    </span>
-                )}
-            </button>
-
-            {showDropdown && (
-                <div className="notification-dropdown position-absolute end-0 mt-2 bg-white rounded shadow-lg border"
-                    style={{ width: '400px', maxHeight: '500px', zIndex: 1050 }}>
-                    <div className="dropdown-header p-3 border-bottom d-flex justify-content-between align-items-center">
-                        <h6 className="mb-0">Notifications</h6>
-                        <div>
-                            {unreadCount > 0 && (
-                                <button
-                                    className="btn btn-sm btn-outline-primary me-2"
-                                    onClick={markAllAsRead}
-                                >
-                                    Mark all read
-                                </button>
-                            )}
-                            <button
-                                className="btn btn-sm btn-outline-secondary"
-                                onClick={() => setShowDropdown(false)}
-                            >
-                                <i className="fas fa-times"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="dropdown-body" style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                        {loading ? (
-                            <div className="text-center p-3">
-                                <div className="spinner-border spinner-border-sm" role="status">
-                                    <span className="visually-hidden">Loading...</span>
-                                </div>
-                            </div>
-                        ) : notifications.length === 0 ? (
-                            <div className="text-center p-4 text-muted">
-                                <i className="fas fa-bell-slash fa-2x mb-2"></i>
-                                <p>No notifications</p>
-                            </div>
-                        ) : (
-                            notifications.map(notification => (
-                                <div
-                                    key={notification.id}
-                                    className={`notification-item p-3 border-bottom ${!notification.is_read ? 'unread' : 'read'} ${notification.type}`}
-                                    onClick={() => markAsRead(notification.id)}
-                                    style={{ cursor: 'pointer' }}
-                                >
-                                    <div className="d-flex align-items-start">
-                                        <div className="me-3">
-                                            <i className={getNotificationIcon(notification.type)}></i>
-                                        </div>
-                                        <div className="flex-grow-1">
-                                            <h6 className="mb-1">{notification.title}</h6>
-                                            <p className="mb-1 small text-muted">{notification.message}</p>
-                                            <small className="text-muted">{notification.time_ago} ago</small>
-                                        </div>
-                                        {!notification.is_read && (
-                                            <span className="badge bg-primary ms-2">New</span>
-                                        )}
-                                    </div>
-                                </div>
-                            ))
-                        )}
-                    </div>
-
-                    <div className="dropdown-footer p-2 border-top text-center">
-
-                        <button
-                            className="btn btn-sm btn-outline-primary w-100"
-                            onClick={() => {
-                                setShowDropdown(false);
-                                navigate('/notifications');
-                            }}
-                        >
-                            View All Notifications
-                        </button>
-                    </div>
+          <div className="dropdown-body" style={{ maxHeight: '400px', overflowY: 'auto', width: '350px' }}>
+            {loading ? (
+              <div className="text-center p-3">
+                <div className="spinner-border spinner-border-sm" role="status">
+                  <span className="visually-hidden">Loading...</span>
                 </div>
-            )}
-
-            {/* Close dropdown when clicking outside */}
-            {showDropdown && (
+              </div>
+            ) : notifications.length === 0 ? (
+              <div className="text-center p-3 text-muted">
+                <i className="fas fa-bell-slash fa-2x mb-2"></i>
+                <p className="mb-0">No notifications</p>
+              </div>
+            ) : (
+              notifications.map(notification => (
                 <div
-                    className="position-fixed top-0 start-0 w-100 h-100"
-                    style={{ zIndex: 1040 }}
-                    onClick={() => setShowDropdown(false)}
-                ></div>
+                  key={notification.id}
+                  className={`notification-item p-3 border-bottom ${
+                    !notification.is_read ? 'bg-light' : ''
+                  }`}
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => handleNotificationClick(notification)}
+                >
+                  <div className="d-flex align-items-start">
+                    <span className={`me-2 ${getNotificationColor(notification.type)}`}>
+                      {getNotificationIcon(notification.type)}
+                    </span>
+                    <div className="flex-grow-1">
+                      <div className="d-flex justify-content-between align-items-start">
+                        <h6 className="mb-1 small fw-bold">{notification.title}</h6>
+                        {!notification.is_read && (
+                          <span className="badge bg-primary badge-sm">New</span>
+                        )}
+                      </div>
+                      <p className="mb-1 small text-muted">{notification.message}</p>
+                      <small className="text-muted">
+                        {formatTimeAgo(notification.created_at)}
+                        {notification.related_book_title && ` • ${notification.related_book_title}`}
+                      </small>
+                    </div>
+                  </div>
+                </div>
+              ))
             )}
+          </div>
+
+          <div className="dropdown-footer p-2 border-top text-center">
+            <button
+              className="btn btn-sm btn-outline-secondary w-100"
+              onClick={() => {
+                navigate('/notifications');
+                setShowDropdown(false);
+              }}
+            >
+              View All Notifications
+            </button>
+          </div>
         </div>
-    );
+      )}
+    </div>
+  );
 };
 
 export default NotificationBell;

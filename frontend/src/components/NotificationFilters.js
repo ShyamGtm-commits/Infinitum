@@ -32,7 +32,7 @@ const NotificationFilters = ({ filters, onFiltersChange, notificationStats }) =>
             </div>
             <div className="card-body">
                 <div className="row g-3">
-                    {/* Status Filter */}
+                    {/* Status Filter - NO CHANGES */}
                     <div className="col-md-3">
                         <label className="form-label fw-bold">
                             <i className="fas fa-eye me-1"></i>
@@ -49,7 +49,7 @@ const NotificationFilters = ({ filters, onFiltersChange, notificationStats }) =>
                         </select>
                     </div>
                     
-                    {/* Category Filter */}
+                    {/* Category Filter - UPDATED: Add 2 new options */}
                     <div className="col-md-3">
                         <label className="form-label fw-bold">
                             <i className="fas fa-tag me-1"></i>
@@ -62,6 +62,8 @@ const NotificationFilters = ({ filters, onFiltersChange, notificationStats }) =>
                         >
                             <option value="all">All Categories</option>
                             <option value="system">System</option>
+                            <option value="reservation">Reservation Updates</option> {/* ADDED */}
+                            <option value="pickup">Pickup Reminders</option> {/* ADDED */}
                             <option value="due_reminder">Due Reminders</option>
                             <option value="overdue">Overdue</option>
                             <option value="achievement">Achievements</option>
@@ -70,7 +72,7 @@ const NotificationFilters = ({ filters, onFiltersChange, notificationStats }) =>
                         </select>
                     </div>
                     
-                    {/* Date Range Filter */}
+                    {/* Date Range Filter - NO CHANGES */}
                     <div className="col-md-3">
                         <label className="form-label fw-bold">
                             <i className="fas fa-calendar me-1"></i>
@@ -88,7 +90,7 @@ const NotificationFilters = ({ filters, onFiltersChange, notificationStats }) =>
                         </select>
                     </div>
                     
-                    {/* Actions */}
+                    {/* Actions - NO CHANGES */}
                     <div className="col-md-3 d-flex align-items-end">
                         <div className="w-100">
                             {isFilterActive ? (
@@ -108,7 +110,7 @@ const NotificationFilters = ({ filters, onFiltersChange, notificationStats }) =>
                     </div>
                 </div>
 
-                {/* Quick Filter Chips */}
+                {/* Quick Filter Chips - UPDATED: Add 2 new buttons */}
                 <div className="mt-3">
                     <small className="text-muted me-2">Quick filters:</small>
                     <button
@@ -118,6 +120,22 @@ const NotificationFilters = ({ filters, onFiltersChange, notificationStats }) =>
                         <i className="fas fa-envelope me-1"></i>
                         Unread
                     </button>
+                    {/* ADD THESE 2 NEW BUTTONS */}
+                    <button
+                        className="btn btn-sm btn-outline-info me-2 mb-1"
+                        onClick={() => handleFilterChange('category', 'reservation')}
+                    >
+                        <i className="fas fa-calendar-check me-1"></i>
+                        Reservations
+                    </button>
+                    <button
+                        className="btn btn-sm btn-outline-success me-2 mb-1"
+                        onClick={() => handleFilterChange('category', 'pickup')}
+                    >
+                        <i className="fas fa-qrcode me-1"></i>
+                        Pickup Reminders
+                    </button>
+                    {/* EXISTING BUTTONS */}
                     <button
                         className="btn btn-sm btn-outline-warning me-2 mb-1"
                         onClick={() => handleFilterChange('category', 'due_reminder')}

@@ -10,24 +10,24 @@ const UserTransactions = ({ user }) => {
   }, []);
 
   const fetchUserTransactions = async () => {
-  try {
-    const response = await fetch('http://localhost:8000/api/user/transactions/', {
-      credentials: 'include',
-    });
+    try {
+      const response = await fetch('http://localhost:8000/api/user/transactions/', {
+        credentials: 'include',
+      });
 
-    if (response.ok) {
-      const data = await response.json();
-      setTransactions(data);
-    } else {
-      setError('Failed to load your transactions');
+      if (response.ok) {
+        const data = await response.json();
+        setTransactions(data);
+      } else {
+        setError('Failed to load your transactions');
+      }
+    } catch (error) {
+      console.error('Error fetching user transactions', error);
+      setError('Error loading your transactions');
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error('Error fetching user transactions', error);
-    setError('Error loading your transactions');
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString();
@@ -44,7 +44,7 @@ const UserTransactions = ({ user }) => {
   return (
     <div>
       <h2>Your Borrowing History</h2>
-      
+
       {transactions.length === 0 ? (
         <div className="alert alert-info">
           You haven't borrowed any books yet.
@@ -71,10 +71,10 @@ const UserTransactions = ({ user }) => {
                   <td>{formatDate(transaction.due_date)}</td>
                   <td>{transaction.return_date ? formatDate(transaction.return_date) : 'Not returned'}</td>
                   <td>
-                    <span className={`badge ${transaction.return_date ? 'bg-success' : 
-                                     new Date(transaction.due_date) < new Date() ? 'bg-danger' : 'bg-primary'}`}>
-                      {transaction.return_date ? 'Returned' : 
-                       new Date(transaction.due_date) < new Date() ? 'Overdue' : 'Active'}
+                    <span className={`badge ${transaction.return_date ? 'bg-success' :
+                      new Date(transaction.due_date) < new Date() ? 'bg-danger' : 'bg-primary'}`}>
+                      {transaction.return_date ? 'Returned' :
+                        new Date(transaction.due_date) < new Date() ? 'Overdue' : 'Active'}
                     </span>
                   </td>
                 </tr>

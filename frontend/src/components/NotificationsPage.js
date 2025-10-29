@@ -2,6 +2,22 @@ import React, { useState, useEffect, useCallback } from 'react';
 import NotificationFilters from './NotificationFilters';
 import BulkActionsPanel from './BulkActionsPanel';
 
+// ADD THIS: Mapping function for category filters
+const getNotificationTypesForCategory = (category) => {
+    const categoryMap = {
+        reservation: ['reservation_confirmation', 'reservation_ready', 'reservation_expiring'],
+        pickup: ['pickup_reminder'],
+        due_reminder: ['due_reminder'],
+        overdue: ['overdue'],
+        fine: ['fine'],
+        achievement: ['achievement'],
+        book_available: ['book_available'],
+        system: ['system', 'welcome'],
+        all: [] // Empty array means all types
+    };
+    return categoryMap[category] || [];
+};
+
 const NotificationsPage = ({ user }) => {
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -14,15 +30,29 @@ const NotificationsPage = ({ user }) => {
         date_range: 'all'
     });
 
-    // Build API URL with filters
+    // Build API URL with filters - UPDATED for reservation categories
     const buildApiUrl = (pageNum = 1) => {
         const params = new URLSearchParams({
             page: pageNum,
             page_size: 20,
             status: filters.status,
-            category: filters.category,
             date_range: filters.date_range
         });
+
+        // ENHANCED: Handle category filter with backend type mapping
+        if (filters.category !== 'all') {
+            const backendTypes = getNotificationTypesForCategory(filters.category);
+            if (backendTypes.length > 0) {
+                // Add each notification type as a separate category parameter
+                backendTypes.forEach(type => {
+                    params.append('category', type);
+                });
+            } else {
+                // Fallback to original behavior
+                params.append('category', filters.category);
+            }
+        }
+
         return `http://localhost:8000/api/notifications/?${params}`;
     };
 
@@ -234,9 +264,20 @@ const NotificationsPage = ({ user }) => {
         }
     };
 
-    // Get notification icon
+    // NEW: Enhanced notification icon with reservation support
     const getNotificationIcon = (type) => {
         switch (type) {
+            // RESERVATION NOTIFICATIONS - NEW
+            case 'reservation_confirmation':
+                return 'fas fa-calendar-check text-success';
+            case 'reservation_ready':
+                return 'fas fa-qrcode text-success';
+            case 'reservation_expiring':
+                return 'fas fa-clock text-warning';
+            case 'pickup_reminder':
+                return 'fas fa-book text-info';
+
+            // EXISTING NOTIFICATIONS
             case 'due_reminder':
                 return 'fas fa-clock text-warning';
             case 'overdue':
@@ -252,9 +293,20 @@ const NotificationsPage = ({ user }) => {
         }
     };
 
-    // Get notification badge color
+    // NEW: Enhanced notification badge with reservation support
     const getNotificationBadge = (type) => {
         switch (type) {
+            // RESERVATION NOTIFICATIONS - NEW
+            case 'reservation_confirmation':
+                return 'bg-success';
+            case 'reservation_ready':
+                return 'bg-success';
+            case 'reservation_expiring':
+                return 'bg-warning';
+            case 'pickup_reminder':
+                return 'bg-info';
+
+            // EXISTING NOTIFICATIONS
             case 'due_reminder':
                 return 'bg-warning';
             case 'overdue':
@@ -268,6 +320,89 @@ const NotificationsPage = ({ user }) => {
             default:
                 return 'bg-info';
         }
+    };
+
+    // NEW: Safe notification click handler using only your existing routes
+    const handleNotificationClick = (notification) => {
+        // Mark as read if unread
+        if (!notification.is_read) {
+            markAsRead(notification.id);
+        }
+
+        // Define safe routes based on your actual app structure
+        const getSafeRoute = (notification) => {
+            switch (notification.type) {
+                // BOOK-RELATED NOTIFICATIONS - Go to book details
+                case 'reservation_confirmation':
+                case 'reservation_ready':
+                case 'pickup_reminder':
+                case 'reservation_expiring':
+                case 'book_available':
+                    if (notification.related_book_id) {
+                        return `/books/${notification.related_book_id}`;
+                    }
+                    return null;
+
+                // BORROWING NOTIFICATIONS - Go to my-borrows (you have this route)
+                case 'due_reminder':
+                case 'overdue':
+                    return '/my-borrows';
+
+                // FINE NOTIFICATIONS - Go to fines page (you have this route)
+                case 'fine':
+                    return '/fines';
+
+                // SYSTEM NOTIFICATIONS - Use action_url if it's a safe route
+                case 'system':
+                case 'welcome':
+                    if (notification.action_url) {
+                        // Only allow navigation to routes that exist in your app
+                        const safeRoutes = [
+                            '/books/', '/my-borrows', '/fines', '/my-reservations',
+                            '/notifications', '/profile', '/dashboard', '/search'
+                        ];
+                        const isSafe = safeRoutes.some(route =>
+                            notification.action_url.includes(route)
+                        );
+                        return isSafe ? notification.action_url : null;
+                    }
+                    return null;
+
+                // ACHIEVEMENTS & OTHER TYPES - No navigation (route doesn't exist)
+                case 'achievement':
+                default:
+                    return null;
+            }
+        };
+
+        // Get the safe route
+        const targetUrl = getSafeRoute(notification);
+
+        if (targetUrl) {
+            window.location.href = targetUrl;
+        }
+        // If no targetUrl, just stay on notifications page (already marked as read)
+    };
+
+    // NEW: Format notification type for display
+    const formatNotificationType = (type) => {
+        const typeMap = {
+            // RESERVATION NOTIFICATIONS
+            reservation_confirmation: 'Reservation Confirmed',
+            reservation_ready: 'Ready for Pickup',
+            reservation_expiring: 'Reservation Expiring',
+            pickup_reminder: 'Pickup Reminder',
+
+            // EXISTING NOTIFICATIONS
+            due_reminder: 'Due Reminder',
+            overdue: 'Overdue',
+            achievement: 'Achievement',
+            book_available: 'Book Available',
+            fine: 'Fine',
+            system: 'System',
+            welcome: 'Welcome'
+        };
+        return typeMap[type] || type.replace('_', ' ');
     };
 
     // Count unread notifications in current view
@@ -308,7 +443,7 @@ const NotificationsPage = ({ user }) => {
                 onFiltersChange={handleFiltersChange}
             />
 
-            {/* Bulk Actions Panel */}
+            {/* Bulk Actions Panel - KEEP YOUR ELEGANT DESIGN */}
             <BulkActionsPanel
                 selectedCount={selectedNotifications.length}
                 totalCount={notifications.length}
@@ -359,6 +494,8 @@ const NotificationsPage = ({ user }) => {
                                     className={notificationClass}
                                     data-category={notification.type}
                                     data-selected={isSelected}
+                                    style={{ cursor: 'pointer' }}
+                                    onClick={() => handleNotificationClick(notification)}
                                 >
                                     <div className="card-body">
                                         <div className="d-flex align-items-start">
@@ -368,11 +505,14 @@ const NotificationsPage = ({ user }) => {
                                                     type="checkbox"
                                                     className={`form-check-input mt-1 ${isSelected ? 'checked' : ''}`}
                                                     checked={isSelected}
-                                                    onChange={() => toggleSelection(notification.id)}
+                                                    onChange={(e) => {
+                                                        e.stopPropagation();
+                                                        toggleSelection(notification.id);
+                                                    }}
                                                 />
                                             </div>
 
-                                            {/* Notification Icon */}
+                                            {/* UPDATED: Notification Icon with reservation support */}
                                             <div className="me-3">
                                                 <i className={`${getNotificationIcon(notification.type)} fa-lg ${isSelected ? 'text-primary' : ''}`}></i>
                                             </div>
@@ -392,8 +532,9 @@ const NotificationsPage = ({ user }) => {
                                                                 New
                                                             </span>
                                                         )}
+                                                        {/* UPDATED: Use enhanced badge with reservation support */}
                                                         <span className={`badge ${getNotificationBadge(notification.type)} ${isSelected ? 'border border-white' : ''}`}>
-                                                            {notification.type.replace('_', ' ')}
+                                                            {formatNotificationType(notification.type)}
                                                         </span>
                                                     </div>
                                                 </div>
@@ -426,7 +567,10 @@ const NotificationsPage = ({ user }) => {
                                                         {!notification.is_read && (
                                                             <button
                                                                 className={`btn btn-sm me-2 ${isSelected ? 'btn-outline-success' : 'btn-outline-primary'}`}
-                                                                onClick={() => markAsRead(notification.id)}
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    markAsRead(notification.id);
+                                                                }}
                                                             >
                                                                 <i className="fas fa-check me-1"></i>
                                                                 Mark as Read
@@ -434,7 +578,10 @@ const NotificationsPage = ({ user }) => {
                                                         )}
                                                         <button
                                                             className={`btn btn-sm ${isSelected ? 'btn-outline-danger' : 'btn-outline-secondary'}`}
-                                                            onClick={() => toggleSelection(notification.id)}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                toggleSelection(notification.id);
+                                                            }}
                                                         >
                                                             <i className={`fas ${isSelected ? 'fa-times' : 'fa-check'} me-1`}></i>
                                                             {isSelected ? 'Deselect' : 'Select'}

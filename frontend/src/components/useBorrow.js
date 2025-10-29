@@ -1,4 +1,4 @@
-// useBorrow.js - Updated to handle the borrow flow better
+// useBorrow.js - Enhanced version with accurate messaging and QR handling
 import { useState } from 'react';
 
 const useBorrow = () => {
@@ -6,8 +6,11 @@ const useBorrow = () => {
     const [showConfirmation, setShowConfirmation] = useState(false);
     const [showErrorModal, setShowErrorModal] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
+    const [qrData, setQrData] = useState(null);
+    const [showQRModal, setShowQRModal] = useState(false);
+    const [waitlistInfo, setWaitlistInfo] = useState(null);
 
-    const handleBorrow = async (bookId) => {
+    const handleBorrow = async (bookId, bookTitle = '') => {
         try {
             const response = await fetch(`http://localhost:8000/api/books/${bookId}/borrow/`, {
                 method: 'POST',
@@ -23,6 +26,7 @@ const useBorrow = () => {
             if (data.requires_confirmation) {
                 setConfirmBorrow({
                     bookId: bookId,
+                    bookTitle: bookTitle,
                     message: data.message,
                     bookDetails: data.book_details
                 });
@@ -37,7 +41,30 @@ const useBorrow = () => {
                 setShowErrorModal(true);
                 return { error: data.error };
             } else if (data.success) {
-                return { success: true };
+                // Handle different success types with accurate messaging
+                if (data.type === 'qr_pending') {  // CHANGED
+                    return { 
+                        success: true, 
+                        message: '📋 Book reserved! Show QR code to librarian for pickup.',  // CHANGED
+                        qrData: data.qr_data,
+                        transactionId: data.transaction_id,
+                        type: 'qr_pending'  // CHANGED
+                    };
+                } else if (data.type === 'waitlist') {
+                    return { 
+                        success: true, 
+                        message: `📋 Added to waitlist! Position: #${data.waitlist_position}. Estimated wait: ${data.estimated_wait}`,
+                        waitlistPosition: data.waitlist_position,
+                        estimatedWait: data.estimated_wait,
+                        type: 'waitlist'
+                    };
+                } else {
+                    return { 
+                        success: true, 
+                        message: 'Book reserved for pickup!',  // CHANGED
+                        type: 'direct'
+                    };
+                }
             }
         } catch (error) {
             setErrorMessage('Error borrowing book. Please try again.');
@@ -62,7 +89,30 @@ const useBorrow = () => {
             const data = await response.json();
             
             if (data.success) {
-                return { success: true };
+                // Handle post-confirmation success with accurate messaging
+                if (data.type === 'qr_pending') {  // CHANGED
+                    return { 
+                        success: true, 
+                        message: '📋 Book reserved! Show QR code to librarian for pickup.',  // CHANGED
+                        qrData: data.qr_data,
+                        transactionId: data.transaction_id,
+                        type: 'qr_pending'  // CHANGED
+                    };
+                } else if (data.type === 'waitlist') {
+                    return { 
+                        success: true, 
+                        message: `📋 Added to waitlist! Position: #${data.waitlist_position}. Estimated wait: ${data.estimated_wait}`,
+                        waitlistPosition: data.waitlist_position,
+                        estimatedWait: data.estimated_wait,
+                        type: 'waitlist'
+                    };
+                } else {
+                    return { 
+                        success: true, 
+                        message: 'Book reserved for pickup!',  // CHANGED
+                        type: 'direct'
+                    };
+                }
             } else if (data.error) {
                 setErrorMessage(data.error);
                 setShowErrorModal(true);
@@ -78,15 +128,31 @@ const useBorrow = () => {
         }
     };
 
+    const handleQRModalClose = () => {
+        setShowQRModal(false);
+        setQrData(null);
+    };
+
+    const showQRCode = (qrData) => {
+        setQrData(qrData);
+        setShowQRModal(true);
+    };
+
     return {
         confirmBorrow,
         showConfirmation,
         showErrorModal,
         errorMessage,
+        qrData,
+        showQRModal,
+        waitlistInfo,
         handleBorrow,
         handleConfirmBorrow,
+        handleQRModalClose,
+        showQRCode,
         setShowConfirmation,
-        setShowErrorModal
+        setShowErrorModal,
+        setShowQRModal
     };
 };
 

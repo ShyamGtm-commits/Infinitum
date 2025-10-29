@@ -3404,7 +3404,7 @@ def check_new_achievements(request):
 @permission_classes([IsAuthenticated])
 def get_user_notifications(request):
     """
-    Get all notifications for the current user - UPDATED WITH FILTERS
+    Get all notifications for the current user - ENHANCED with reservation support
     """
     try:
         # Get page parameters for infinite scroll
@@ -3413,7 +3413,9 @@ def get_user_notifications(request):
 
         # Get filter parameters
         status_filter = request.GET.get('status', 'all')
-        category_filter = request.GET.get('category', 'all')
+        
+        # ENHANCED: Handle multiple category parameters for reservation types
+        categories = request.GET.getlist('category')  # Get all category parameters
         date_filter = request.GET.get('date_range', 'all')
 
         # Start building the query
@@ -3425,10 +3427,13 @@ def get_user_notifications(request):
         elif status_filter == 'read':
             notifications = notifications.filter(is_read=True)
 
-        # Apply category filter
-        if category_filter and category_filter != 'all':
-            notifications = notifications.filter(
-                notification_type=category_filter)
+        # ENHANCED: Apply category filter for multiple notification types
+        if categories:
+            # If multiple categories specified, use OR condition
+            category_query = Q()
+            for category in categories:
+                category_query |= Q(notification_type=category)
+            notifications = notifications.filter(category_query)
 
         # Apply date filter
         if date_filter != 'all':
@@ -3437,12 +3442,10 @@ def get_user_notifications(request):
                 notifications = notifications.filter(created_at__date=today)
             elif date_filter == 'week':
                 week_ago = today - timedelta(days=7)
-                notifications = notifications.filter(
-                    created_at__date__gte=week_ago)
+                notifications = notifications.filter(created_at__date__gte=week_ago)
             elif date_filter == 'month':
                 month_ago = today - timedelta(days=30)
-                notifications = notifications.filter(
-                    created_at__date__gte=month_ago)
+                notifications = notifications.filter(created_at__date__gte=month_ago)
 
         # Order by newest first
         notifications = notifications.order_by('-created_at')
@@ -3460,19 +3463,42 @@ def get_user_notifications(request):
         # Serialize notifications
         notifications_data = []
         for notification in paginated_notifications:
-            notifications_data.append({
+            notification_data = {
                 'id': notification.id,
                 'type': notification.notification_type,
                 'title': notification.title,
                 'message': notification.message,
                 'is_read': notification.is_read,
                 'created_at': notification.created_at,
-                'related_book_id': notification.related_book.id if notification.related_book else None,
-                'related_book_title': notification.related_book.title if notification.related_book else None,
-                'related_book_cover': request.build_absolute_uri(notification.related_book.cover_image.url) if notification.related_book and notification.related_book.cover_image else None,
                 'action_url': notification.action_url,
                 'time_ago': timesince(notification.created_at)
-            })
+            }
+            
+            # Add related book information if available
+            if notification.related_book:
+                notification_data['related_book_id'] = notification.related_book.id
+                notification_data['related_book_title'] = notification.related_book.title
+                if notification.related_book.cover_image:
+                    try:
+                        notification_data['related_book_cover'] = request.build_absolute_uri(
+                            notification.related_book.cover_image.url
+                        )
+                    except:
+                        notification_data['related_book_cover'] = None
+                else:
+                    notification_data['related_book_cover'] = None
+            else:
+                notification_data['related_book_id'] = None
+                notification_data['related_book_title'] = None
+                notification_data['related_book_cover'] = None
+            
+            # Add related transaction information if available
+            if notification.related_transaction:
+                notification_data['related_transaction_id'] = notification.related_transaction.id
+            else:
+                notification_data['related_transaction_id'] = None
+                
+            notifications_data.append(notification_data)
 
         return Response({
             'notifications': notifications_data,
@@ -3485,7 +3511,7 @@ def get_user_notifications(request):
             },
             'filters': {
                 'status': status_filter,
-                'category': category_filter,
+                'categories': categories,
                 'date_range': date_filter
             }
         })
@@ -3560,7 +3586,7 @@ def get_unread_notification_count(request):
 @permission_classes([IsAuthenticated])
 def notification_preferences(request):
     """
-    Get or update user notification preferences
+    Get or update user notification preferences - UPDATED for reservation preferences
     """
     try:
         preferences, created = UserNotificationPreference.objects.get_or_create(
@@ -3569,6 +3595,17 @@ def notification_preferences(request):
 
         if request.method == 'GET':
             return Response({
+                # NEW RESERVATION PREFERENCES
+                'email_reservation_confirmation': preferences.email_reservation_confirmation,
+                'email_reservation_ready': preferences.email_reservation_ready,
+                'email_reservation_expiring': preferences.email_reservation_expiring,
+                'email_pickup_reminder': preferences.email_pickup_reminder,
+                'push_reservation_confirmation': preferences.push_reservation_confirmation,
+                'push_reservation_ready': preferences.push_reservation_ready,
+                'push_reservation_expiring': preferences.push_reservation_expiring,
+                'push_pickup_reminder': preferences.push_pickup_reminder,
+                
+                # EXISTING PREFERENCES
                 'email_due_reminders': preferences.email_due_reminders,
                 'email_overdue_alerts': preferences.email_overdue_alerts,
                 'email_fine_notifications': preferences.email_fine_notifications,
@@ -3580,6 +3617,26 @@ def notification_preferences(request):
 
         elif request.method == 'PUT':
             data = request.data
+            
+            # UPDATE NEW RESERVATION PREFERENCES
+            preferences.email_reservation_confirmation = data.get(
+                'email_reservation_confirmation', preferences.email_reservation_confirmation)
+            preferences.email_reservation_ready = data.get(
+                'email_reservation_ready', preferences.email_reservation_ready)
+            preferences.email_reservation_expiring = data.get(
+                'email_reservation_expiring', preferences.email_reservation_expiring)
+            preferences.email_pickup_reminder = data.get(
+                'email_pickup_reminder', preferences.email_pickup_reminder)
+            preferences.push_reservation_confirmation = data.get(
+                'push_reservation_confirmation', preferences.push_reservation_confirmation)
+            preferences.push_reservation_ready = data.get(
+                'push_reservation_ready', preferences.push_reservation_ready)
+            preferences.push_reservation_expiring = data.get(
+                'push_reservation_expiring', preferences.push_reservation_expiring)
+            preferences.push_pickup_reminder = data.get(
+                'push_pickup_reminder', preferences.push_pickup_reminder)
+            
+            # UPDATE EXISTING PREFERENCES
             preferences.email_due_reminders = data.get(
                 'email_due_reminders', preferences.email_due_reminders)
             preferences.email_overdue_alerts = data.get(
@@ -3594,6 +3651,7 @@ def notification_preferences(request):
                 'push_due_reminders', preferences.push_due_reminders)
             preferences.push_overdue_alerts = data.get(
                 'push_overdue_alerts', preferences.push_overdue_alerts)
+            
             preferences.save()
 
             return Response({'success': 'Notification preferences updated'})
