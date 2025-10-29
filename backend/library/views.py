@@ -1,3 +1,4 @@
+
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
@@ -127,7 +128,6 @@ def search_books(request):
     return Response(serializer.data)
 
 # --- Authentication Endpoints ---
-
 
 # @api_view(['POST'])
 # @permission_classes([AllowAny])
@@ -526,7 +526,8 @@ def borrow_book(request, book_id):
 
             return Response({
                 'requires_confirmation': True,
-                'message': f'Do you want to borrow "{book.title}" by {book.author}?',
+                # CHANGED
+                'message': f'Do you want to reserve "{book.title}" by {book.author} for library pickup?',
                 'book_details': book_details
             }, status=status.HTTP_200_OK)
 
@@ -598,6 +599,11 @@ def borrow_book(request, book_id):
             related_transaction=transaction,
             action_url='/my-borrows'
         )
+        NotificationManager.send_reservation_confirmation(
+            user=request.user,
+            book=book,
+            transaction=transaction
+        )
 
         # Also create a due date reminder (7 days before)
         NotificationManager.create_due_date_reminder(transaction)
@@ -612,11 +618,14 @@ def borrow_book(request, book_id):
             logger.error(f"Error in achievement check after borrow: {e}")
 
         serializer = TransactionSerializer(transaction)
+
+        # ✅ UPDATED: Return accurate success message and type
         return Response({
-            'success': 'Book borrowed successfully!',
+            'success': 'Book reserved for pickup! Show QR code to librarian.',  # CHANGED
             'due_date': due_date.strftime('%Y-%m-%d'),
             'borrowing_period_days': user_profile.borrowing_period,
-            'transaction': serializer.data
+            'transaction': serializer.data,
+            'type': 'qr_pending'  # CHANGED: Indicates pending pickup
         }, status=status.HTTP_201_CREATED)
 
     except Book.DoesNotExist:
@@ -1632,8 +1641,7 @@ def get_genre_trends():
 
     return genres
 
-# Add to views.py
-# In views.py - Update the generate_borrow_qr function
+# Add to views.py - Update the generate_borrow_qr function
 
 
 @api_view(['POST'])
@@ -1667,7 +1675,7 @@ def generate_borrow_qr(request, book_id):
                 'qr_data': existing_qr.qr_data,
                 'transaction_id': existing_qr.id,
                 'expires_at': existing_qr.get_qr_expiry_time().isoformat() if existing_qr.get_qr_expiry_time() else None,
-                'type': 'qr'
+                'type': 'qr_pending'  # CHANGED
             })
 
         # Check book availability
@@ -1696,12 +1704,20 @@ def generate_borrow_qr(request, book_id):
             book.available_copies -= 1
             book.save()
 
+            # ✅ UPDATED: Send QR ready notification
+            from .notification_utils import NotificationManager
+            NotificationManager.send_reservation_ready(
+                user=user,
+                book=book,
+                transaction=transaction
+            )
+
             return Response({
-                'success': 'QR code generated successfully!',
+                'success': 'QR code generated for library pickup!',  # CHANGED
                 'qr_data': qr_data,
                 'transaction_id': transaction.id,
                 'expires_at': transaction.get_qr_expiry_time().isoformat(),
-                'type': 'qr'
+                'type': 'qr_pending'  # CHANGED
             })
 
         else:
@@ -1754,7 +1770,6 @@ def fix_missing_qr(request, transaction_id):
 
 # In views.py - Add this endpoint
 
-
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def check_pending_qr(request, book_id):
@@ -1784,7 +1799,6 @@ def check_pending_qr(request, book_id):
         return Response({'error': 'Book not found'}, status=404)
 
 # In views.py - Add this endpoint
-
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -1995,7 +2009,6 @@ def decode_qr_image(request):
 
 # LIBRARIAN ISSUED BOOKS ENDPOINT - FIXED VERSION
 
-
 @api_view(['GET'])
 @permission_classes([IsLibrarianUser])
 def librarian_issued_books(request):
@@ -2049,7 +2062,6 @@ def librarian_issued_books(request):
 
 # USER PENDING TRANSACTIONS ENDPOINT
 
-
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def user_pending_transactions(request):
@@ -2087,7 +2099,6 @@ def user_pending_transactions(request):
         return Response({'error': 'Failed to load pending transactions'}, status=500)
 
 # In views.py - Add this endpoint
-
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -2208,8 +2219,7 @@ def get_book_borrow_info(request, book_id):
 
     except Book.DoesNotExist:
         return Response({'error': 'Book not found'})
-
-
+    
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def return_book_via_qr(request, transaction_id):
@@ -2402,15 +2412,16 @@ def process_book_return(request):
             action_url='/my-transactions'
         )
         
-        # Check waitlist and notify next user if any
+        # ✅ ADDED: Check waitlist and notify next user if any
         from .utils import notify_waitlist_users
-        notify_waitlist_users(transaction.book)
+        waitlist_notified = notify_waitlist_users(transaction.book)
         
         return Response({
             'success': f'Book returned by {transaction.user.username}',
             'fine_amount': fine_amount,
             'days_overdue': max(0, (today - due_date).days),
-            'book_available_copies': book.available_copies
+            'book_available_copies': book.available_copies,
+            'waitlist_notified': waitlist_notified  # ✅ ADDED: Return waitlist status
         })
         
     except Transaction.DoesNotExist:
@@ -2418,9 +2429,7 @@ def process_book_return(request):
     except Exception as e:
         logger.error(f"Return processing error: {e}")
         return Response({'error': 'Failed to process return'}, status=400)
-
 # views.py
-
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -2448,7 +2457,6 @@ def request_return(request, transaction_id):
 
     except Transaction.DoesNotExist:
         return Response({'error': 'Transaction not found'}, status=404)
-
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -2485,7 +2493,6 @@ def process_return(request, return_request_id):
         return Response({'error': 'Return request not found or already processed'}, status=404)
 
 # views.py - Add this endpoint
-
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -2629,7 +2636,6 @@ def start_registration(request):
 
 # otp verification
 
-
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def verify_registration_otp(request):
@@ -2729,7 +2735,6 @@ class PasswordValidator:
         return password
 
 # Update complete_registration function
-
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -2871,7 +2876,6 @@ def complete_registration(request):
 logger = logging.getLogger(__name__)
 
 # Add this view function (place it with your other API views)
-
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -3103,18 +3107,6 @@ def get_book_ratings(request, book_id):
         ratings = BookRating.objects.filter(book=book).select_related('user')
         serializer = BookRatingSerializer(ratings, many=True)
         return Response(serializer.data)
-    except Book.DoesNotExist:
-        return Response({'error': 'Book not found'}, status=404)
-
-
-@api_view(['POST', 'PUT', 'DELETE'])
-@permission_classes([IsAuthenticated])
-def handle_book_review(request, book_id):
-    """
-    Handle book reviews: add, update, or delete review
-    """
-    try:
-        book = Book.objects.get(id=book_id)
     except Book.DoesNotExist:
         return Response({'error': 'Book not found'}, status=404)
 
@@ -3693,3 +3685,4 @@ def bulk_archive_notifications(request):
     except Exception as e:
         logger.error(f"Error in bulk archive: {e}")
         return Response({'error': 'Failed to archive notifications'}, status=500)
+

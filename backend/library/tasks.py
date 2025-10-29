@@ -63,3 +63,73 @@ def check_overdue_books():
 # Schedule tasks
 check_due_date_reminders(repeat=3600)  # Every hour
 check_overdue_books(repeat=3600)       # Every hour
+
+@background(schedule=3600)  # Run every hour
+def cleanup_waitlist_task():
+    """
+    Clean up expired waitlist entries
+    """
+    from .utils import cleanup_expired_waitlist
+    count = cleanup_expired_waitlist()
+    print(f'Cleaned up {count} expired waitlist entries')
+
+# Schedule the task
+cleanup_waitlist_task(repeat=3600)  # Every hour
+
+# Add to existing tasks.py
+@background(schedule=60)  # Run every hour
+def check_reservation_expiry():
+    """
+    Check for reservations expiring soon and send notifications
+    """
+    from .models import Transaction
+    from .notification_utils import NotificationManager
+    
+    # Find reservations expiring in the next 6 hours
+    expiry_threshold = timezone.now() + timedelta(hours=6)
+    expiring_reservations = Transaction.objects.filter(
+        status='pending',
+        qr_generated_at__isnull=False,
+        qr_generated_at__lte=expiry_threshold
+    ).select_related('book', 'user')
+    
+    for transaction in expiring_reservations:
+        hours_remaining = int((transaction.get_qr_expiry_time() - timezone.now()).total_seconds() / 3600)
+        if 1 <= hours_remaining <= 6:  # Only notify if between 1-6 hours left
+            NotificationManager.send_reservation_expiring(
+                user=transaction.user,
+                book=transaction.book,
+                hours_remaining=hours_remaining,
+                transaction=transaction
+            )
+    
+    print(f"✅ Reservation expiry check: {expiring_reservations.count()} reservations expiring soon")
+
+@background(schedule=3600)  # Run every hour
+def send_pickup_reminders():
+    """
+    Send reminders for reservations that haven't been picked up
+    """
+    from .models import Transaction
+    from .notification_utils import NotificationManager
+    
+    # Find reservations created more than 2 hours ago but not picked up
+    reminder_threshold = timezone.now() - timedelta(hours=2)
+    pending_pickups = Transaction.objects.filter(
+        status='pending',
+        qr_generated_at__lte=reminder_threshold,
+        issued_at__isnull=True  # Not yet picked up
+    ).select_related('book', 'user')
+    
+    for transaction in pending_pickups:
+        NotificationManager.send_pickup_reminder(
+            user=transaction.user,
+            book=transaction.book,
+            transaction=transaction
+        )
+    
+    print(f"📚 Pickup reminders: {pending_pickups.count()} reminders sent")
+
+# Schedule the new tasks
+check_reservation_expiry(repeat=3600)  # Every hour
+send_pickup_reminders(repeat=7200)     # Every 2 hours

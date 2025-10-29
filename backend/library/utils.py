@@ -142,3 +142,87 @@ def estimate_wait_time(position):
     except Exception as e:
         logger.error(f"Wait time estimation error: {e}")
         return "some time"  # Fallback
+    
+def notify_waitlist_users(book):
+    """
+    Notify waitlisted users when a book becomes available
+    """
+    try:
+        from .notification_utils import NotificationManager
+        
+        # Get first user in waitlist for this book (active entries only)
+        waitlist_entry = BookWaitlist.objects.filter(
+            book=book,
+            expires_at__isnull=True  # Active entries only
+        ).order_by('position').first()
+        
+        if waitlist_entry:
+            # Notify the user
+            NotificationManager.create_notification(
+                user=waitlist_entry.user,
+                notification_type='book_available',
+                title='📚 Book Available!',
+                message=f'"{book.title}" is now available! You are next in line. You have 24 hours to borrow it.',
+                related_book=book,
+                action_url=f'/books/{book.id}'
+            )
+            
+            # Mark as notified and set expiry (24 hours to claim)
+            waitlist_entry.notified_at = timezone.now()
+            waitlist_entry.expires_at = timezone.now() + timedelta(hours=24)
+            waitlist_entry.save()
+            
+            logger.info(f"Notified waitlist user {waitlist_entry.user.username} for book {book.title}")
+            return True
+            
+        return False
+            
+    except Exception as e:
+        logger.error(f"Error notifying waitlist users: {e}")
+        return False
+    
+def get_waitlist_position(user, book):
+    """Get user's position in waitlist for a book"""
+    try:
+        entry = BookWaitlist.objects.filter(book=book, user=user).first()
+        return entry.position if entry else None
+    except Exception as e:
+        logger.error(f"Error getting waitlist position: {e}")
+        return None
+
+def cleanup_expired_waitlist():
+    """Remove expired waitlist entries (run as background task)"""
+    try:
+        expired_entries = BookWaitlist.objects.filter(
+            expires_at__lte=timezone.now()
+        )
+        count = expired_entries.count()
+        expired_entries.delete()
+        
+        if count > 0:
+            logger.info(f"Cleaned up {count} expired waitlist entries")
+        return count
+    except Exception as e:
+        logger.error(f"Error cleaning up waitlist: {e}")
+        return 0
+
+def promote_waitlist_users(book):
+    """Move users up in waitlist when someone ahead drops out"""
+    try:
+        # Get all active waitlist entries for this book
+        entries = BookWaitlist.objects.filter(
+            book=book,
+            expires_at__isnull=True
+        ).order_by('position')
+        
+        # Re-number positions starting from 1
+        for index, entry in enumerate(entries, start=1):
+            if entry.position != index:
+                entry.position = index
+                entry.save()
+                
+        logger.info(f"Reorganized waitlist for {book.title}")
+        return True
+    except Exception as e:
+        logger.error(f"Error promoting waitlist users: {e}")
+        return False

@@ -281,7 +281,8 @@ class Transaction(models.Model):
     def get_qr_expiry_time(self):
         """Get when QR expires - FIXED"""
         if self.qr_generated_at:
-            expiry = self.qr_generated_at + timedelta(hours=self.qr_expiry_hours)
+            expiry = self.qr_generated_at + \
+                timedelta(hours=self.qr_expiry_hours)
             return expiry
         return None
 
@@ -720,11 +721,15 @@ class Notification(models.Model):
         ('book_available', 'Book Available'),
         ('system', 'System Notification'),
         ('welcome', 'Welcome Message'),
+        ('reservation_confirmation', 'Reservation Confirmed'),
+        ('reservation_ready', 'Reservation Ready'),
+        ('reservation_expiring', 'Reservation Expiring Soon'),
+        ('pickup_reminder', 'Pickup Reminder'),
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     notification_type = models.CharField(
-        max_length=20, choices=NOTIFICATION_TYPES)
+        max_length=30, choices=NOTIFICATION_TYPES)
     title = models.CharField(max_length=200)
     message = models.TextField()
     is_read = models.BooleanField(default=False)
@@ -745,11 +750,21 @@ class Notification(models.Model):
         return f"{self.user.username} - {self.title}"
 
 
+# In models.py - Add these fields to UserNotificationPreference model
 class UserNotificationPreference(models.Model):
-    """
-    User preferences for notification types
-    """
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    
+    # NEW RESERVATION PREFERENCES
+    email_reservation_confirmation = models.BooleanField(default=True)
+    email_reservation_ready = models.BooleanField(default=True)
+    email_reservation_expiring = models.BooleanField(default=True)
+    email_pickup_reminder = models.BooleanField(default=True)
+    push_reservation_confirmation = models.BooleanField(default=True)
+    push_reservation_ready = models.BooleanField(default=True)
+    push_reservation_expiring = models.BooleanField(default=True)
+    push_pickup_reminder = models.BooleanField(default=True)
+    
+    # EXISTING PREFERENCES
     email_due_reminders = models.BooleanField(default=True)
     email_overdue_alerts = models.BooleanField(default=True)
     email_fine_notifications = models.BooleanField(default=True)

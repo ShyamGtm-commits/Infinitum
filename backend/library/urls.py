@@ -59,6 +59,7 @@ urlpatterns = [
     path('profile/', views.user_profile, name='user_profile'),
     path('profile/history/', views.user_reading_history,
          name='user_reading_history'),
+    path('transactions/', views.user_transactions, name='user_transactions'),
     path('user/transactions/', views.user_transactions, name='user_transactions'),
     path('user/pending-transactions/', views.user_pending_transactions,
          name='user_pending_transactions'),
@@ -147,7 +148,6 @@ urlpatterns = [
          views.decode_qr_image, name='decode_qr_image'),
     path('librarian/validate-return-qr/',
          views.validate_return_qr, name='validate_return_qr'),
-    path('librarian/process-return/', views.process_book_return,
-         name='process_book_return'),  # Unified return processing
+    path('librarian/process-book-return/', views.process_book_return, name='process_book_return')  # Unified return processing
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -4,6 +4,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class LibraryConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'library'
@@ -15,13 +16,13 @@ class LibraryConfig(AppConfig):
             logger.info("Library signals loaded successfully")
         except Exception as e:
             logger.error(f"Error loading signals: {e}")
-        
+
         # Background tasks - ONLY QR cleanup remains
         try:
             from . import tasks
             # Existing QR cleanup task only
             tasks.cleanup_expired_qrs_task()
-            
+
             logger.info("Background tasks scheduled successfully")
         except Exception as e:
             logger.error(f"Error scheduling background tasks: {e}")
@@ -36,3 +37,11 @@ class LibraryConfig(AppConfig):
                 logger.info("✅ Automated notification tasks started")
         except Exception as e:
             logger.error(f"Error starting automated tasks: {e}")
+
+        # Start waitlist cleanup task
+        try:
+            from . import tasks
+            tasks.cleanup_waitlist_task()
+            logger.info("Waitlist cleanup task scheduled")
+        except Exception as e:
+            logger.error(f"Error scheduling waitlist task: {e}")
