@@ -192,11 +192,21 @@ class Book(models.Model):
         super().save(update_fields=['qr_code'])
 
     @property
-    def cover_image_url(self):
+    def get_cover_url(self, request=None):
+        """Safe method to get cover image URL with fallback"""
         if self.cover_image and hasattr(self.cover_image, 'url'):
+            if request:
+                return request.build_absolute_uri(self.cover_image.url)
             return self.cover_image.url
         return None
-
+    
+    @property
+    def get_safe_description(self):
+        """Get description with fallback"""
+        if self.description:
+            return self.description
+        return f"A book by {self.author} in the genre of {self.genre}."
+    
     @property
     def qr_code_url(self):
         if self.qr_code and hasattr(self.qr_code, 'url'):

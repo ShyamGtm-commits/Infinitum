@@ -101,7 +101,7 @@ const ReadingGoals = ({ goals, onCreateGoal }) => {
                 )}
 
                 {/* Goals List */}
-                {goals.length === 0 ? (
+                {(!goals || goals.length === 0) ? (
                     <div className="text-center text-muted py-4">
                         <i className="fas fa-bullseye fa-2x mb-3"></i>
                         <p>No active goals set yet.</p>

@@ -18758,3 +18758,1203 @@ ERROR 2025-10-30 11:59:07,607 apps 2896 9240 Error scheduling background tasks: 
 ERROR 2025-10-30 11:59:07,621 apps 2896 9240 Error starting automated tasks: name 'check_reservation_expiry' is not defined
 ERROR 2025-10-30 11:59:07,641 apps 2896 9240 Error scheduling waitlist task: name 'check_reservation_expiry' is not defined
 INFO 2025-10-30 11:59:07,695 autoreload 2896 9240 Watching for file changes with StatReloader
+INFO 2025-10-30 11:59:42,346 basehttp 2896 17564 "GET /api/user/reservations/ HTTP/1.1" 200 2206
+INFO 2025-10-30 11:59:55,589 basehttp 2896 16612 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8326
+INFO 2025-10-30 12:00:03,730 basehttp 2896 4636 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8326
+INFO 2025-10-30 12:00:32,565 basehttp 2896 14564 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8326
+INFO 2025-10-30 12:01:02,561 basehttp 2896 4664 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8326
+INFO 2025-10-30 12:01:35,154 basehttp 2896 6816 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8326
+INFO 2025-10-30 12:01:47,394 basehttp 2896 15552 "POST /api/logout/ HTTP/1.1" 200 31
+INFO 2025-10-30 12:01:56,990 audit_utils 2896 15552 Audit log: login - User logged in successfully
+INFO 2025-10-30 12:01:57,004 basehttp 2896 15552 "POST /api/login/ HTTP/1.1" 200 141
+INFO 2025-10-30 12:01:57,101 basehttp 2896 15552 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8326
+INFO 2025-10-30 12:01:57,129 basehttp 2896 15552 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 12:01:57,177 basehttp 2896 15552 "GET /api/transactions/ HTTP/1.1" 200 7406
+INFO 2025-10-30 12:01:57,198 basehttp 2896 15552 "GET /api/recommendations/insights/ HTTP/1.1" 200 375
+INFO 2025-10-30 12:01:57,259 basehttp 2896 15552 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8326
+INFO 2025-10-30 12:01:57,296 basehttp 2896 15552 "GET /api/transactions/ HTTP/1.1" 200 7406
+INFO 2025-10-30 12:01:57,321 basehttp 2896 15552 "GET /api/user/pending-transactions/ HTTP/1.1" 200 1748
+INFO 2025-10-30 12:01:57,344 basehttp 2896 15552 "GET /api/recommendations/insights/ HTTP/1.1" 200 375
+INFO 2025-10-30 12:01:57,373 basehttp 2896 15552 "GET /api/user/pending-transactions/ HTTP/1.1" 200 1748
+INFO 2025-10-30 12:02:27,563 basehttp 2896 17624 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8326
+INFO 2025-10-30 12:02:57,586 basehttp 2896 17516 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8326
+INFO 2025-10-30 12:03:27,573 basehttp 2896 6360 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8326
+INFO 2025-10-30 12:03:57,594 basehttp 2896 17768 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8302
+INFO 2025-10-30 12:04:27,392 basehttp 2896 10200 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8302
+INFO 2025-10-30 12:04:28,684 basehttp 2896 10200 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 12:04:28,696 basehttp 2896 10200 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 12:04:28,755 basehttp 2896 2860 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 12:04:28,794 basehttp 2896 2860 "GET /api/user/reservations/ HTTP/1.1" 200 2206
+INFO 2025-10-30 12:04:28,801 basehttp 2896 10200 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8302
+INFO 2025-10-30 12:04:28,820 basehttp 2896 2860 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 12:04:28,833 basehttp 2896 10200 "GET /api/user/reservations/ HTTP/1.1" 200 2206
+INFO 2025-10-30 12:04:28,876 basehttp 2896 2860 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8302
+INFO 2025-10-30 12:04:42,343 basehttp 2896 2860 "GET /api/notifications/?page=1&page_size=20&status=all&date_range=all HTTP/1.1" 200 8324
+INFO 2025-10-30 12:04:42,413 basehttp 2896 2860 "GET /api/notifications/?page=1&page_size=20&status=all&date_range=all HTTP/1.1" 200 8324
+INFO 2025-10-30 12:04:43,940 basehttp 2896 2860 "GET /api/user/reservations/ HTTP/1.1" 200 2206
+INFO 2025-10-30 12:04:43,972 basehttp 2896 2860 "GET /api/user/reservations/ HTTP/1.1" 200 2206
+INFO 2025-10-30 12:04:47,395 basehttp 2896 2860 "GET /api/notifications/?page=1&page_size=20&status=all&date_range=all HTTP/1.1" 200 8324
+INFO 2025-10-30 12:04:47,478 basehttp 2896 10200 "GET /api/notifications/?page=1&page_size=20&status=all&date_range=all HTTP/1.1" 200 8324
+INFO 2025-10-30 12:04:49,527 basehttp 2896 10200 "GET /api/user/reservations/ HTTP/1.1" 200 2206
+INFO 2025-10-30 12:04:49,559 basehttp 2896 10200 "GET /api/user/reservations/ HTTP/1.1" 200 2206
+INFO 2025-10-30 12:04:58,771 basehttp 2896 10200 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8324
+INFO 2025-10-30 12:05:29,258 basehttp 2896 10200 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8324
+INFO 2025-10-30 12:05:59,243 basehttp 2896 10200 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8326
+INFO 2025-10-30 12:06:16,047 basehttp 2896 10200 "GET /api/user/active-borrows/ HTTP/1.1" 200 7406
+INFO 2025-10-30 12:06:16,083 basehttp 2896 2860 "GET /api/user/active-borrows/ HTTP/1.1" 200 7406
+INFO 2025-10-30 12:06:17,369 basehttp 2896 2860 "GET /api/user/transactions/ HTTP/1.1" 200 7406
+INFO 2025-10-30 12:06:17,407 basehttp 2896 10200 "GET /api/user/transactions/ HTTP/1.1" 200 7406
+INFO 2025-10-30 12:06:20,484 basehttp 2896 10200 "GET /api/user/reservations/ HTTP/1.1" 200 2206
+INFO 2025-10-30 12:06:20,511 basehttp 2896 10200 "GET /api/user/reservations/ HTTP/1.1" 200 2206
+INFO 2025-10-30 12:06:28,770 basehttp 2896 10200 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8327
+INFO 2025-10-30 12:06:59,245 basehttp 2896 10200 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8327
+INFO 2025-10-30 12:07:29,248 basehttp 2896 10200 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8327
+INFO 2025-10-30 12:07:59,252 basehttp 2896 10200 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8327
+INFO 2025-10-30 12:08:38,552 basehttp 2896 10200 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8327
+INFO 2025-10-30 12:08:59,094 basehttp 2896 16620 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8327
+INFO 2025-10-30 12:09:29,561 basehttp 2896 10764 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8327
+INFO 2025-10-30 12:09:59,246 basehttp 2896 10764 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8327
+INFO 2025-10-30 12:10:55,251 basehttp 2896 10764 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8314
+WARNING 2025-10-30 12:11:36,330 log 2896 10764 Method Not Allowed: /api/reservations/67/cancel/
+WARNING 2025-10-30 12:11:36,331 basehttp 2896 10764 "GET /api/reservations/67/cancel/ HTTP/1.1" 405 40
+INFO 2025-10-30 12:11:44,732 basehttp 2896 10764 "GET /api/user/reservations/ HTTP/1.1" 200 2206
+INFO 2025-10-30 12:11:55,245 basehttp 2896 10764 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8325
+INFO 2025-10-30 12:12:44,253 basehttp 2896 10764 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8326
+INFO 2025-10-30 12:12:46,454 basehttp 2896 10764 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 12:12:46,467 basehttp 2896 10764 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 12:12:46,553 basehttp 2896 10764 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8326
+INFO 2025-10-30 12:12:46,571 basehttp 2896 10764 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 12:12:46,597 basehttp 2896 10764 "GET /api/user/reservations/ HTTP/1.1" 200 2206
+INFO 2025-10-30 12:12:46,665 basehttp 2896 10764 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8326
+INFO 2025-10-30 12:12:46,681 basehttp 2896 10764 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 12:12:46,701 basehttp 2896 10764 "GET /api/user/reservations/ HTTP/1.1" 200 2206
+INFO 2025-10-30 12:12:49,671 basehttp 2896 13588 "OPTIONS /api/reservations/67/cancel/ HTTP/1.1" 200 0
+INFO 2025-10-30 12:12:50,080 notification_utils 2896 10384 Notification created for lighteningblade.256: system
+INFO 2025-10-30 12:12:50,110 basehttp 2896 10384 "POST /api/reservations/67/cancel/ HTTP/1.1" 200 92
+INFO 2025-10-30 12:12:52,134 basehttp 2896 10384 "GET /api/user/reservations/ HTTP/1.1" 200 1884
+INFO 2025-10-30 12:13:02,174 basehttp 2896 10384 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 12:13:02,190 basehttp 2896 10384 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 12:13:02,238 basehttp 2896 10124 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 12:13:02,288 basehttp 2896 10124 "GET /api/user/reservations/ HTTP/1.1" 200 1884
+INFO 2025-10-30 12:13:02,289 basehttp 2896 10384 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8482
+INFO 2025-10-30 12:13:02,320 basehttp 2896 10384 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 12:13:02,373 basehttp 2896 10384 "GET /api/user/reservations/ HTTP/1.1" 200 1884
+INFO 2025-10-30 12:13:02,392 basehttp 2896 10124 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8482
+INFO 2025-10-30 12:13:32,569 basehttp 2896 8404 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8482
+INFO 2025-10-30 12:14:03,560 basehttp 2896 11052 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8483
+INFO 2025-10-30 12:14:33,555 basehttp 2896 13000 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8483
+INFO 2025-10-30 12:15:03,558 basehttp 2896 9596 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8484
+INFO 2025-10-30 12:15:33,561 basehttp 2896 17440 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8484
+INFO 2025-10-30 12:16:03,545 basehttp 2896 4752 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8484
+INFO 2025-10-30 12:16:33,576 basehttp 2896 15248 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8484
+INFO 2025-10-30 12:17:34,558 basehttp 2896 2764 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8484
+INFO 2025-10-30 12:18:52,526 basehttp 2896 10336 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 12:18:52,537 basehttp 2896 10336 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 12:18:53,598 basehttp 2896 13108 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 12:18:53,612 basehttp 2896 13108 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 12:19:27,517 basehttp 2896 18028 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 12:19:27,527 basehttp 2896 18028 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 12:19:29,218 basehttp 2896 18028 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 12:19:29,233 basehttp 2896 18028 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 12:19:29,253 basehttp 2896 18028 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 12:19:29,291 basehttp 2896 17624 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8484
+INFO 2025-10-30 12:19:29,291 basehttp 2896 18028 "GET /api/user/reservations/ HTTP/1.1" 200 1884
+INFO 2025-10-30 12:19:29,311 basehttp 2896 18028 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 12:19:29,350 basehttp 2896 18028 "GET /api/user/reservations/ HTTP/1.1" 200 1884
+INFO 2025-10-30 12:19:29,358 basehttp 2896 17624 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8484
+INFO 2025-10-30 12:19:44,466 basehttp 2896 17468 "GET /api/notifications/?page=1&page_size=20&status=all&date_range=all HTTP/1.1" 200 8484
+INFO 2025-10-30 12:19:44,516 basehttp 2896 17468 "GET /api/notifications/?page=1&page_size=20&status=all&date_range=all HTTP/1.1" 200 8484
+INFO 2025-10-30 12:19:46,263 basehttp 2896 17468 "GET /api/user/reservations/ HTTP/1.1" 200 1884
+INFO 2025-10-30 12:19:46,293 basehttp 2896 17468 "GET /api/user/reservations/ HTTP/1.1" 200 1884
+INFO 2025-10-30 12:19:59,598 basehttp 2896 8612 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8484
+INFO 2025-10-30 12:20:30,561 basehttp 2896 5604 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8485
+INFO 2025-10-30 12:21:00,587 basehttp 2896 14960 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8485
+INFO 2025-10-30 12:21:30,584 basehttp 2896 6360 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8485
+INFO 2025-10-30 12:22:00,563 basehttp 2896 17876 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8485
+INFO 2025-10-30 12:22:30,584 basehttp 2896 4180 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8485
+INFO 2025-10-30 12:23:00,583 basehttp 2896 1580 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8486
+INFO 2025-10-30 12:23:55,562 basehttp 2896 17860 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8486
+INFO 2025-10-30 12:24:55,551 basehttp 2896 15068 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8473
+INFO 2025-10-30 12:25:55,566 basehttp 2896 2772 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8484
+INFO 2025-10-30 12:25:56,212 basehttp 2896 2772 "GET /api/user/reservations/ HTTP/1.1" 200 1884
+INFO 2025-10-30 12:26:09,563 basehttp 2896 7304 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8484
+INFO 2025-10-30 12:26:11,604 basehttp 2896 7304 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 12:26:11,615 basehttp 2896 7304 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 12:26:11,674 basehttp 2896 8456 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 12:26:11,710 basehttp 2896 8456 "GET /api/user/reservations/ HTTP/1.1" 200 1884
+INFO 2025-10-30 12:26:11,711 basehttp 2896 7304 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8484
+INFO 2025-10-30 12:26:11,734 basehttp 2896 7304 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 12:26:11,802 basehttp 2896 8456 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8484
+INFO 2025-10-30 12:26:11,857 basehttp 2896 7304 "GET /api/user/reservations/ HTTP/1.1" 200 1884
+INFO 2025-10-30 12:26:28,903 basehttp 2896 7484 "OPTIONS /api/reservations/64/cancel/ HTTP/1.1" 200 0
+INFO 2025-10-30 12:26:29,279 notification_utils 2896 15760 Notification created for lighteningblade.256: system
+INFO 2025-10-30 12:26:29,283 basehttp 2896 15760 "POST /api/reservations/64/cancel/ HTTP/1.1" 200 92
+INFO 2025-10-30 12:26:30,834 basehttp 2896 15760 "GET /api/user/reservations/ HTTP/1.1" 200 1555
+INFO 2025-10-30 12:26:42,560 basehttp 2896 2072 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8639
+INFO 2025-10-30 12:27:12,020 basehttp 2896 18076 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8639
+INFO 2025-10-30 12:27:42,012 basehttp 2896 4768 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8638
+INFO 2025-10-30 12:28:12,020 basehttp 2896 12828 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8638
+INFO 2025-10-30 12:28:42,557 basehttp 2896 15188 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8639
+INFO 2025-10-30 12:29:12,548 basehttp 2896 1636 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8600
+INFO 2025-10-30 12:29:42,592 basehttp 2896 17536 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8600
+INFO 2025-10-30 12:30:43,559 basehttp 2896 16360 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8633
+INFO 2025-10-30 12:31:36,183 basehttp 2896 15564 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8636
+INFO 2025-10-30 12:31:37,717 basehttp 2896 15564 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 12:31:37,729 basehttp 2896 15564 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 12:31:37,792 basehttp 2896 2776 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 12:31:37,831 basehttp 2896 2776 "GET /api/user/reservations/ HTTP/1.1" 200 1555
+INFO 2025-10-30 12:31:37,844 basehttp 2896 15564 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8636
+INFO 2025-10-30 12:31:37,860 basehttp 2896 2776 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 12:31:37,886 basehttp 2896 15564 "GET /api/user/reservations/ HTTP/1.1" 200 1555
+INFO 2025-10-30 12:31:37,931 basehttp 2896 2776 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8636
+INFO 2025-10-30 12:32:00,448 basehttp 2896 8508 "OPTIONS /api/reservations/63/cancel/ HTTP/1.1" 200 0
+INFO 2025-10-30 12:32:00,810 notification_utils 2896 5092 Notification created for lighteningblade.256: system
+INFO 2025-10-30 12:32:00,814 basehttp 2896 5092 "POST /api/reservations/63/cancel/ HTTP/1.1" 200 92
+INFO 2025-10-30 12:32:01,962 basehttp 2896 5092 "GET /api/user/reservations/ HTTP/1.1" 200 655
+INFO 2025-10-30 12:32:07,819 basehttp 2896 5092 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8754
+INFO 2025-10-30 12:32:38,129 basehttp 2896 3732 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8754
+INFO 2025-10-30 12:33:08,238 basehttp 2896 3732 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8753
+INFO 2025-10-30 12:33:38,551 basehttp 2896 8320 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8753
+INFO 2025-10-30 12:34:08,569 basehttp 2896 14596 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8754
+INFO 2025-10-30 12:34:38,571 basehttp 2896 16604 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8755
+INFO 2025-10-30 12:35:08,569 basehttp 2896 10828 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8755
+INFO 2025-10-30 12:35:16,278 basehttp 2896 17948 "GET /api/user/reservations/ HTTP/1.1" 200 655
+INFO 2025-10-30 12:35:37,917 basehttp 2896 17948 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 12:35:37,936 basehttp 2896 17948 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 12:35:37,999 basehttp 2896 3732 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 12:35:38,044 basehttp 2896 3732 "GET /api/user/reservations/ HTTP/1.1" 200 655
+INFO 2025-10-30 12:35:38,062 basehttp 2896 17948 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8755
+INFO 2025-10-30 12:35:38,082 basehttp 2896 3732 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 12:35:38,111 basehttp 2896 17948 "GET /api/user/reservations/ HTTP/1.1" 200 655
+INFO 2025-10-30 12:35:38,161 basehttp 2896 3732 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8755
+INFO 2025-10-30 12:35:42,734 basehttp 2896 17948 "GET /api/recommendations/insights/ HTTP/1.1" 200 375
+INFO 2025-10-30 12:35:42,742 basehttp 2896 3732 "GET /api/transactions/ HTTP/1.1" 200 7414
+INFO 2025-10-30 12:35:42,772 basehttp 2896 17948 "GET /api/recommendations/insights/ HTTP/1.1" 200 375
+INFO 2025-10-30 12:35:42,802 basehttp 2896 15032 "GET /api/user/pending-transactions/ HTTP/1.1" 200 463
+INFO 2025-10-30 12:35:42,805 basehttp 2896 3732 "GET /api/transactions/ HTTP/1.1" 200 7414
+INFO 2025-10-30 12:35:42,825 basehttp 2896 15032 "GET /api/user/pending-transactions/ HTTP/1.1" 200 463
+INFO 2025-10-30 12:36:04,209 basehttp 2896 15032 "GET /api/user/active-borrows/ HTTP/1.1" 200 7414
+INFO 2025-10-30 12:36:04,293 basehttp 2896 3732 "GET /api/user/active-borrows/ HTTP/1.1" 200 7414
+ERROR 2025-10-30 12:36:04,496 views 2896 15032 Error generating recommendations: (1235, "This version of MySQL doesn't yet support 'LIMIT & IN/ALL/ANY/SOME subquery'")
+INFO 2025-10-30 12:36:04,630 basehttp 2896 15032 "GET /api/recommendations/ HTTP/1.1" 200 9143
+INFO 2025-10-30 12:36:04,682 basehttp 2896 3732 "GET /api/recommendations/insights/ HTTP/1.1" 200 375
+ERROR 2025-10-30 12:36:04,806 views 2896 15032 Error generating recommendations: (1235, "This version of MySQL doesn't yet support 'LIMIT & IN/ALL/ANY/SOME subquery'")
+INFO 2025-10-30 12:36:04,915 basehttp 2896 15032 "GET /api/recommendations/ HTTP/1.1" 200 9143
+INFO 2025-10-30 12:36:04,958 basehttp 2896 15032 "GET /api/recommendations/insights/ HTTP/1.1" 200 375
+INFO 2025-10-30 12:36:08,057 basehttp 2896 15032 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8755
+INFO 2025-10-30 12:36:21,426 basehttp 2896 4040 "OPTIONS /api/books/9/borrow/ HTTP/1.1" 200 0
+INFO 2025-10-30 12:36:21,445 basehttp 2896 15032 "POST /api/books/9/borrow/ HTTP/1.1" 200 245
+INFO 2025-10-30 12:36:38,247 basehttp 2896 15032 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8756
+INFO 2025-10-30 12:37:08,246 basehttp 2896 15032 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8756
+INFO 2025-10-30 12:37:38,260 basehttp 2896 15032 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8756
+INFO 2025-10-30 12:38:08,571 basehttp 2896 18124 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8756
+INFO 2025-10-30 12:38:38,248 basehttp 2896 18124 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8756
+INFO 2025-10-30 12:39:08,250 basehttp 2896 18124 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8759
+INFO 2025-10-30 12:39:55,252 basehttp 2896 18124 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8759
+INFO 2025-10-30 12:40:55,260 basehttp 2896 18124 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8759
+INFO 2025-10-30 12:41:55,255 basehttp 2896 18124 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8759
+INFO 2025-10-30 12:42:55,256 basehttp 2896 18124 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8760
+INFO 2025-10-30 12:43:08,017 basehttp 2896 18124 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8760
+INFO 2025-10-30 12:43:38,574 basehttp 2896 14976 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8760
+INFO 2025-10-30 12:44:08,560 basehttp 2896 12724 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8760
+INFO 2025-10-30 12:44:55,259 basehttp 2896 12724 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8760
+INFO 2025-10-30 12:45:55,256 basehttp 2896 12724 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8760
+INFO 2025-10-30 12:46:55,257 basehttp 2896 12724 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8760
+INFO 2025-10-30 12:47:55,567 basehttp 2896 2860 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8760
+INFO 2025-10-30 12:48:55,569 basehttp 2896 17988 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8760
+INFO 2025-10-30 12:49:55,562 basehttp 2896 7088 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8760
+INFO 2025-10-30 12:50:55,587 basehttp 2896 12260 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8760
+INFO 2025-10-30 12:51:55,574 basehttp 2896 5308 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8760
+INFO 2025-10-30 12:52:55,565 basehttp 2896 2748 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8760
+INFO 2025-10-30 12:53:55,571 basehttp 2896 13472 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8760
+INFO 2025-10-30 12:58:32,784 basehttp 2896 4652 "GET /api/user/reservations/ HTTP/1.1" 200 655
+INFO 2025-10-30 13:01:07,134 basehttp 2896 4652 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 13:01:07,172 basehttp 2896 4652 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 13:01:07,284 basehttp 2896 4652 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8760
+INFO 2025-10-30 13:01:07,321 basehttp 2896 4652 "GET /api/user/active-borrows/ HTTP/1.1" 200 7414
+INFO 2025-10-30 13:01:07,339 basehttp 2896 4652 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 13:01:07,399 basehttp 2896 4652 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8760
+INFO 2025-10-30 13:01:07,436 basehttp 2896 4652 "GET /api/user/active-borrows/ HTTP/1.1" 200 7414
+ERROR 2025-10-30 13:01:07,538 views 2896 4652 Error generating recommendations: (1235, "This version of MySQL doesn't yet support 'LIMIT & IN/ALL/ANY/SOME subquery'")
+INFO 2025-10-30 13:01:07,552 basehttp 2896 9448 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 13:01:07,608 basehttp 2896 4652 "GET /api/recommendations/ HTTP/1.1" 200 9143
+INFO 2025-10-30 13:01:07,641 basehttp 2896 9448 "GET /api/recommendations/insights/ HTTP/1.1" 200 375
+ERROR 2025-10-30 13:01:07,716 views 2896 4652 Error generating recommendations: (1235, "This version of MySQL doesn't yet support 'LIMIT & IN/ALL/ANY/SOME subquery'")
+INFO 2025-10-30 13:01:07,808 basehttp 2896 4652 "GET /api/recommendations/ HTTP/1.1" 200 9143
+INFO 2025-10-30 13:01:07,847 basehttp 2896 4652 "GET /api/recommendations/insights/ HTTP/1.1" 200 375
+INFO 2025-10-30 13:01:38,562 basehttp 2896 14764 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8760
+INFO 2025-10-30 13:02:08,251 basehttp 2896 14764 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8760
+INFO 2025-10-30 13:02:38,251 basehttp 2896 14764 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8760
+INFO 2025-10-30 13:03:08,248 basehttp 2896 14764 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8760
+INFO 2025-10-30 13:03:38,263 basehttp 2896 14764 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8760
+INFO 2025-10-30 13:04:08,232 basehttp 2896 14764 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8734
+INFO 2025-10-30 13:04:38,553 basehttp 2896 256 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8756
+INFO 2025-10-30 13:05:39,552 basehttp 2896 4212 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8758
+INFO 2025-10-30 13:06:40,575 basehttp 2896 10124 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8759
+INFO 2025-10-30 13:07:41,550 basehttp 2896 17868 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8759
+INFO 2025-10-30 13:08:42,562 basehttp 2896 9260 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8759
+INFO 2025-10-30 13:09:43,556 basehttp 2896 8392 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8759
+INFO 2025-10-30 13:10:44,557 basehttp 2896 14108 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8747
+INFO 2025-10-30 13:11:45,552 basehttp 2896 15164 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8758
+INFO 2025-10-30 13:12:46,564 basehttp 2896 17752 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8759
+INFO 2025-10-30 13:13:47,576 basehttp 2896 9772 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8757
+INFO 2025-10-30 13:14:48,567 basehttp 2896 5480 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8768
+INFO 2025-10-30 13:15:49,553 basehttp 2896 15996 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8769
+INFO 2025-10-30 13:16:50,563 basehttp 2896 420 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8769
+INFO 2025-10-30 13:17:51,551 basehttp 2896 10384 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8769
+INFO 2025-10-30 13:18:21,911 autoreload 2896 9240 C:\Users\Victus\Documents\Final_Year_Project\infinitum_library\backend\library\serializers.py changed, reloading.
+INFO 2025-10-30 13:18:24,754 apps 1840 14544 Library signals loaded successfully
+ERROR 2025-10-30 13:18:24,815 apps 1840 14544 Error scheduling background tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 13:18:24,827 apps 1840 14544 Error starting automated tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 13:18:24,838 apps 1840 14544 Error scheduling waitlist task: name 'check_reservation_expiry' is not defined
+INFO 2025-10-30 13:18:24,890 autoreload 1840 14544 Watching for file changes with StatReloader
+INFO 2025-10-30 13:18:52,562 basehttp 1840 10620 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8769
+INFO 2025-10-30 13:19:53,586 basehttp 1840 3324 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8769
+INFO 2025-10-30 13:20:49,588 autoreload 1840 14544 C:\Users\Victus\Documents\Final_Year_Project\infinitum_library\backend\library\views.py changed, reloading.
+INFO 2025-10-30 13:20:51,389 apps 9768 17836 Library signals loaded successfully
+ERROR 2025-10-30 13:20:51,438 apps 9768 17836 Error scheduling background tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 13:20:51,451 apps 9768 17836 Error starting automated tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 13:20:51,464 apps 9768 17836 Error scheduling waitlist task: name 'check_reservation_expiry' is not defined
+INFO 2025-10-30 13:20:51,523 autoreload 9768 17836 Watching for file changes with StatReloader
+INFO 2025-10-30 13:20:56,101 basehttp 9768 15936 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8770
+INFO 2025-10-30 13:21:55,562 basehttp 9768 4868 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8770
+INFO 2025-10-30 13:22:55,565 basehttp 9768 3968 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8771
+INFO 2025-10-30 13:23:01,647 autoreload 9768 17836 C:\Users\Victus\Documents\Final_Year_Project\infinitum_library\backend\library\views.py changed, reloading.
+INFO 2025-10-30 13:23:03,296 apps 17844 14288 Library signals loaded successfully
+ERROR 2025-10-30 13:23:03,346 apps 17844 14288 Error scheduling background tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 13:23:03,359 apps 17844 14288 Error starting automated tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 13:23:03,375 apps 17844 14288 Error scheduling waitlist task: name 'check_reservation_expiry' is not defined
+INFO 2025-10-30 13:23:03,420 autoreload 17844 14288 Watching for file changes with StatReloader
+INFO 2025-10-30 13:23:55,594 basehttp 17844 14972 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8771
+INFO 2025-10-30 13:24:55,566 basehttp 17844 8892 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8759
+INFO 2025-10-30 13:25:55,575 basehttp 17844 14668 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8770
+INFO 2025-10-30 13:26:55,574 basehttp 17844 17412 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8767
+INFO 2025-10-30 13:27:55,568 basehttp 17844 4184 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8778
+INFO 2025-10-30 13:28:55,581 basehttp 17844 11972 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8779
+INFO 2025-10-30 13:29:21,549 basehttp 17844 14908 "GET /api/user/active-borrows/ HTTP/1.1" 200 7414
+ERROR 2025-10-30 13:29:21,628 views 17844 14908 Error generating recommendations: (1235, "This version of MySQL doesn't yet support 'LIMIT & IN/ALL/ANY/SOME subquery'")
+INFO 2025-10-30 13:29:21,675 basehttp 17844 14908 "GET /api/recommendations/ HTTP/1.1" 200 9642
+INFO 2025-10-30 13:29:21,693 basehttp 17844 14908 "GET /api/recommendations/insights/ HTTP/1.1" 200 375
+INFO 2025-10-30 13:29:55,559 basehttp 17844 9276 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8740
+INFO 2025-10-30 13:30:07,593 basehttp 17844 9820 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8773
+INFO 2025-10-30 13:30:37,599 basehttp 17844 9648 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8773
+INFO 2025-10-30 13:31:08,556 basehttp 17844 11576 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8776
+INFO 2025-10-30 13:31:38,576 basehttp 17844 15468 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8776
+INFO 2025-10-30 13:32:39,600 basehttp 17844 9732 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8772
+INFO 2025-10-30 13:33:40,567 basehttp 17844 15188 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8783
+INFO 2025-10-30 13:34:41,589 basehttp 17844 916 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8785
+INFO 2025-10-30 13:35:42,575 basehttp 17844 416 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8785
+INFO 2025-10-30 13:36:43,254 basehttp 17844 416 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8786
+INFO 2025-10-30 13:37:07,291 basehttp 17844 416 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8786
+INFO 2025-10-30 13:37:38,258 basehttp 17844 416 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8786
+INFO 2025-10-30 13:38:08,246 basehttp 17844 416 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8786
+INFO 2025-10-30 13:38:19,961 autoreload 17844 14288 C:\Users\Victus\Documents\Final_Year_Project\infinitum_library\backend\library\views.py changed, reloading.
+INFO 2025-10-30 13:38:21,968 apps 12428 3084 Library signals loaded successfully
+ERROR 2025-10-30 13:38:22,025 apps 12428 3084 Error scheduling background tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 13:38:22,043 apps 12428 3084 Error starting automated tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 13:38:22,066 apps 12428 3084 Error scheduling waitlist task: name 'check_reservation_expiry' is not defined
+INFO 2025-10-30 13:38:22,123 autoreload 12428 3084 Watching for file changes with StatReloader
+INFO 2025-10-30 13:38:55,574 basehttp 12428 15256 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8786
+INFO 2025-10-30 13:39:50,015 autoreload 12428 3084 C:\Users\Victus\Documents\Final_Year_Project\infinitum_library\backend\library\models.py changed, reloading.
+INFO 2025-10-30 13:39:51,845 apps 9104 5916 Library signals loaded successfully
+ERROR 2025-10-30 13:39:51,900 apps 9104 5916 Error scheduling background tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 13:39:51,915 apps 9104 5916 Error starting automated tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 13:39:51,931 apps 9104 5916 Error scheduling waitlist task: name 'check_reservation_expiry' is not defined
+INFO 2025-10-30 13:39:51,992 autoreload 9104 5916 Watching for file changes with StatReloader
+INFO 2025-10-30 13:39:55,575 basehttp 9104 17660 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8789
+INFO 2025-10-30 13:40:10,604 autoreload 9104 5916 C:\Users\Victus\Documents\Final_Year_Project\infinitum_library\backend\library\models.py changed, reloading.
+INFO 2025-10-30 13:40:12,170 apps 12616 3424 Library signals loaded successfully
+ERROR 2025-10-30 13:40:12,223 apps 12616 3424 Error scheduling background tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 13:40:12,235 apps 12616 3424 Error starting automated tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 13:40:12,247 apps 12616 3424 Error scheduling waitlist task: name 'check_reservation_expiry' is not defined
+INFO 2025-10-30 13:40:12,294 autoreload 12616 3424 Watching for file changes with StatReloader
+INFO 2025-10-30 13:40:24,520 autoreload 12616 3424 C:\Users\Victus\Documents\Final_Year_Project\infinitum_library\backend\library\models.py changed, reloading.
+INFO 2025-10-30 13:40:26,104 apps 10704 17868 Library signals loaded successfully
+ERROR 2025-10-30 13:40:26,143 apps 10704 17868 Error scheduling background tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 13:40:26,156 apps 10704 17868 Error starting automated tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 13:40:26,168 apps 10704 17868 Error scheduling waitlist task: name 'check_reservation_expiry' is not defined
+INFO 2025-10-30 13:40:26,212 autoreload 10704 17868 Watching for file changes with StatReloader
+INFO 2025-10-30 13:40:55,574 basehttp 10704 5348 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8789
+INFO 2025-10-30 13:41:55,589 basehttp 10704 15264 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8789
+INFO 2025-10-30 13:42:55,550 basehttp 10704 14936 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8790
+INFO 2025-10-30 13:43:55,564 basehttp 10704 8428 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8790
+INFO 2025-10-30 13:44:55,586 basehttp 10704 17212 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8790
+INFO 2025-10-30 13:45:55,572 basehttp 10704 18152 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8790
+INFO 2025-10-30 13:46:55,559 basehttp 10704 10720 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8790
+INFO 2025-10-30 13:47:55,573 basehttp 10704 16192 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8790
+INFO 2025-10-30 13:48:07,577 basehttp 10704 15928 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8790
+INFO 2025-10-30 13:48:08,347 basehttp 10704 15928 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 13:48:08,361 basehttp 10704 15928 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 13:48:08,435 basehttp 10704 5268 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 13:48:08,506 basehttp 10704 15928 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8790
+INFO 2025-10-30 13:48:08,515 basehttp 10704 5268 "GET /api/user/active-borrows/ HTTP/1.1" 200 7414
+INFO 2025-10-30 13:48:08,531 basehttp 10704 15928 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 13:48:08,578 basehttp 10704 15928 "GET /api/user/active-borrows/ HTTP/1.1" 200 7414
+INFO 2025-10-30 13:48:08,601 basehttp 10704 5268 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8790
+INFO 2025-10-30 13:48:08,692 basehttp 10704 15928 "GET /api/recommendations/ HTTP/1.1" 200 9471
+INFO 2025-10-30 13:48:08,727 basehttp 10704 5268 "GET /api/recommendations/insights/ HTTP/1.1" 200 375
+INFO 2025-10-30 13:48:08,775 basehttp 10704 15928 "GET /api/recommendations/ HTTP/1.1" 200 9471
+INFO 2025-10-30 13:48:08,795 basehttp 10704 15928 "GET /api/recommendations/insights/ HTTP/1.1" 200 375
+INFO 2025-10-30 13:48:39,578 basehttp 10704 3988 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8790
+INFO 2025-10-30 13:49:09,559 basehttp 10704 12712 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8790
+INFO 2025-10-30 13:49:38,773 basehttp 10704 4220 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8790
+INFO 2025-10-30 13:50:09,563 basehttp 10704 14720 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8790
+INFO 2025-10-30 13:50:38,763 autoreload 10704 17868 C:\Users\Victus\Documents\Final_Year_Project\infinitum_library\backend\library\views.py changed, reloading.
+INFO 2025-10-30 13:50:40,201 apps 14596 944 Library signals loaded successfully
+ERROR 2025-10-30 13:50:40,249 apps 14596 944 Error scheduling background tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 13:50:40,265 apps 14596 944 Error starting automated tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 13:50:40,278 apps 14596 944 Error scheduling waitlist task: name 'check_reservation_expiry' is not defined
+INFO 2025-10-30 13:50:40,328 autoreload 14596 944 Watching for file changes with StatReloader
+INFO 2025-10-30 13:51:09,572 basehttp 14596 12740 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8790
+INFO 2025-10-30 13:51:39,554 basehttp 14596 4768 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8790
+INFO 2025-10-30 13:52:40,564 basehttp 14596 4600 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8790
+INFO 2025-10-30 13:53:11,984 autoreload 14596 944 C:\Users\Victus\Documents\Final_Year_Project\infinitum_library\backend\library\views.py changed, reloading.
+INFO 2025-10-30 13:53:13,781 apps 10324 13492 Library signals loaded successfully
+ERROR 2025-10-30 13:53:13,826 apps 10324 13492 Error scheduling background tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 13:53:13,848 apps 10324 13492 Error starting automated tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 13:53:13,871 apps 10324 13492 Error scheduling waitlist task: name 'check_reservation_expiry' is not defined
+INFO 2025-10-30 13:53:13,923 autoreload 10324 13492 Watching for file changes with StatReloader
+INFO 2025-10-30 13:53:41,611 basehttp 10324 10332 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8790
+INFO 2025-10-30 13:53:43,997 autoreload 10324 13492 C:\Users\Victus\Documents\Final_Year_Project\infinitum_library\backend\library\views.py changed, reloading.
+INFO 2025-10-30 13:53:45,519 apps 8300 18180 Library signals loaded successfully
+ERROR 2025-10-30 13:53:45,577 apps 8300 18180 Error scheduling background tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 13:53:45,599 apps 8300 18180 Error starting automated tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 13:53:45,619 apps 8300 18180 Error scheduling waitlist task: name 'check_reservation_expiry' is not defined
+INFO 2025-10-30 13:53:45,669 autoreload 8300 18180 Watching for file changes with StatReloader
+INFO 2025-10-30 13:53:53,380 autoreload 8300 18180 C:\Users\Victus\Documents\Final_Year_Project\infinitum_library\backend\library\views.py changed, reloading.
+INFO 2025-10-30 13:53:55,121 apps 920 2020 Library signals loaded successfully
+ERROR 2025-10-30 13:53:55,184 apps 920 2020 Error scheduling background tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 13:53:55,206 apps 920 2020 Error starting automated tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 13:53:55,227 apps 920 2020 Error scheduling waitlist task: name 'check_reservation_expiry' is not defined
+INFO 2025-10-30 13:53:55,311 autoreload 920 2020 Watching for file changes with StatReloader
+INFO 2025-10-30 13:53:59,313 autoreload 920 2020 C:\Users\Victus\Documents\Final_Year_Project\infinitum_library\backend\library\views.py changed, reloading.
+INFO 2025-10-30 13:54:00,484 apps 15008 6944 Library signals loaded successfully
+ERROR 2025-10-30 13:54:00,541 apps 15008 6944 Error scheduling background tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 13:54:00,567 apps 15008 6944 Error starting automated tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 13:54:00,591 apps 15008 6944 Error scheduling waitlist task: name 'check_reservation_expiry' is not defined
+INFO 2025-10-30 13:54:00,643 autoreload 15008 6944 Watching for file changes with StatReloader
+INFO 2025-10-30 13:54:14,141 autoreload 15008 6944 C:\Users\Victus\Documents\Final_Year_Project\infinitum_library\backend\library\views.py changed, reloading.
+INFO 2025-10-30 13:54:15,847 apps 15972 17808 Library signals loaded successfully
+ERROR 2025-10-30 13:54:15,903 apps 15972 17808 Error scheduling background tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 13:54:15,925 apps 15972 17808 Error starting automated tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 13:54:15,947 apps 15972 17808 Error scheduling waitlist task: name 'check_reservation_expiry' is not defined
+INFO 2025-10-30 13:54:16,014 autoreload 15972 17808 Watching for file changes with StatReloader
+INFO 2025-10-30 13:54:35,301 autoreload 15972 17808 C:\Users\Victus\Documents\Final_Year_Project\infinitum_library\backend\library\views.py changed, reloading.
+INFO 2025-10-30 13:54:37,182 apps 2324 10200 Library signals loaded successfully
+ERROR 2025-10-30 13:54:37,238 apps 2324 10200 Error scheduling background tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 13:54:37,266 apps 2324 10200 Error starting automated tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 13:54:37,292 apps 2324 10200 Error scheduling waitlist task: name 'check_reservation_expiry' is not defined
+INFO 2025-10-30 13:54:37,370 autoreload 2324 10200 Watching for file changes with StatReloader
+INFO 2025-10-30 13:54:42,575 basehttp 2324 17876 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8790
+INFO 2025-10-30 13:55:43,580 basehttp 2324 2452 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8790
+INFO 2025-10-30 13:56:44,575 basehttp 2324 16656 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8777
+INFO 2025-10-30 13:57:45,581 basehttp 2324 5876 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8788
+INFO 2025-10-30 13:58:46,584 basehttp 2324 11136 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8789
+INFO 2025-10-30 13:59:14,349 basehttp 2324 9856 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8789
+INFO 2025-10-30 13:59:16,195 basehttp 2324 9856 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 13:59:16,209 basehttp 2324 9856 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 13:59:16,269 basehttp 2324 14900 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 13:59:16,322 basehttp 2324 9856 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8789
+INFO 2025-10-30 13:59:16,339 basehttp 2324 14900 "GET /api/user/active-borrows/ HTTP/1.1" 200 7414
+INFO 2025-10-30 13:59:16,354 basehttp 2324 9856 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 13:59:16,398 basehttp 2324 9856 "GET /api/user/active-borrows/ HTTP/1.1" 200 7414
+INFO 2025-10-30 13:59:16,416 basehttp 2324 14900 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8789
+INFO 2025-10-30 13:59:16,524 basehttp 2324 9856 "GET /api/recommendations/ HTTP/1.1" 200 10650
+INFO 2025-10-30 13:59:16,554 basehttp 2324 14900 "GET /api/recommendations/insights/ HTTP/1.1" 200 375
+INFO 2025-10-30 13:59:16,622 basehttp 2324 9856 "GET /api/recommendations/ HTTP/1.1" 200 10650
+INFO 2025-10-30 13:59:16,643 basehttp 2324 9856 "GET /api/recommendations/insights/ HTTP/1.1" 200 375
+INFO 2025-10-30 13:59:36,727 basehttp 2324 9944 "GET /api/recommendations/insights/ HTTP/1.1" 200 375
+INFO 2025-10-30 13:59:36,752 basehttp 2324 356 "GET /api/user/active-borrows/ HTTP/1.1" 200 7414
+INFO 2025-10-30 13:59:36,818 basehttp 2324 4556 "GET /api/recommendations/ HTTP/1.1" 200 10650
+INFO 2025-10-30 13:59:41,385 basehttp 2324 4556 "GET /api/user/reservations/ HTTP/1.1" 200 655
+INFO 2025-10-30 13:59:41,409 basehttp 2324 4556 "GET /api/user/reservations/ HTTP/1.1" 200 655
+INFO 2025-10-30 13:59:46,617 basehttp 2324 13304 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8789
+INFO 2025-10-30 14:00:16,622 basehttp 2324 5840 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8789
+INFO 2025-10-30 14:00:47,574 basehttp 2324 4900 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8789
+INFO 2025-10-30 14:01:17,560 basehttp 2324 3772 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8789
+INFO 2025-10-30 14:01:47,254 basehttp 2324 3772 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8789
+INFO 2025-10-30 14:02:17,256 basehttp 2324 3772 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8789
+INFO 2025-10-30 14:02:47,561 basehttp 2324 9920 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8789
+INFO 2025-10-30 14:03:48,576 basehttp 2324 1016 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8763
+INFO 2025-10-30 14:04:49,576 basehttp 2324 2032 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8785
+INFO 2025-10-30 14:05:50,568 basehttp 2324 12740 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8787
+INFO 2025-10-30 14:06:51,561 basehttp 2324 2372 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8788
+INFO 2025-10-30 14:07:52,565 basehttp 2324 9400 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8788
+INFO 2025-10-30 14:08:53,565 basehttp 2324 7928 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8788
+INFO 2025-10-30 14:09:54,566 basehttp 2324 18096 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8788
+INFO 2025-10-30 14:10:55,599 basehttp 2324 696 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8775
+INFO 2025-10-30 14:11:55,576 basehttp 2324 16212 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8786
+INFO 2025-10-30 14:13:10,528 basehttp 2324 7304 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 14:13:10,540 basehttp 2324 7304 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 14:13:19,533 basehttp 2324 16620 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 14:13:19,542 basehttp 2324 16620 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 14:13:21,223 basehttp 2324 16620 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 14:13:21,237 basehttp 2324 16620 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 14:13:21,278 basehttp 2324 9368 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 14:13:21,308 basehttp 2324 9368 "GET /api/user/reservations/ HTTP/1.1" 200 655
+INFO 2025-10-30 14:13:21,312 basehttp 2324 16620 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8775
+INFO 2025-10-30 14:13:21,328 basehttp 2324 9368 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 14:13:21,341 basehttp 2324 16620 "GET /api/user/reservations/ HTTP/1.1" 200 655
+INFO 2025-10-30 14:13:21,386 basehttp 2324 9368 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8775
+INFO 2025-10-30 14:13:31,550 basehttp 2324 9352 "GET /api/profile/history/ HTTP/1.1" 200 5319
+INFO 2025-10-30 14:13:31,589 basehttp 2324 9352 "GET /api/profile/history/ HTTP/1.1" 200 5319
+INFO 2025-10-30 14:13:53,844 basehttp 2324 17804 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 14:13:53,865 basehttp 2324 9416 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 14:13:53,901 basehttp 2324 17804 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 14:13:53,918 basehttp 2324 9416 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 14:13:53,936 basehttp 2324 14908 "GET /api/profile/history/ HTTP/1.1" 200 5319
+INFO 2025-10-30 14:13:53,953 basehttp 2324 9636 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8788
+INFO 2025-10-30 14:13:54,016 basehttp 2324 14908 "GET /api/profile/history/ HTTP/1.1" 200 5319
+INFO 2025-10-30 14:13:54,039 basehttp 2324 9636 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8788
+INFO 2025-10-30 14:15:37,702 basehttp 2324 17212 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 14:15:37,763 basehttp 2324 17212 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8789
+INFO 2025-10-30 14:15:37,782 basehttp 2324 17212 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 14:15:37,795 basehttp 2324 17212 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 14:15:37,855 basehttp 2324 17212 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8789
+INFO 2025-10-30 14:15:37,862 basehttp 2324 10280 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 14:15:42,547 basehttp 2324 11744 "POST /api/logout/ HTTP/1.1" 200 31
+INFO 2025-10-30 14:15:45,133 basehttp 2324 11744 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 14:15:45,141 basehttp 2324 11744 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 14:15:48,875 basehttp 2324 17464 "OPTIONS /api/login/ HTTP/1.1" 200 0
+INFO 2025-10-30 14:15:50,694 audit_utils 2324 17528 Audit log: login - User logged in successfully
+INFO 2025-10-30 14:15:50,712 basehttp 2324 17528 "POST /api/login/ HTTP/1.1" 200 141
+INFO 2025-10-30 14:15:50,766 basehttp 2324 13064 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 14:15:50,816 basehttp 2324 13064 "GET /api/transactions/ HTTP/1.1" 200 7414
+INFO 2025-10-30 14:15:50,822 basehttp 2324 17528 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8789
+INFO 2025-10-30 14:15:50,841 basehttp 2324 13064 "GET /api/recommendations/insights/ HTTP/1.1" 200 375
+INFO 2025-10-30 14:15:50,870 basehttp 2324 17528 "GET /api/transactions/ HTTP/1.1" 200 7414
+INFO 2025-10-30 14:15:50,899 basehttp 2324 17528 "GET /api/recommendations/insights/ HTTP/1.1" 200 375
+INFO 2025-10-30 14:15:50,928 basehttp 2324 17528 "GET /api/user/pending-transactions/ HTTP/1.1" 200 463
+INFO 2025-10-30 14:15:50,928 basehttp 2324 13064 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8789
+INFO 2025-10-30 14:15:50,947 basehttp 2324 17528 "GET /api/user/pending-transactions/ HTTP/1.1" 200 463
+INFO 2025-10-30 14:15:54,713 basehttp 2324 17528 "GET /api/profile/history/ HTTP/1.1" 200 5319
+INFO 2025-10-30 14:15:54,765 basehttp 2324 13064 "GET /api/profile/history/ HTTP/1.1" 200 5319
+INFO 2025-10-30 14:25:29,523 basehttp 2324 1352 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 14:25:29,550 basehttp 2324 18844 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 14:25:29,581 basehttp 2324 1352 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 14:25:29,586 basehttp 2324 18844 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 14:25:29,587 basehttp 2324 18544 "GET /api/profile/history/ HTTP/1.1" 200 5319
+INFO 2025-10-30 14:25:29,603 basehttp 2324 4504 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8789
+INFO 2025-10-30 14:25:29,635 basehttp 2324 18844 "GET /api/profile/history/ HTTP/1.1" 200 5319
+INFO 2025-10-30 14:25:29,658 basehttp 2324 4504 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8789
+INFO 2025-10-30 14:25:59,594 basehttp 2324 17508 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8789
+INFO 2025-10-30 14:26:22,452 basehttp 2324 19196 "GET /api/user/active-borrows/ HTTP/1.1" 200 7414
+INFO 2025-10-30 14:26:22,489 basehttp 2324 19196 "GET /api/user/active-borrows/ HTTP/1.1" 200 7414
+INFO 2025-10-30 14:26:29,595 basehttp 2324 7652 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8778
+INFO 2025-10-30 14:26:38,921 basehttp 2324 7652 "GET /api/profile/history/ HTTP/1.1" 200 5319
+INFO 2025-10-30 14:26:38,977 basehttp 2324 7652 "GET /api/profile/history/ HTTP/1.1" 200 5319
+INFO 2025-10-30 14:26:59,616 basehttp 2324 17836 "GET /api/notifications/?limit=5 HTTP/1.1" 200 8778
+INFO 2025-10-30 14:27:10,465 basehttp 2324 5840 "GET /api/user/active-borrows/ HTTP/1.1" 200 7414
+INFO 2025-10-30 14:27:10,507 basehttp 2324 5840 "GET /api/user/active-borrows/ HTTP/1.1" 200 7414
+INFO 2025-10-30 14:27:12,458 basehttp 2324 5840 "GET /api/user/reservations/ HTTP/1.1" 200 655
+INFO 2025-10-30 14:27:12,485 basehttp 2324 5840 "GET /api/user/reservations/ HTTP/1.1" 200 655
+INFO 2025-10-30 14:27:14,954 basehttp 2324 18712 "OPTIONS /api/reservations/66/cancel/ HTTP/1.1" 200 0
+INFO 2025-10-30 14:27:15,011 notification_utils 2324 5840 Notification created for lighteningblade.256: system
+INFO 2025-10-30 14:27:15,016 basehttp 2324 5840 "POST /api/reservations/66/cancel/ HTTP/1.1" 200 92
+INFO 2025-10-30 14:27:16,140 basehttp 2324 5840 "GET /api/user/reservations/ HTTP/1.1" 200 335
+INFO 2025-10-30 14:27:18,257 basehttp 2324 18712 "OPTIONS /api/reservations/65/cancel/ HTTP/1.1" 200 0
+INFO 2025-10-30 14:27:18,318 notification_utils 2324 5840 Notification created for lighteningblade.256: system
+INFO 2025-10-30 14:27:18,323 basehttp 2324 5840 "POST /api/reservations/65/cancel/ HTTP/1.1" 200 92
+INFO 2025-10-30 14:27:19,241 basehttp 2324 5840 "GET /api/user/reservations/ HTTP/1.1" 200 2
+INFO 2025-10-30 14:27:29,593 basehttp 2324 18868 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9093
+INFO 2025-10-30 14:27:33,531 basehttp 2324 18868 "GET /api/user/active-borrows/ HTTP/1.1" 200 7418
+INFO 2025-10-30 14:27:33,566 basehttp 2324 15468 "GET /api/user/active-borrows/ HTTP/1.1" 200 7418
+INFO 2025-10-30 14:27:40,916 basehttp 2324 19196 "GET /api/user/transactions/ HTTP/1.1" 200 7418
+INFO 2025-10-30 14:27:40,950 basehttp 2324 19196 "GET /api/user/transactions/ HTTP/1.1" 200 7418
+INFO 2025-10-30 14:27:46,092 basehttp 2324 19196 "GET /api/user/active-borrows/ HTTP/1.1" 200 7418
+INFO 2025-10-30 14:27:46,127 basehttp 2324 19196 "GET /api/user/active-borrows/ HTTP/1.1" 200 7418
+INFO 2025-10-30 14:27:47,214 basehttp 2324 19196 "GET /api/user/transactions/ HTTP/1.1" 200 7418
+INFO 2025-10-30 14:27:47,249 basehttp 2324 19196 "GET /api/user/transactions/ HTTP/1.1" 200 7418
+INFO 2025-10-30 14:27:52,951 basehttp 2324 18624 "GET /api/profile/history/ HTTP/1.1" 200 5319
+INFO 2025-10-30 14:27:53,003 basehttp 2324 18624 "GET /api/profile/history/ HTTP/1.1" 200 5319
+INFO 2025-10-30 14:27:59,295 basehttp 2324 18624 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9093
+INFO 2025-10-30 14:28:01,460 basehttp 2324 18624 "GET /api/user/transactions/ HTTP/1.1" 200 7418
+INFO 2025-10-30 14:28:01,500 basehttp 2324 18624 "GET /api/user/transactions/ HTTP/1.1" 200 7418
+INFO 2025-10-30 14:28:02,289 basehttp 2324 18624 "GET /api/user/active-borrows/ HTTP/1.1" 200 7418
+INFO 2025-10-30 14:28:02,328 basehttp 2324 18624 "GET /api/user/active-borrows/ HTTP/1.1" 200 7418
+INFO 2025-10-30 14:28:29,603 basehttp 2324 17340 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9092
+INFO 2025-10-30 14:29:00,566 basehttp 2324 15956 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9092
+INFO 2025-10-30 14:29:30,585 basehttp 2324 10324 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9055
+INFO 2025-10-30 14:29:59,614 basehttp 2324 15972 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9055
+INFO 2025-10-30 14:30:30,575 basehttp 2324 19008 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9088
+INFO 2025-10-30 14:31:00,580 basehttp 2324 4728 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9088
+INFO 2025-10-30 14:31:55,576 basehttp 2324 14544 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9091
+INFO 2025-10-30 14:32:32,459 basehttp 2324 16004 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9079
+INFO 2025-10-30 14:33:00,576 basehttp 2324 12752 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9079
+INFO 2025-10-30 14:33:30,577 basehttp 2324 18896 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9090
+INFO 2025-10-30 14:34:31,553 basehttp 2324 10256 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9092
+INFO 2025-10-30 14:34:33,839 basehttp 2324 10256 "GET /api/user/active-borrows/ HTTP/1.1" 200 7418
+INFO 2025-10-30 14:35:00,581 basehttp 2324 1740 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9092
+INFO 2025-10-30 14:35:30,580 basehttp 2324 2620 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9092
+INFO 2025-10-30 14:36:31,570 basehttp 2324 944 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9093
+INFO 2025-10-30 14:37:32,593 basehttp 2324 10960 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9095
+INFO 2025-10-30 14:38:33,569 basehttp 2324 14788 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9095
+INFO 2025-10-30 14:38:36,036 autoreload 2324 10200 C:\Users\Victus\Documents\Final_Year_Project\infinitum_library\backend\library\views.py changed, reloading.
+INFO 2025-10-30 14:38:38,177 apps 18100 14604 Library signals loaded successfully
+ERROR 2025-10-30 14:38:38,241 apps 18100 14604 Error scheduling background tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 14:38:38,264 apps 18100 14604 Error starting automated tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 14:38:38,287 apps 18100 14604 Error scheduling waitlist task: name 'check_reservation_expiry' is not defined
+INFO 2025-10-30 14:38:38,348 autoreload 18100 14604 Watching for file changes with StatReloader
+INFO 2025-10-30 14:38:42,707 basehttp 18100 12752 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 14:38:42,760 basehttp 18100 12752 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9095
+INFO 2025-10-30 14:38:42,777 basehttp 18100 12752 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 14:38:42,795 basehttp 18100 12752 "GET /api/user/active-borrows/ HTTP/1.1" 200 2
+INFO 2025-10-30 14:38:42,810 basehttp 18100 12752 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 14:38:42,848 basehttp 18100 12752 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9095
+INFO 2025-10-30 14:38:42,861 basehttp 18100 12752 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 14:38:42,874 basehttp 18100 12752 "GET /api/user/active-borrows/ HTTP/1.1" 200 2
+INFO 2025-10-30 14:38:46,345 basehttp 18100 12752 "GET /api/user/transactions/ HTTP/1.1" 200 7418
+INFO 2025-10-30 14:38:46,374 basehttp 18100 19004 "GET /api/user/transactions/ HTTP/1.1" 200 7418
+INFO 2025-10-30 14:39:12,542 basehttp 18100 14976 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9098
+INFO 2025-10-30 14:39:21,887 basehttp 18100 4956 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 14:39:21,946 basehttp 18100 10808 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 14:39:21,965 basehttp 18100 19192 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 14:39:21,967 basehttp 18100 388 "GET /api/user/transactions/ HTTP/1.1" 200 7418
+INFO 2025-10-30 14:39:21,982 basehttp 18100 4956 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9098
+INFO 2025-10-30 14:39:21,993 basehttp 18100 10808 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 14:39:22,032 basehttp 18100 19192 "GET /api/user/transactions/ HTTP/1.1" 200 7418
+INFO 2025-10-30 14:39:22,066 basehttp 18100 388 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9098
+INFO 2025-10-30 14:39:52,581 basehttp 18100 4164 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9098
+INFO 2025-10-30 14:40:22,568 basehttp 18100 10984 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9098
+INFO 2025-10-30 14:40:52,563 basehttp 18100 19008 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9098
+INFO 2025-10-30 14:41:22,555 basehttp 18100 11804 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9098
+INFO 2025-10-30 14:41:52,551 basehttp 18100 18900 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9098
+INFO 2025-10-30 14:42:08,891 basehttp 18100 9692 "GET /api/user/transactions/ HTTP/1.1" 200 7418
+INFO 2025-10-30 14:42:22,574 basehttp 18100 10804 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9099
+INFO 2025-10-30 14:42:52,574 basehttp 18100 8660 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9099
+INFO 2025-10-30 14:43:53,583 basehttp 18100 4040 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9099
+INFO 2025-10-30 14:44:54,558 basehttp 18100 18972 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9099
+INFO 2025-10-30 14:45:40,237 autoreload 18100 14604 C:\Users\Victus\Documents\Final_Year_Project\infinitum_library\backend\library\views.py changed, reloading.
+INFO 2025-10-30 14:45:41,895 apps 17496 19076 Library signals loaded successfully
+ERROR 2025-10-30 14:45:41,952 apps 17496 19076 Error scheduling background tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 14:45:41,973 apps 17496 19076 Error starting automated tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 14:45:41,998 apps 17496 19076 Error scheduling waitlist task: name 'check_reservation_expiry' is not defined
+INFO 2025-10-30 14:45:42,046 autoreload 17496 19076 Watching for file changes with StatReloader
+INFO 2025-10-30 14:45:45,632 basehttp 17496 11136 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 14:45:45,648 basehttp 17496 11136 "GET /api/user/transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 14:45:45,664 basehttp 17496 11136 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 14:45:45,711 basehttp 17496 11136 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9099
+INFO 2025-10-30 14:45:45,725 basehttp 17496 11136 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 14:45:45,740 basehttp 17496 11136 "GET /api/user/transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 14:46:01,209 autoreload 17496 19076 C:\Users\Victus\Documents\Final_Year_Project\infinitum_library\backend\library\views.py changed, reloading.
+INFO 2025-10-30 14:46:02,844 apps 3304 13088 Library signals loaded successfully
+ERROR 2025-10-30 14:46:02,899 apps 3304 13088 Error scheduling background tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 14:46:02,923 apps 3304 13088 Error starting automated tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 14:46:02,947 apps 3304 13088 Error scheduling waitlist task: name 'check_reservation_expiry' is not defined
+INFO 2025-10-30 14:46:02,998 autoreload 3304 13088 Watching for file changes with StatReloader
+INFO 2025-10-30 14:46:06,912 basehttp 3304 2580 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 14:46:06,951 basehttp 3304 17612 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 14:46:06,960 basehttp 3304 18516 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 14:46:06,971 basehttp 3304 17612 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 14:46:06,982 basehttp 3304 2580 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9099
+INFO 2025-10-30 14:46:06,990 basehttp 3304 9660 "GET /api/user/transactions/ HTTP/1.1" 200 7418
+INFO 2025-10-30 14:46:07,025 basehttp 3304 17612 "GET /api/user/transactions/ HTTP/1.1" 200 7418
+INFO 2025-10-30 14:46:07,047 basehttp 3304 2580 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9099
+INFO 2025-10-30 14:46:24,323 basehttp 3304 18492 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 14:46:24,354 basehttp 3304 13452 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 14:46:24,356 basehttp 3304 6892 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 14:46:24,375 basehttp 3304 8624 "GET /api/user/transactions/ HTTP/1.1" 200 7418
+INFO 2025-10-30 14:46:24,391 basehttp 3304 6892 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 14:46:24,395 basehttp 3304 18492 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9099
+INFO 2025-10-30 14:46:24,419 basehttp 3304 13452 "GET /api/user/transactions/ HTTP/1.1" 200 7418
+INFO 2025-10-30 14:46:24,450 basehttp 3304 18492 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9099
+INFO 2025-10-30 14:46:41,928 autoreload 3304 13088 C:\Users\Victus\Documents\Final_Year_Project\infinitum_library\backend\library\views.py changed, reloading.
+INFO 2025-10-30 14:46:43,575 apps 9232 17508 Library signals loaded successfully
+ERROR 2025-10-30 14:46:43,626 apps 9232 17508 Error scheduling background tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 14:46:43,648 apps 9232 17508 Error starting automated tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 14:46:43,666 apps 9232 17508 Error scheduling waitlist task: name 'check_reservation_expiry' is not defined
+INFO 2025-10-30 14:46:43,724 autoreload 9232 17508 Watching for file changes with StatReloader
+INFO 2025-10-30 14:46:47,486 basehttp 9232 17988 "GET /api/user/transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 14:46:47,488 basehttp 9232 17188 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 14:46:47,519 basehttp 9232 696 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9099
+INFO 2025-10-30 14:46:55,909 autoreload 9232 17508 C:\Users\Victus\Documents\Final_Year_Project\infinitum_library\backend\library\views.py changed, reloading.
+INFO 2025-10-30 14:46:57,444 apps 15508 19392 Library signals loaded successfully
+ERROR 2025-10-30 14:46:57,502 apps 15508 19392 Error scheduling background tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 14:46:57,527 apps 15508 19392 Error starting automated tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 14:46:57,547 apps 15508 19392 Error scheduling waitlist task: name 'check_reservation_expiry' is not defined
+INFO 2025-10-30 14:46:57,608 autoreload 15508 19392 Watching for file changes with StatReloader
+INFO 2025-10-30 14:47:01,289 basehttp 15508 18940 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 14:47:01,318 basehttp 15508 11504 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9099
+INFO 2025-10-30 14:47:01,330 basehttp 15508 2340 "GET /api/user/transactions/ HTTP/1.1" 200 7418
+INFO 2025-10-30 14:47:02,914 basehttp 15508 2340 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 14:47:02,937 basehttp 15508 18940 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 14:47:02,961 basehttp 15508 2340 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 14:47:02,971 basehttp 15508 10280 "GET /api/user/transactions/ HTTP/1.1" 200 7418
+INFO 2025-10-30 14:47:02,972 basehttp 15508 18940 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 14:47:03,006 basehttp 15508 11504 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9099
+INFO 2025-10-30 14:47:03,006 basehttp 15508 2340 "GET /api/user/transactions/ HTTP/1.1" 200 7418
+INFO 2025-10-30 14:47:03,050 basehttp 15508 2340 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9099
+INFO 2025-10-30 14:47:33,575 basehttp 15508 16236 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9099
+INFO 2025-10-30 14:48:03,570 basehttp 15508 11756 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9099
+INFO 2025-10-30 14:48:33,550 basehttp 15508 15012 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9099
+INFO 2025-10-30 14:49:03,569 basehttp 15508 18808 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9099
+INFO 2025-10-30 14:49:11,780 autoreload 15508 19392 C:\Users\Victus\Documents\Final_Year_Project\infinitum_library\backend\library\views.py changed, reloading.
+INFO 2025-10-30 14:49:13,478 apps 15076 14136 Library signals loaded successfully
+ERROR 2025-10-30 14:49:13,522 apps 15076 14136 Error scheduling background tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 14:49:13,534 apps 15076 14136 Error starting automated tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 14:49:13,548 apps 15076 14136 Error scheduling waitlist task: name 'check_reservation_expiry' is not defined
+INFO 2025-10-30 14:49:13,590 autoreload 15076 14136 Watching for file changes with StatReloader
+INFO 2025-10-30 14:49:20,144 basehttp 15076 1156 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 14:49:20,181 basehttp 15076 18864 "GET /api/user/transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 14:49:20,182 basehttp 15076 13224 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 14:49:20,185 basehttp 15076 1920 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 14:49:20,205 basehttp 15076 18864 "GET /api/user/transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 14:49:20,211 basehttp 15076 13224 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 14:49:20,219 basehttp 15076 1156 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9099
+INFO 2025-10-30 14:49:20,259 basehttp 15076 13224 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9099
+INFO 2025-10-30 14:49:39,281 basehttp 15076 12600 "GET /api/user/active-borrows/ HTTP/1.1" 200 2
+INFO 2025-10-30 14:49:39,302 basehttp 15076 12600 "GET /api/user/active-borrows/ HTTP/1.1" 200 2
+INFO 2025-10-30 14:49:39,979 basehttp 15076 12600 "GET /api/user/transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 14:49:39,998 basehttp 15076 12600 "GET /api/user/transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 14:49:40,643 basehttp 15076 12600 "GET /api/user/active-borrows/ HTTP/1.1" 200 2
+INFO 2025-10-30 14:49:40,664 basehttp 15076 12600 "GET /api/user/active-borrows/ HTTP/1.1" 200 2
+INFO 2025-10-30 14:49:43,723 basehttp 15076 18952 "GET /api/profile/history/ HTTP/1.1" 200 5319
+INFO 2025-10-30 14:49:43,766 basehttp 15076 18952 "GET /api/profile/history/ HTTP/1.1" 200 5319
+INFO 2025-10-30 14:49:49,924 basehttp 15076 18952 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9099
+INFO 2025-10-30 14:50:20,570 basehttp 15076 13304 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9099
+INFO 2025-10-30 14:50:50,555 basehttp 15076 11128 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9099
+INFO 2025-10-30 14:51:20,559 basehttp 15076 12672 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9099
+INFO 2025-10-30 14:51:50,568 basehttp 15076 19000 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9099
+INFO 2025-10-30 14:52:20,557 basehttp 15076 15584 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9099
+INFO 2025-10-30 14:52:50,550 basehttp 15076 14596 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9099
+INFO 2025-10-30 14:53:49,744 basehttp 15076 17232 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9099
+INFO 2025-10-30 14:53:53,555 basehttp 15076 11648 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 14:53:53,608 basehttp 15076 1860 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 14:53:53,637 basehttp 15076 15624 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 14:53:53,672 basehttp 15076 1860 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 14:53:53,672 basehttp 15076 18748 "GET /api/profile/history/ HTTP/1.1" 200 5319
+INFO 2025-10-30 14:53:53,681 basehttp 15076 11648 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9099
+INFO 2025-10-30 14:53:53,741 basehttp 15076 18748 "GET /api/profile/history/ HTTP/1.1" 200 5319
+INFO 2025-10-30 14:53:53,771 basehttp 15076 1860 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9099
+INFO 2025-10-30 14:54:04,281 basehttp 15076 18728 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 14:54:04,326 basehttp 15076 17988 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 14:54:04,344 basehttp 15076 12064 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 14:54:04,386 basehttp 15076 17988 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 14:54:04,390 basehttp 15076 18728 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9099
+INFO 2025-10-30 14:54:04,397 basehttp 15076 17800 "GET /api/profile/history/ HTTP/1.1" 200 5319
+INFO 2025-10-30 14:54:04,458 basehttp 15076 17800 "GET /api/profile/history/ HTTP/1.1" 200 5319
+INFO 2025-10-30 14:54:04,471 basehttp 15076 17988 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9099
+INFO 2025-10-30 14:54:25,781 basehttp 15076 4648 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 14:54:25,811 basehttp 15076 10584 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 14:54:25,837 basehttp 15076 4648 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 14:54:25,867 basehttp 15076 15060 "GET /api/profile/history/ HTTP/1.1" 200 5319
+INFO 2025-10-30 14:54:25,888 basehttp 15076 10584 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 14:54:25,901 basehttp 15076 14668 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9099
+INFO 2025-10-30 14:54:25,956 basehttp 15076 15060 "GET /api/profile/history/ HTTP/1.1" 200 5319
+INFO 2025-10-30 14:54:25,997 basehttp 15076 10584 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9099
+INFO 2025-10-30 14:54:41,545 basehttp 15076 18768 "POST /api/logout/ HTTP/1.1" 200 31
+INFO 2025-10-30 14:54:47,480 basehttp 15076 18768 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 14:54:47,488 basehttp 15076 18768 "GET /api/csrf/ HTTP/1.1" 200 28
+WARNING 2025-10-30 14:54:47,504 log 15076 18768 Forbidden: /api/profile/history/
+WARNING 2025-10-30 14:54:47,507 basehttp 15076 18768 "GET /api/profile/history/ HTTP/1.1" 403 58
+WARNING 2025-10-30 14:54:47,513 log 15076 18768 Forbidden: /api/profile/history/
+WARNING 2025-10-30 14:54:47,514 basehttp 15076 18768 "GET /api/profile/history/ HTTP/1.1" 403 58
+INFO 2025-10-30 14:55:03,064 basehttp 15076 2168 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 14:55:03,069 basehttp 15076 2168 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 14:55:05,720 audit_utils 15076 2168 Audit log: login - User logged in successfully
+INFO 2025-10-30 14:55:05,732 basehttp 15076 2168 "POST /api/login/ HTTP/1.1" 200 141
+INFO 2025-10-30 14:55:05,789 basehttp 15076 15928 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 14:55:05,815 basehttp 15076 15928 "GET /api/transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 14:55:05,841 basehttp 15076 2168 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9099
+INFO 2025-10-30 14:55:05,841 basehttp 15076 15928 "GET /api/recommendations/insights/ HTTP/1.1" 200 375
+INFO 2025-10-30 14:55:05,858 basehttp 15076 2168 "GET /api/transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 14:55:05,868 basehttp 15076 15928 "GET /api/user/pending-transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 14:55:05,896 basehttp 15076 15928 "GET /api/recommendations/insights/ HTTP/1.1" 200 375
+INFO 2025-10-30 14:55:05,920 basehttp 15076 15928 "GET /api/user/pending-transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 14:55:05,929 basehttp 15076 2168 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9099
+INFO 2025-10-30 14:55:27,630 basehttp 15076 12512 "GET /api/profile/history/ HTTP/1.1" 200 5319
+INFO 2025-10-30 14:55:27,674 basehttp 15076 12512 "GET /api/profile/history/ HTTP/1.1" 200 5319
+INFO 2025-10-30 14:55:30,844 basehttp 15076 12512 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 14:55:30,864 basehttp 15076 12512 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 14:55:30,900 basehttp 15076 12512 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 14:55:30,972 basehttp 15076 18324 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9099
+INFO 2025-10-30 14:55:30,976 basehttp 15076 12512 "GET /api/profile/history/ HTTP/1.1" 200 5319
+INFO 2025-10-30 14:55:31,000 basehttp 15076 18324 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 14:55:31,070 basehttp 15076 18324 "GET /api/profile/history/ HTTP/1.1" 200 5319
+INFO 2025-10-30 14:55:31,079 basehttp 15076 12512 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9099
+INFO 2025-10-30 14:55:40,502 basehttp 15076 9204 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 14:55:40,573 basehttp 15076 9204 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9099
+INFO 2025-10-30 14:55:40,577 basehttp 15076 18680 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 14:55:40,578 basehttp 15076 8304 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 14:55:40,612 basehttp 15076 9204 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 14:55:40,614 basehttp 15076 8320 "GET /api/profile/history/ HTTP/1.1" 200 5319
+INFO 2025-10-30 14:55:40,650 basehttp 15076 18680 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9099
+INFO 2025-10-30 14:55:40,656 basehttp 15076 8320 "GET /api/profile/history/ HTTP/1.1" 200 5319
+INFO 2025-10-30 14:55:44,648 basehttp 15076 2184 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 14:55:44,713 basehttp 15076 15032 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 14:55:44,715 basehttp 15076 11272 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 14:55:44,751 basehttp 15076 1560 "GET /api/profile/history/ HTTP/1.1" 200 5319
+INFO 2025-10-30 14:55:44,751 basehttp 15076 2184 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9099
+INFO 2025-10-30 14:55:44,756 basehttp 15076 15032 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 14:55:44,804 basehttp 15076 1560 "GET /api/profile/history/ HTTP/1.1" 200 5319
+INFO 2025-10-30 14:55:44,832 basehttp 15076 2184 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9099
+INFO 2025-10-30 14:55:52,459 basehttp 15076 3744 "GET /api/notifications/?page=1&page_size=20&status=all&date_range=all HTTP/1.1" 200 9099
+INFO 2025-10-30 14:55:52,545 basehttp 15076 3744 "GET /api/notifications/?page=1&page_size=20&status=all&date_range=all HTTP/1.1" 200 9099
+INFO 2025-10-30 14:56:09,638 basehttp 15076 9516 "GET /api/profile/history/ HTTP/1.1" 200 5319
+INFO 2025-10-30 14:56:09,695 basehttp 15076 9516 "GET /api/profile/history/ HTTP/1.1" 200 5319
+INFO 2025-10-30 14:56:13,760 basehttp 15076 6596 "POST /api/notifications/read-all/ HTTP/1.1" 200 44
+INFO 2025-10-30 14:56:14,430 basehttp 15076 6596 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9092
+INFO 2025-10-30 14:56:45,574 basehttp 15076 18812 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9079
+INFO 2025-10-30 14:57:15,557 basehttp 15076 13108 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9079
+INFO 2025-10-30 14:57:36,647 basehttp 15076 3656 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 14:57:36,699 basehttp 15076 13016 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 14:57:36,712 basehttp 15076 10124 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 14:57:36,716 basehttp 15076 3656 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9090
+INFO 2025-10-30 14:57:36,730 basehttp 15076 17956 "GET /api/profile/history/ HTTP/1.1" 200 5319
+INFO 2025-10-30 14:57:36,730 basehttp 15076 13016 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 14:57:36,771 basehttp 15076 3656 "GET /api/profile/history/ HTTP/1.1" 200 5319
+INFO 2025-10-30 14:57:36,778 basehttp 15076 10124 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9090
+INFO 2025-10-30 14:58:07,560 basehttp 15076 18236 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9090
+INFO 2025-10-30 14:58:25,193 apps 18700 18060 Library signals loaded successfully
+ERROR 2025-10-30 14:58:25,243 apps 18700 18060 Error scheduling background tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 14:58:25,261 apps 18700 18060 Error starting automated tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 14:58:25,275 apps 18700 18060 Error scheduling waitlist task: name 'check_reservation_expiry' is not defined
+INFO 2025-10-30 14:58:26,228 apps 12616 4140 Library signals loaded successfully
+ERROR 2025-10-30 14:58:26,267 apps 12616 4140 Error scheduling background tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 14:58:26,281 apps 12616 4140 Error starting automated tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 14:58:26,293 apps 12616 4140 Error scheduling waitlist task: name 'check_reservation_expiry' is not defined
+INFO 2025-10-30 14:58:26,339 autoreload 12616 4140 Watching for file changes with StatReloader
+INFO 2025-10-30 14:58:36,745 basehttp 12616 13472 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9091
+INFO 2025-10-30 14:58:38,468 basehttp 12616 13472 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 14:58:38,482 basehttp 12616 13472 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 14:58:38,509 basehttp 12616 18672 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 14:58:38,554 basehttp 12616 13472 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9091
+INFO 2025-10-30 14:58:38,554 basehttp 12616 18672 "GET /api/profile/history/ HTTP/1.1" 200 5319
+INFO 2025-10-30 14:58:38,570 basehttp 12616 13472 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 14:58:38,611 basehttp 12616 13472 "GET /api/profile/history/ HTTP/1.1" 200 5319
+INFO 2025-10-30 14:58:38,617 basehttp 12616 18672 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9091
+INFO 2025-10-30 14:59:09,565 basehttp 12616 18392 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9091
+INFO 2025-10-30 14:59:39,567 basehttp 12616 18372 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9091
+INFO 2025-10-30 15:00:09,565 basehttp 12616 2312 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9091
+INFO 2025-10-30 15:00:39,562 basehttp 12616 5384 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9091
+INFO 2025-10-30 15:01:01,546 basehttp 12616 5740 "GET /api/profile/history/ HTTP/1.1" 200 5319
+INFO 2025-10-30 15:01:16,532 basehttp 12616 18332 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 15:01:16,561 basehttp 12616 18332 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 15:01:16,583 basehttp 12616 15984 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 15:01:16,630 basehttp 12616 18332 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 15:01:16,630 basehttp 12616 6368 "GET /api/profile/history/ HTTP/1.1" 200 5319
+INFO 2025-10-30 15:01:16,645 basehttp 12616 10236 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9091
+INFO 2025-10-30 15:01:16,704 basehttp 12616 6368 "GET /api/profile/history/ HTTP/1.1" 200 5319
+INFO 2025-10-30 15:01:16,732 basehttp 12616 10236 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9091
+INFO 2025-10-30 15:01:33,565 basehttp 12616 18632 "GET /api/profile/history/ HTTP/1.1" 200 5319
+INFO 2025-10-30 15:01:47,551 basehttp 12616 18996 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9091
+INFO 2025-10-30 15:01:58,915 basehttp 12616 18628 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 15:01:58,978 basehttp 12616 14564 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 15:01:58,990 basehttp 12616 12992 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 15:01:59,000 basehttp 12616 18628 "GET /api/profile/history/ HTTP/1.1" 200 5319
+INFO 2025-10-30 15:01:59,038 basehttp 12616 14564 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 15:01:59,060 basehttp 12616 13088 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9091
+INFO 2025-10-30 15:01:59,077 basehttp 12616 12992 "GET /api/profile/history/ HTTP/1.1" 200 5319
+INFO 2025-10-30 15:01:59,115 basehttp 12616 13088 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9091
+INFO 2025-10-30 15:02:29,569 basehttp 12616 18152 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9091
+INFO 2025-10-30 15:02:59,563 basehttp 12616 9660 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9091
+INFO 2025-10-30 15:03:17,391 basehttp 12616 9840 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 15:03:17,429 basehttp 12616 756 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 15:03:17,449 basehttp 12616 13248 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 15:03:17,468 basehttp 12616 756 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 15:03:17,468 basehttp 12616 9840 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9091
+INFO 2025-10-30 15:03:17,469 basehttp 12616 16716 "GET /api/profile/history/ HTTP/1.1" 200 5319
+INFO 2025-10-30 15:03:17,515 basehttp 12616 16716 "GET /api/profile/history/ HTTP/1.1" 200 5319
+INFO 2025-10-30 15:03:17,530 basehttp 12616 756 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9091
+INFO 2025-10-30 15:03:47,568 basehttp 12616 14400 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9065
+INFO 2025-10-30 15:04:17,566 basehttp 12616 17544 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9065
+INFO 2025-10-30 15:04:47,575 basehttp 12616 19272 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9087
+INFO 2025-10-30 15:05:15,802 autoreload 12616 4140 C:\Users\Victus\Documents\Final_Year_Project\infinitum_library\backend\library\views.py changed, reloading.
+INFO 2025-10-30 15:05:17,576 apps 9728 18376 Library signals loaded successfully
+ERROR 2025-10-30 15:05:17,627 apps 9728 18376 Error scheduling background tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 15:05:17,642 apps 9728 18376 Error starting automated tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 15:05:17,657 apps 9728 18376 Error scheduling waitlist task: name 'check_reservation_expiry' is not defined
+INFO 2025-10-30 15:05:17,716 autoreload 9728 18376 Watching for file changes with StatReloader
+INFO 2025-10-30 15:05:47,622 basehttp 9728 14096 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9089
+INFO 2025-10-30 15:05:59,005 autoreload 9728 18376 C:\Users\Victus\Documents\Final_Year_Project\infinitum_library\backend\library\views.py changed, reloading.
+INFO 2025-10-30 15:06:00,471 apps 10940 7744 Library signals loaded successfully
+ERROR 2025-10-30 15:06:00,508 apps 10940 7744 Error scheduling background tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 15:06:00,521 apps 10940 7744 Error starting automated tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 15:06:00,534 apps 10940 7744 Error scheduling waitlist task: name 'check_reservation_expiry' is not defined
+INFO 2025-10-30 15:06:00,582 autoreload 10940 7744 Watching for file changes with StatReloader
+INFO 2025-10-30 15:06:17,575 basehttp 10940 18156 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9089
+INFO 2025-10-30 15:06:47,561 basehttp 10940 19256 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9090
+INFO 2025-10-30 15:06:56,268 basehttp 10940 16856 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 15:06:56,316 basehttp 10940 10760 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 15:06:56,324 basehttp 10940 19028 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 15:06:56,350 basehttp 10940 16856 "GET /api/profile/history/ HTTP/1.1" 200 5364
+INFO 2025-10-30 15:06:56,361 basehttp 10940 10760 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 15:06:56,399 basehttp 10940 4900 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9090
+INFO 2025-10-30 15:06:56,414 basehttp 10940 19028 "GET /api/profile/history/ HTTP/1.1" 200 5364
+INFO 2025-10-30 15:06:56,466 basehttp 10940 10760 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9090
+INFO 2025-10-30 15:07:26,567 basehttp 10940 8392 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9090
+INFO 2025-10-30 15:07:35,201 basehttp 10940 9728 "GET /api/user/transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 15:07:35,229 basehttp 10940 9728 "GET /api/user/transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 15:07:35,450 basehttp 10940 15056 "GET /api/books/ HTTP/1.1" 200 39363
+INFO 2025-10-30 15:07:35,699 basehttp 10940 9728 "GET /api/books/ HTTP/1.1" 200 39363
+INFO 2025-10-30 15:07:36,182 basehttp 10940 18660 "GET /api/books/ HTTP/1.1" 200 39366
+INFO 2025-10-30 15:07:36,335 basehttp 10940 18660 "GET /api/books/ HTTP/1.1" 200 39366
+INFO 2025-10-30 15:07:37,172 basehttp 10940 9728 "GET /api/user/transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 15:07:37,176 basehttp 10940 15056 "GET /api/books/2/ HTTP/1.1" 200 789
+INFO 2025-10-30 15:07:37,183 basehttp 10940 17872 "GET /api/books/2/get_my_qr/ HTTP/1.1" 200 53
+INFO 2025-10-30 15:07:37,204 basehttp 10940 9728 "GET /api/user/transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 15:07:37,204 basehttp 10940 17872 "GET /api/books/2/get_my_qr/ HTTP/1.1" 200 53
+INFO 2025-10-30 15:07:37,210 basehttp 10940 15056 "GET /api/books/2/ HTTP/1.1" 200 789
+INFO 2025-10-30 15:07:37,283 basehttp 10940 18660 "GET /api/books/2/reviews/ HTTP/1.1" 200 422
+INFO 2025-10-30 15:07:37,300 basehttp 10940 18660 "GET /api/books/2/reviews/ HTTP/1.1" 200 422
+INFO 2025-10-30 15:07:41,520 basehttp 10940 18660 "OPTIONS /api/books/2/borrow/ HTTP/1.1" 200 0
+INFO 2025-10-30 15:07:41,534 basehttp 10940 15056 "POST /api/books/2/borrow/ HTTP/1.1" 200 262
+WARNING 2025-10-30 15:07:43,175 log 10940 1792 Bad Request: /api/books/2/borrow/
+WARNING 2025-10-30 15:07:43,177 basehttp 10940 1792 "POST /api/books/2/borrow/ HTTP/1.1" 400 99
+INFO 2025-10-30 15:07:54,457 basehttp 10940 5864 "GET /api/user/transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 15:07:54,475 basehttp 10940 5864 "GET /api/user/transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 15:07:55,332 basehttp 10940 5864 "GET /api/user/active-borrows/ HTTP/1.1" 200 2
+INFO 2025-10-30 15:07:55,354 basehttp 10940 5864 "GET /api/user/active-borrows/ HTTP/1.1" 200 2
+INFO 2025-10-30 15:07:56,036 basehttp 10940 5864 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9090
+INFO 2025-10-30 15:07:58,707 basehttp 10940 4532 "GET /api/user/transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 15:07:58,742 basehttp 10940 4532 "GET /api/user/transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 15:07:58,977 basehttp 10940 5864 "GET /api/books/ HTTP/1.1" 200 39363
+INFO 2025-10-30 15:07:59,217 basehttp 10940 5864 "GET /api/books/ HTTP/1.1" 200 39363
+INFO 2025-10-30 15:07:59,685 basehttp 10940 18756 "GET /api/books/ HTTP/1.1" 200 39366
+INFO 2025-10-30 15:07:59,861 basehttp 10940 18756 "GET /api/books/ HTTP/1.1" 200 39366
+INFO 2025-10-30 15:08:03,072 basehttp 10940 2392 "GET /api/user/transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 15:08:03,074 basehttp 10940 13248 "GET /api/books/2/ HTTP/1.1" 200 789
+INFO 2025-10-30 15:08:03,086 basehttp 10940 756 "GET /api/books/2/get_my_qr/ HTTP/1.1" 200 53
+INFO 2025-10-30 15:08:03,098 basehttp 10940 2392 "GET /api/user/transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 15:08:03,106 basehttp 10940 13248 "GET /api/books/2/ HTTP/1.1" 200 789
+INFO 2025-10-30 15:08:03,126 basehttp 10940 756 "GET /api/books/2/get_my_qr/ HTTP/1.1" 200 53
+INFO 2025-10-30 15:08:03,408 basehttp 10940 7928 "GET /api/books/2/reviews/ HTTP/1.1" 200 422
+INFO 2025-10-30 15:08:03,439 basehttp 10940 7928 "GET /api/books/2/reviews/ HTTP/1.1" 200 422
+INFO 2025-10-30 15:08:05,564 basehttp 10940 756 "POST /api/books/2/borrow/ HTTP/1.1" 200 262
+WARNING 2025-10-30 15:08:08,677 log 10940 3080 Bad Request: /api/books/2/borrow/
+WARNING 2025-10-30 15:08:08,679 basehttp 10940 3080 "POST /api/books/2/borrow/ HTTP/1.1" 400 99
+INFO 2025-10-30 15:08:26,573 basehttp 10940 2716 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9090
+INFO 2025-10-30 15:08:56,576 basehttp 10940 13204 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9090
+INFO 2025-10-30 15:09:07,695 basehttp 10940 17680 "GET /api/user/transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 15:09:07,716 basehttp 10940 17680 "GET /api/user/transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 15:09:09,768 basehttp 10940 17680 "GET /api/profile/history/ HTTP/1.1" 200 5364
+INFO 2025-10-30 15:09:09,823 basehttp 10940 17680 "GET /api/profile/history/ HTTP/1.1" 200 5364
+INFO 2025-10-30 15:09:26,570 basehttp 10940 12432 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9090
+INFO 2025-10-30 15:09:56,576 basehttp 10940 1360 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9090
+INFO 2025-10-30 15:10:26,563 basehttp 10940 4532 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9077
+INFO 2025-10-30 15:11:22,061 basehttp 10940 18904 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9088
+INFO 2025-10-30 15:11:26,019 basehttp 10940 18904 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9088
+INFO 2025-10-30 15:11:28,774 basehttp 10940 18956 "GET /api/transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 15:11:28,789 basehttp 10940 7652 "GET /api/recommendations/insights/ HTTP/1.1" 200 375
+INFO 2025-10-30 15:11:28,806 basehttp 10940 18956 "GET /api/transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 15:11:28,818 basehttp 10940 7652 "GET /api/recommendations/insights/ HTTP/1.1" 200 375
+INFO 2025-10-30 15:11:28,829 basehttp 10940 18956 "GET /api/user/pending-transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 15:11:28,846 basehttp 10940 18956 "GET /api/user/pending-transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 15:11:31,081 basehttp 10940 18956 "POST /api/logout/ HTTP/1.1" 200 31
+INFO 2025-10-30 18:58:31,288 apps 3936 12112 Library signals loaded successfully
+ERROR 2025-10-30 18:58:31,550 apps 3936 12112 Error scheduling background tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 18:58:31,567 apps 3936 12112 Error starting automated tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 18:58:31,595 apps 3936 12112 Error scheduling waitlist task: name 'check_reservation_expiry' is not defined
+INFO 2025-10-30 18:58:32,719 apps 8480 17204 Library signals loaded successfully
+ERROR 2025-10-30 18:58:32,790 apps 8480 17204 Error scheduling background tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 18:58:32,813 apps 8480 17204 Error starting automated tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 18:58:32,839 apps 8480 17204 Error scheduling waitlist task: name 'check_reservation_expiry' is not defined
+INFO 2025-10-30 18:58:32,887 autoreload 8480 17204 Watching for file changes with StatReloader
+INFO 2025-10-30 18:58:58,236 basehttp 8480 16804 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 18:58:58,240 basehttp 8480 16804 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 19:00:39,720 apps 13064 14708 Library signals loaded successfully
+ERROR 2025-10-30 19:00:39,783 apps 13064 14708 Error scheduling background tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 19:00:39,797 apps 13064 14708 Error starting automated tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 19:00:39,811 apps 13064 14708 Error scheduling waitlist task: name 'check_reservation_expiry' is not defined
+INFO 2025-10-30 19:04:31,662 apps 5300 7792 Library signals loaded successfully
+ERROR 2025-10-30 19:04:31,732 apps 5300 7792 Error scheduling background tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 19:04:31,749 apps 5300 7792 Error starting automated tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 19:04:31,762 apps 5300 7792 Error scheduling waitlist task: name 'check_reservation_expiry' is not defined
+INFO 2025-10-30 19:07:26,437 basehttp 8480 6496 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 19:07:26,441 basehttp 8480 6496 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 19:07:28,214 basehttp 8480 18816 "OPTIONS /api/login/ HTTP/1.1" 200 0
+INFO 2025-10-30 19:07:29,694 audit_utils 8480 15716 Audit log: login - User logged in successfully
+INFO 2025-10-30 19:07:29,707 basehttp 8480 15716 "POST /api/login/ HTTP/1.1" 200 141
+INFO 2025-10-30 19:07:29,774 basehttp 8480 15716 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 19:07:29,860 basehttp 8480 15716 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9117
+INFO 2025-10-30 19:07:29,887 basehttp 8480 15716 "GET /api/recommendations/insights/ HTTP/1.1" 200 375
+INFO 2025-10-30 19:07:29,914 basehttp 8480 15716 "GET /api/transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 19:07:29,985 basehttp 8480 15716 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9117
+INFO 2025-10-30 19:07:30,010 basehttp 8480 15716 "GET /api/recommendations/insights/ HTTP/1.1" 200 375
+INFO 2025-10-30 19:07:30,033 basehttp 8480 15716 "GET /api/transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 19:07:30,056 basehttp 8480 15716 "GET /api/user/pending-transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 19:07:30,079 basehttp 8480 15716 "GET /api/user/pending-transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 19:07:33,508 basehttp 8480 15496 "GET /api/user/transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 19:07:33,537 basehttp 8480 15496 "GET /api/user/transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 19:07:33,764 basehttp 8480 15716 "GET /api/books/ HTTP/1.1" 200 39363
+INFO 2025-10-30 19:07:34,024 basehttp 8480 15716 "GET /api/books/ HTTP/1.1" 200 39363
+INFO 2025-10-30 19:07:34,214 basehttp 8480 18816 "GET /api/books/ HTTP/1.1" 200 39366
+INFO 2025-10-30 19:07:34,397 basehttp 8480 18816 "GET /api/books/ HTTP/1.1" 200 39366
+INFO 2025-10-30 19:07:35,076 basehttp 8480 15716 "GET /api/user/transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 19:07:35,085 basehttp 8480 15496 "GET /api/books/2/ HTTP/1.1" 200 789
+INFO 2025-10-30 19:07:35,085 basehttp 8480 2968 "GET /api/books/2/get_my_qr/ HTTP/1.1" 200 53
+INFO 2025-10-30 19:07:35,105 basehttp 8480 15716 "GET /api/user/transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 19:07:35,116 basehttp 8480 2968 "GET /api/books/2/get_my_qr/ HTTP/1.1" 200 53
+INFO 2025-10-30 19:07:35,116 basehttp 8480 15496 "GET /api/books/2/ HTTP/1.1" 200 789
+INFO 2025-10-30 19:07:35,182 basehttp 8480 18816 "GET /api/books/2/reviews/ HTTP/1.1" 200 422
+INFO 2025-10-30 19:07:35,215 basehttp 8480 18816 "GET /api/books/2/reviews/ HTTP/1.1" 200 422
+INFO 2025-10-30 19:07:36,519 basehttp 8480 18816 "OPTIONS /api/books/2/borrow/ HTTP/1.1" 200 0
+INFO 2025-10-30 19:07:36,535 basehttp 8480 15496 "POST /api/books/2/borrow/ HTTP/1.1" 200 262
+WARNING 2025-10-30 19:07:37,971 log 8480 17716 Bad Request: /api/books/2/borrow/
+WARNING 2025-10-30 19:07:37,973 basehttp 8480 17716 "POST /api/books/2/borrow/ HTTP/1.1" 400 105
+INFO 2025-10-30 19:07:49,180 basehttp 8480 15456 "GET /api/user/transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 19:07:49,200 basehttp 8480 15456 "GET /api/user/transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 19:07:49,806 basehttp 8480 15456 "GET /api/user/active-borrows/ HTTP/1.1" 200 2
+INFO 2025-10-30 19:07:49,828 basehttp 8480 15456 "GET /api/user/active-borrows/ HTTP/1.1" 200 2
+INFO 2025-10-30 19:07:50,983 basehttp 8480 15456 "GET /api/user/transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 19:07:51,005 basehttp 8480 15456 "GET /api/user/transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 19:08:00,125 basehttp 8480 12184 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9117
+INFO 2025-10-30 19:08:30,379 basehttp 8480 3880 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9117
+INFO 2025-10-30 19:09:00,380 basehttp 8480 19148 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9117
+INFO 2025-10-30 19:09:30,382 basehttp 8480 13656 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9117
+INFO 2025-10-30 19:10:00,402 basehttp 8480 18776 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9117
+INFO 2025-10-30 19:10:03,425 autoreload 8480 17204 C:\Users\Victus\Documents\Final_Year_Project\infinitum_library\backend\library\views.py changed, reloading.
+INFO 2025-10-30 19:10:05,464 apps 18820 9960 Library signals loaded successfully
+ERROR 2025-10-30 19:10:05,526 apps 18820 9960 Error scheduling background tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 19:10:05,540 apps 18820 9960 Error starting automated tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 19:10:05,558 apps 18820 9960 Error scheduling waitlist task: name 'check_reservation_expiry' is not defined
+INFO 2025-10-30 19:10:05,616 autoreload 18820 9960 Watching for file changes with StatReloader
+INFO 2025-10-30 19:10:07,521 autoreload 18820 9960 C:\Users\Victus\Documents\Final_Year_Project\infinitum_library\backend\library\views.py changed, reloading.
+INFO 2025-10-30 19:10:08,657 apps 15112 14896 Library signals loaded successfully
+ERROR 2025-10-30 19:10:08,708 apps 15112 14896 Error scheduling background tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 19:10:08,722 apps 15112 14896 Error starting automated tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 19:10:08,735 apps 15112 14896 Error scheduling waitlist task: name 'check_reservation_expiry' is not defined
+INFO 2025-10-30 19:10:08,781 autoreload 15112 14896 Watching for file changes with StatReloader
+INFO 2025-10-30 19:10:11,648 autoreload 15112 14896 C:\Users\Victus\Documents\Final_Year_Project\infinitum_library\backend\library\views.py changed, reloading.
+INFO 2025-10-30 19:10:12,766 apps 16588 14776 Library signals loaded successfully
+ERROR 2025-10-30 19:10:12,821 apps 16588 14776 Error scheduling background tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 19:10:12,835 apps 16588 14776 Error starting automated tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 19:10:12,849 apps 16588 14776 Error scheduling waitlist task: name 'check_reservation_expiry' is not defined
+INFO 2025-10-30 19:10:12,900 autoreload 16588 14776 Watching for file changes with StatReloader
+INFO 2025-10-30 19:10:30,487 basehttp 16588 17000 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9104
+INFO 2025-10-30 19:10:32,851 autoreload 16588 14776 C:\Users\Victus\Documents\Final_Year_Project\infinitum_library\backend\library\views.py changed, reloading.
+INFO 2025-10-30 19:10:34,329 apps 11040 3556 Library signals loaded successfully
+ERROR 2025-10-30 19:10:34,379 apps 11040 3556 Error scheduling background tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 19:10:34,393 apps 11040 3556 Error starting automated tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 19:10:34,406 apps 11040 3556 Error scheduling waitlist task: name 'check_reservation_expiry' is not defined
+INFO 2025-10-30 19:10:34,455 autoreload 11040 3556 Watching for file changes with StatReloader
+INFO 2025-10-30 19:10:41,534 autoreload 11040 3556 C:\Users\Victus\Documents\Final_Year_Project\infinitum_library\backend\library\views.py changed, reloading.
+INFO 2025-10-30 19:10:43,202 apps 1700 18152 Library signals loaded successfully
+ERROR 2025-10-30 19:10:43,254 apps 1700 18152 Error scheduling background tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 19:10:43,266 apps 1700 18152 Error starting automated tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 19:10:43,280 apps 1700 18152 Error scheduling waitlist task: name 'check_reservation_expiry' is not defined
+INFO 2025-10-30 19:10:43,335 autoreload 1700 18152 Watching for file changes with StatReloader
+INFO 2025-10-30 19:11:00,391 basehttp 1700 19180 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9104
+INFO 2025-10-30 19:11:53,367 basehttp 1700 10632 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9115
+INFO 2025-10-30 19:12:31,306 autoreload 1700 18152 C:\Users\Victus\Documents\Final_Year_Project\infinitum_library\backend\library\views.py changed, reloading.
+INFO 2025-10-30 19:12:33,079 apps 9932 12400 Library signals loaded successfully
+ERROR 2025-10-30 19:12:33,123 apps 9932 12400 Error scheduling background tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 19:12:33,138 apps 9932 12400 Error starting automated tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 19:12:33,151 apps 9932 12400 Error scheduling waitlist task: name 'check_reservation_expiry' is not defined
+INFO 2025-10-30 19:12:33,202 autoreload 9932 12400 Watching for file changes with StatReloader
+INFO 2025-10-30 19:12:53,387 basehttp 9932 384 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9103
+INFO 2025-10-30 19:12:56,372 autoreload 9932 12400 C:\Users\Victus\Documents\Final_Year_Project\infinitum_library\backend\library\views.py changed, reloading.
+INFO 2025-10-30 19:12:58,026 apps 2824 13140 Library signals loaded successfully
+ERROR 2025-10-30 19:12:58,076 apps 2824 13140 Error scheduling background tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 19:12:58,089 apps 2824 13140 Error starting automated tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 19:12:58,102 apps 2824 13140 Error scheduling waitlist task: name 'check_reservation_expiry' is not defined
+INFO 2025-10-30 19:12:58,155 autoreload 2824 13140 Watching for file changes with StatReloader
+INFO 2025-10-30 19:13:10,837 autoreload 2824 13140 C:\Users\Victus\Documents\Final_Year_Project\infinitum_library\backend\library\views.py changed, reloading.
+INFO 2025-10-30 19:13:12,267 apps 19452 6372 Library signals loaded successfully
+ERROR 2025-10-30 19:13:12,327 apps 19452 6372 Error scheduling background tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 19:13:12,341 apps 19452 6372 Error starting automated tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 19:13:12,355 apps 19452 6372 Error scheduling waitlist task: name 'check_reservation_expiry' is not defined
+INFO 2025-10-30 19:13:12,413 autoreload 19452 6372 Watching for file changes with StatReloader
+INFO 2025-10-30 19:13:25,864 autoreload 19452 6372 C:\Users\Victus\Documents\Final_Year_Project\infinitum_library\backend\library\views.py changed, reloading.
+INFO 2025-10-30 19:13:27,383 apps 18776 10940 Library signals loaded successfully
+ERROR 2025-10-30 19:13:27,432 apps 18776 10940 Error scheduling background tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 19:13:27,446 apps 18776 10940 Error starting automated tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 19:13:27,459 apps 18776 10940 Error scheduling waitlist task: name 'check_reservation_expiry' is not defined
+INFO 2025-10-30 19:13:27,509 autoreload 18776 10940 Watching for file changes with StatReloader
+INFO 2025-10-30 19:13:36,578 basehttp 18776 13964 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9103
+INFO 2025-10-30 19:13:40,929 basehttp 18776 5328 "GET /api/user/transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 19:13:40,955 basehttp 18776 5328 "GET /api/user/transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 19:13:41,162 basehttp 18776 18744 "GET /api/books/ HTTP/1.1" 200 39363
+INFO 2025-10-30 19:13:41,448 basehttp 18776 18744 "GET /api/books/ HTTP/1.1" 200 39363
+INFO 2025-10-30 19:13:41,940 basehttp 18776 10628 "GET /api/books/ HTTP/1.1" 200 39366
+INFO 2025-10-30 19:13:42,137 basehttp 18776 10628 "GET /api/books/ HTTP/1.1" 200 39366
+INFO 2025-10-30 19:13:42,600 basehttp 18776 9696 "GET /api/user/transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 19:13:42,608 basehttp 18776 14932 "GET /api/books/2/ HTTP/1.1" 200 789
+INFO 2025-10-30 19:13:42,613 basehttp 18776 4664 "GET /api/books/2/get_my_qr/ HTTP/1.1" 200 53
+INFO 2025-10-30 19:13:42,630 basehttp 18776 9696 "GET /api/user/transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 19:13:42,649 basehttp 18776 14932 "GET /api/books/2/ HTTP/1.1" 200 789
+INFO 2025-10-30 19:13:42,659 basehttp 18776 4664 "GET /api/books/2/get_my_qr/ HTTP/1.1" 200 53
+INFO 2025-10-30 19:13:42,979 basehttp 18776 8912 "GET /api/books/2/reviews/ HTTP/1.1" 200 422
+INFO 2025-10-30 19:13:42,997 basehttp 18776 8912 "GET /api/books/2/reviews/ HTTP/1.1" 200 422
+INFO 2025-10-30 19:13:44,836 basehttp 18776 4664 "POST /api/books/2/borrow/ HTTP/1.1" 200 262
+INFO 2025-10-30 19:13:46,110 notification_utils 18776 4664 Notification created for lighteningblade.256: reservation_confirmation
+INFO 2025-10-30 19:13:46,117 basehttp 18776 4664 "POST /api/books/2/borrow/ HTTP/1.1" 201 1373
+INFO 2025-10-30 19:13:48,603 basehttp 18776 10532 "GET /api/books/2/ HTTP/1.1" 200 789
+INFO 2025-10-30 19:13:58,142 notification_utils 18776 132 Notification created for lighteningblade.256: reservation_ready
+INFO 2025-10-30 19:13:58,144 basehttp 18776 132 "POST /api/books/2/generate_borrow_qr/ HTTP/1.1" 200 744
+INFO 2025-10-30 19:13:59,821 basehttp 18776 132 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9393
+INFO 2025-10-30 19:14:04,115 basehttp 18776 132 "POST /api/logout/ HTTP/1.1" 200 31
+INFO 2025-10-30 19:14:10,846 audit_utils 18776 1560 Audit log: login - User logged in successfully
+INFO 2025-10-30 19:14:10,859 basehttp 18776 1560 "POST /api/login/ HTTP/1.1" 200 129
+INFO 2025-10-30 19:14:10,925 basehttp 18776 8628 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 19:14:10,931 basehttp 18776 1560 "GET /api/notifications/?limit=5 HTTP/1.1" 200 4249
+INFO 2025-10-30 19:14:10,960 basehttp 18776 8628 "GET /api/transactions/ HTTP/1.1" 200 1788
+INFO 2025-10-30 19:14:10,966 basehttp 18776 1560 "GET /api/recommendations/insights/ HTTP/1.1" 200 243
+INFO 2025-10-30 19:14:11,004 basehttp 18776 8628 "GET /api/notifications/?limit=5 HTTP/1.1" 200 4249
+INFO 2025-10-30 19:14:11,004 basehttp 18776 1560 "GET /api/transactions/ HTTP/1.1" 200 1788
+INFO 2025-10-30 19:14:11,029 basehttp 18776 8628 "GET /api/user/pending-transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 19:14:11,029 basehttp 18776 1560 "GET /api/recommendations/insights/ HTTP/1.1" 200 243
+INFO 2025-10-30 19:14:11,049 basehttp 18776 8628 "GET /api/user/pending-transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 19:14:22,923 basehttp 18776 18364 "POST /api/librarian/decode-qr-image/ HTTP/1.1" 200 104
+INFO 2025-10-30 19:14:23,232 basehttp 18776 17948 "OPTIONS /api/librarian/validate-qr/ HTTP/1.1" 200 0
+INFO 2025-10-30 19:14:23,249 basehttp 18776 18364 "POST /api/librarian/validate-qr/ HTTP/1.1" 200 269
+INFO 2025-10-30 19:14:24,704 basehttp 18776 17948 "OPTIONS /api/librarian/issue-book/ HTTP/1.1" 200 0
+INFO 2025-10-30 19:14:24,748 notification_utils 18776 18364 Notification created for lighteningblade.256: system
+INFO 2025-10-30 19:14:24,756 notification_utils 18776 18364 Notification created for lighteningblade.256: due_reminder
+INFO 2025-10-30 19:14:24,758 basehttp 18776 18364 "POST /api/librarian/issue-book/ HTTP/1.1" 200 92
+INFO 2025-10-30 19:14:31,602 basehttp 18776 13044 "GET /api/librarian/issued-books/?filter=today HTTP/1.1" 200 238
+INFO 2025-10-30 19:14:31,610 basehttp 18776 9516 "GET /api/librarian/issued-books/?filter=all HTTP/1.1" 200 1187
+INFO 2025-10-30 19:14:31,634 basehttp 18776 13044 "GET /api/librarian/issued-books/?filter=today HTTP/1.1" 200 238
+INFO 2025-10-30 19:14:31,666 basehttp 18776 13044 "GET /api/librarian/issued-books/?filter=today HTTP/1.1" 200 238
+INFO 2025-10-30 19:14:31,693 basehttp 18776 13044 "GET /api/librarian/issued-books/?filter=today HTTP/1.1" 200 238
+INFO 2025-10-30 19:14:35,326 basehttp 18776 11036 "POST /api/logout/ HTTP/1.1" 200 31
+INFO 2025-10-30 19:14:49,245 audit_utils 18776 16192 Audit log: login - User logged in successfully
+INFO 2025-10-30 19:14:49,259 basehttp 18776 16192 "POST /api/login/ HTTP/1.1" 200 141
+INFO 2025-10-30 19:14:49,320 basehttp 18776 8324 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 19:14:49,364 basehttp 18776 8324 "GET /api/transactions/ HTTP/1.1" 200 1797
+INFO 2025-10-30 19:14:49,398 basehttp 18776 8324 "GET /api/recommendations/insights/ HTTP/1.1" 200 375
+INFO 2025-10-30 19:14:49,410 basehttp 18776 16192 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9559
+INFO 2025-10-30 19:14:49,430 basehttp 18776 8324 "GET /api/transactions/ HTTP/1.1" 200 1797
+INFO 2025-10-30 19:14:49,439 basehttp 18776 16192 "GET /api/user/pending-transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 19:14:49,457 basehttp 18776 8324 "GET /api/recommendations/insights/ HTTP/1.1" 200 375
+INFO 2025-10-30 19:14:49,484 basehttp 18776 8324 "GET /api/user/pending-transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 19:14:49,533 basehttp 18776 16192 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9559
+INFO 2025-10-30 19:15:02,827 basehttp 18776 19428 "POST /api/notifications/98/read/ HTTP/1.1" 200 41
+INFO 2025-10-30 19:15:02,896 basehttp 18776 19428 "GET /api/user/active-borrows/ HTTP/1.1" 200 1797
+INFO 2025-10-30 19:15:02,926 basehttp 18776 19428 "GET /api/user/active-borrows/ HTTP/1.1" 200 1797
+INFO 2025-10-30 19:15:06,668 basehttp 18776 19428 "GET /api/user/transactions/ HTTP/1.1" 200 1797
+INFO 2025-10-30 19:15:06,696 basehttp 18776 19428 "GET /api/user/transactions/ HTTP/1.1" 200 1797
+INFO 2025-10-30 19:15:08,414 basehttp 18776 19152 "GET /api/user/active-borrows/ HTTP/1.1" 200 1797
+INFO 2025-10-30 19:15:08,440 basehttp 18776 19152 "GET /api/user/active-borrows/ HTTP/1.1" 200 1797
+INFO 2025-10-30 19:15:10,987 basehttp 18776 19152 "GET /api/profile/history/ HTTP/1.1" 200 6253
+INFO 2025-10-30 19:15:11,058 basehttp 18776 19152 "GET /api/profile/history/ HTTP/1.1" 200 6253
+INFO 2025-10-30 19:15:19,678 basehttp 18776 19004 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9558
+INFO 2025-10-30 19:15:50,388 basehttp 18776 11784 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9557
+INFO 2025-10-30 19:16:20,397 basehttp 18776 19208 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9558
+INFO 2025-10-30 19:16:50,400 basehttp 18776 2396 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9560
+INFO 2025-10-30 19:17:19,686 basehttp 18776 4224 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9560
+INFO 2025-10-30 19:17:24,720 basehttp 18776 4224 "GET /api/fines/ HTTP/1.1" 200 50
+INFO 2025-10-30 19:17:24,748 basehttp 18776 4224 "GET /api/fines/ HTTP/1.1" 200 50
+INFO 2025-10-30 19:17:31,128 basehttp 18776 14016 "GET /api/books/popular/ HTTP/1.1" 200 872
+INFO 2025-10-30 19:17:31,173 basehttp 18776 14016 "GET /api/books/popular/ HTTP/1.1" 200 872
+INFO 2025-10-30 19:17:38,942 basehttp 18776 16836 "GET /api/dashboard/reading/ HTTP/1.1" 200 1772
+INFO 2025-10-30 19:17:39,010 basehttp 18776 16836 "GET /api/dashboard/reading/ HTTP/1.1" 200 1772
+INFO 2025-10-30 19:17:47,371 basehttp 18776 16836 "POST /api/dashboard/achievements/check/ HTTP/1.1" 200 55
+INFO 2025-10-30 19:17:47,434 basehttp 18776 16836 "GET /api/dashboard/reading/ HTTP/1.1" 200 1772
+INFO 2025-10-30 19:17:49,366 basehttp 18776 16836 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9560
+INFO 2025-10-30 19:17:51,060 basehttp 18776 16836 "POST /api/dashboard/achievements/check/ HTTP/1.1" 200 55
+INFO 2025-10-30 19:17:51,128 basehttp 18776 16836 "GET /api/dashboard/reading/ HTTP/1.1" 200 1772
+INFO 2025-10-30 19:18:09,006 basehttp 18776 1620 "GET /api/profile/history/ HTTP/1.1" 200 6253
+INFO 2025-10-30 19:18:09,062 basehttp 18776 1620 "GET /api/profile/history/ HTTP/1.1" 200 6253
+INFO 2025-10-30 19:18:14,937 basehttp 18776 1620 "GET /api/dashboard/reading/ HTTP/1.1" 200 1772
+INFO 2025-10-30 19:18:15,013 basehttp 18776 1620 "GET /api/dashboard/reading/ HTTP/1.1" 200 1772
+INFO 2025-10-30 19:18:19,667 basehttp 18776 19124 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9560
+INFO 2025-10-30 19:18:50,393 basehttp 18776 1872 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9560
+INFO 2025-10-30 19:19:20,389 basehttp 18776 13684 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9560
+INFO 2025-10-30 19:19:53,395 basehttp 18776 17844 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9560
+INFO 2025-10-30 19:20:53,401 basehttp 18776 15060 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9561
+INFO 2025-10-30 19:21:31,778 basehttp 18776 18960 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9561
+INFO 2025-10-30 19:21:33,940 basehttp 18776 18960 "GET /api/user/active-borrows/ HTTP/1.1" 200 1797
+INFO 2025-10-30 19:21:33,974 basehttp 18776 18960 "GET /api/user/active-borrows/ HTTP/1.1" 200 1797
+INFO 2025-10-30 19:21:35,078 basehttp 18776 18960 "POST /api/books/return/68/generate-qr/ HTTP/1.1" 200 761
+INFO 2025-10-30 19:21:43,136 basehttp 18776 6280 "POST /api/logout/ HTTP/1.1" 200 31
+INFO 2025-10-30 19:21:50,341 audit_utils 18776 10476 Audit log: login - User logged in successfully
+INFO 2025-10-30 19:21:50,353 basehttp 18776 10476 "POST /api/login/ HTTP/1.1" 200 129
+INFO 2025-10-30 19:21:50,428 basehttp 18776 12424 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 19:21:50,436 basehttp 18776 10476 "GET /api/notifications/?limit=5 HTTP/1.1" 200 4249
+INFO 2025-10-30 19:21:50,459 basehttp 18776 12424 "GET /api/transactions/ HTTP/1.1" 200 1788
+INFO 2025-10-30 19:21:50,469 basehttp 18776 10476 "GET /api/recommendations/insights/ HTTP/1.1" 200 243
+INFO 2025-10-30 19:21:50,513 basehttp 18776 10476 "GET /api/transactions/ HTTP/1.1" 200 1788
+INFO 2025-10-30 19:21:50,513 basehttp 18776 12424 "GET /api/notifications/?limit=5 HTTP/1.1" 200 4249
+INFO 2025-10-30 19:21:50,536 basehttp 18776 12424 "GET /api/recommendations/insights/ HTTP/1.1" 200 243
+INFO 2025-10-30 19:21:50,536 basehttp 18776 10476 "GET /api/user/pending-transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 19:21:50,555 basehttp 18776 10476 "GET /api/user/pending-transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 19:21:59,904 basehttp 18776 10480 "POST /api/librarian/decode-qr-image/ HTTP/1.1" 200 104
+INFO 2025-10-30 19:22:00,218 basehttp 18776 15968 "OPTIONS /api/librarian/validate-return-qr/ HTTP/1.1" 200 0
+INFO 2025-10-30 19:22:00,234 basehttp 18776 10480 "POST /api/librarian/validate-return-qr/ HTTP/1.1" 200 291
+INFO 2025-10-30 19:22:02,263 basehttp 18776 15968 "OPTIONS /api/librarian/process-book-return/ HTTP/1.1" 200 0
+INFO 2025-10-30 19:22:02,309 notification_utils 18776 10480 Notification created for lighteningblade.256: system
+INFO 2025-10-30 19:22:02,315 basehttp 18776 10480 "POST /api/librarian/process-book-return/ HTTP/1.1" 200 136
+INFO 2025-10-30 19:22:15,408 basehttp 18776 14168 "POST /api/logout/ HTTP/1.1" 200 31
+INFO 2025-10-30 19:22:19,010 basehttp 18776 12716 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 19:22:19,019 basehttp 18776 12716 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 19:22:22,784 audit_utils 18776 12716 Audit log: login - User logged in successfully
+INFO 2025-10-30 19:22:22,793 basehttp 18776 12716 "POST /api/login/ HTTP/1.1" 200 141
+INFO 2025-10-30 19:22:22,852 basehttp 18776 7552 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 19:22:22,894 basehttp 18776 7552 "GET /api/transactions/ HTTP/1.1" 200 1822
+INFO 2025-10-30 19:22:22,925 basehttp 18776 7552 "GET /api/recommendations/insights/ HTTP/1.1" 200 375
+INFO 2025-10-30 19:22:22,937 basehttp 18776 12716 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9618
+INFO 2025-10-30 19:22:22,958 basehttp 18776 7552 "GET /api/transactions/ HTTP/1.1" 200 1822
+INFO 2025-10-30 19:22:22,966 basehttp 18776 12716 "GET /api/user/pending-transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 19:22:22,989 basehttp 18776 7552 "GET /api/recommendations/insights/ HTTP/1.1" 200 375
+INFO 2025-10-30 19:22:23,014 basehttp 18776 7552 "GET /api/user/pending-transactions/ HTTP/1.1" 200 2
+INFO 2025-10-30 19:22:23,063 basehttp 18776 12716 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9618
+INFO 2025-10-30 19:22:25,831 basehttp 18776 12716 "GET /api/dashboard/reading/ HTTP/1.1" 200 1901
+INFO 2025-10-30 19:22:25,883 basehttp 18776 12716 "GET /api/dashboard/reading/ HTTP/1.1" 200 1901
+INFO 2025-10-30 19:22:53,236 basehttp 18776 6924 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9619
+INFO 2025-10-30 19:23:23,387 basehttp 18776 18928 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9618
+INFO 2025-10-30 19:23:50,920 basehttp 18776 5880 "GET /api/profile/history/ HTTP/1.1" 200 6278
+INFO 2025-10-30 19:23:50,986 basehttp 18776 5880 "GET /api/profile/history/ HTTP/1.1" 200 6278
+INFO 2025-10-30 19:23:52,892 basehttp 18776 5880 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9619
+INFO 2025-10-30 19:24:23,398 basehttp 18776 17920 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9608
+INFO 2025-10-30 19:24:53,386 basehttp 18776 18380 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9610
+INFO 2025-10-30 19:25:23,385 basehttp 18776 11036 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9621
+INFO 2025-10-30 19:25:53,378 basehttp 18776 8996 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9621
+INFO 2025-10-30 19:26:53,416 basehttp 18776 15484 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9609
+INFO 2025-10-30 19:27:53,391 basehttp 18776 17644 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9594
+INFO 2025-10-30 19:28:53,386 basehttp 18776 10756 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9617
+INFO 2025-10-30 19:29:53,379 basehttp 18776 11684 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9580
+INFO 2025-10-30 19:30:53,381 basehttp 18776 17776 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9613
+INFO 2025-10-30 19:31:53,387 basehttp 18776 4416 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9616
+INFO 2025-10-30 19:32:53,385 basehttp 18776 9960 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9604
+INFO 2025-10-30 19:33:53,406 basehttp 18776 15904 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9615
+INFO 2025-10-30 19:34:53,384 basehttp 18776 2036 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9617
+INFO 2025-10-30 19:35:53,396 basehttp 18776 18508 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9617
+INFO 2025-10-30 19:36:53,072 basehttp 18776 18508 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9618
+INFO 2025-10-30 19:37:53,080 basehttp 18776 18508 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9620
+INFO 2025-10-30 19:38:53,070 basehttp 18776 18508 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9620
+INFO 2025-10-30 19:39:53,073 basehttp 18776 18508 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9623
+INFO 2025-10-30 19:40:53,395 basehttp 18776 12700 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9623
+INFO 2025-10-30 19:41:53,073 basehttp 18776 12700 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9623
+INFO 2025-10-30 19:42:53,080 basehttp 18776 12700 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9624
+INFO 2025-10-30 19:43:53,079 basehttp 18776 12700 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9624
+INFO 2025-10-30 19:44:53,081 basehttp 18776 12700 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9624
+INFO 2025-10-30 19:45:53,399 basehttp 18776 11220 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9624
+INFO 2025-10-30 19:46:53,396 basehttp 18776 9880 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9624
+INFO 2025-10-30 19:47:53,400 basehttp 18776 11804 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9624
+INFO 2025-10-30 19:47:59,698 basehttp 18776 11804 "GET /api/fines/ HTTP/1.1" 200 50
+INFO 2025-10-30 19:47:59,726 basehttp 18776 11804 "GET /api/fines/ HTTP/1.1" 200 50
+INFO 2025-10-30 19:48:23,389 basehttp 18776 6740 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9624
+INFO 2025-10-30 19:48:53,393 basehttp 18776 11940 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9624
+INFO 2025-10-30 19:49:53,377 basehttp 18776 3752 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9624
+INFO 2025-10-30 19:50:53,404 basehttp 18776 8364 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9624
+INFO 2025-10-30 19:51:53,389 basehttp 18776 14516 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9624
+INFO 2025-10-30 19:52:53,384 basehttp 18776 6496 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9624
+INFO 2025-10-30 19:53:53,396 basehttp 18776 17120 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9624
+INFO 2025-10-30 19:54:53,379 basehttp 18776 8204 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9624
+INFO 2025-10-30 19:55:53,387 basehttp 18776 19384 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9624
+INFO 2025-10-30 19:56:53,383 basehttp 18776 3560 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9611
+INFO 2025-10-30 19:57:53,378 basehttp 18776 16108 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9622
+INFO 2025-10-30 19:58:53,389 basehttp 18776 5112 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9623
+INFO 2025-10-30 19:59:53,390 basehttp 18776 19204 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9623
+INFO 2025-10-30 20:00:53,382 basehttp 18776 18900 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9623
+INFO 2025-10-30 20:01:53,396 basehttp 18776 17400 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9623
+INFO 2025-10-30 20:02:53,409 basehttp 18776 16500 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9623
+INFO 2025-10-30 20:03:53,384 basehttp 18776 9844 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9597
+INFO 2025-10-30 20:04:53,414 basehttp 18776 14612 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9619
+INFO 2025-10-30 20:05:53,391 basehttp 18776 1640 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9621
+INFO 2025-10-30 20:06:53,383 basehttp 18776 13988 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9622
+INFO 2025-10-30 20:07:53,394 basehttp 18776 7036 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9622
+INFO 2025-10-30 20:08:53,383 basehttp 18776 3564 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9622
+INFO 2025-10-30 20:09:53,384 basehttp 18776 5448 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9622
+INFO 2025-10-30 20:10:53,378 basehttp 18776 6892 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9609
+INFO 2025-10-30 20:11:53,446 basehttp 18776 11516 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9620
+INFO 2025-10-30 20:12:53,388 basehttp 18776 2452 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9608
+INFO 2025-10-30 20:13:53,390 basehttp 18776 18060 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9617
+INFO 2025-10-30 20:14:53,398 basehttp 18776 10524 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9617
+INFO 2025-10-30 20:15:53,380 basehttp 18776 18708 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9651
+INFO 2025-10-30 20:16:53,386 basehttp 18776 8604 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9654
+INFO 2025-10-30 20:17:53,381 basehttp 18776 2328 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9654
+INFO 2025-10-30 20:18:53,386 basehttp 18776 17640 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9654
+INFO 2025-10-30 20:19:53,384 basehttp 18776 1520 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9654
+INFO 2025-10-30 20:20:53,383 basehttp 18776 17460 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9655

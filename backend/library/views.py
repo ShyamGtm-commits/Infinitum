@@ -468,10 +468,11 @@ def user_reading_history(request):
     reading_history = []
     for transaction in transactions:
         reading_history.append({
+            'id': transaction.id,
             'book': BookSerializer(transaction.book).data,
             'issue_date': transaction.issue_date,
             'return_date': transaction.return_date,
-            'status': 'Returned' if transaction.return_date else 'Borrowed'
+            'status': transaction.status,
         })
     return Response(reading_history)
 
@@ -481,10 +482,14 @@ def user_reading_history(request):
 def user_transactions(request):
     """
     Retrieves all transactions for the current user.
+    EXCLUDES cancelled and expired transactions
     """
     transactions = Transaction.objects.filter(
         user=request.user
+    ).exclude(
+        status__in=['cancelled', 'expired']  # ✅ HIDE THESE
     ).select_related('book').order_by('-issue_date')
+    
     serializer = TransactionSerializer(transactions, many=True)
     return Response(serializer.data)
 
@@ -497,8 +502,10 @@ def user_active_borrows(request):
     """
     transactions = Transaction.objects.filter(
         user=request.user,
-        return_date__isnull=True
+        return_date__isnull=True,
+        status='borrowed'  # ✅ ADD THIS LINE - ONLY borrowed books!
     ).select_related('book').order_by('due_date')
+    
     serializer = TransactionSerializer(transactions, many=True)
     return Response(serializer.data)
 
@@ -695,6 +702,8 @@ def borrow_book(request, book_id):
             book=book,
             user=request.user,
             return_date__isnull=True
+        ).exclude(
+            status__in=['cancelled', 'returned']  # ✅ EXCLUDE both cancelled and returned
         ).exists()
         
         if existing_transaction:
@@ -707,13 +716,13 @@ def borrow_book(request, book_id):
         current_active = Transaction.objects.filter(
             user=request.user,
             return_date__isnull=True
-        ).count()
+        ).exclude(status='cancelled').count()
 
         if current_active >= user_profile.borrowing_limit:
             return Response({
                 'error': f'Borrowing limit reached. You can only have {user_profile.borrowing_limit} active books (including reservations) at a time.'
             }, status=status.HTTP_400_BAD_REQUEST)
-
+        
         # Check 4: Outstanding fines
         unpaid_fines = Transaction.objects.filter(
             user=request.user,
@@ -1068,43 +1077,85 @@ def get_enhanced_collaborative_recommendations(user, borrowed_book_ids, limit=5)
 
 def get_cached_recommendations(user, borrowed_book_ids):
     """
-    Cache recommendations for 1 hour to improve performance
+    GUARANTEED working recommendations - always returns books
     """
     cache_key = f"user_{user.id}_recommendations"
     cached_recommendations = cache.get(cache_key)
 
     if cached_recommendations is not None:
-        print(f"🎯 Using cached recommendations for user {user.username}")
         return cached_recommendations
 
-    print(f"🔍 Generating fresh recommendations for user {user.username}")
+    print(f"🎯 Generating guaranteed recommendations for {user.username}")
 
-    # Generate fresh recommendations using your existing functions
-    content_based = get_enhanced_content_based_recommendations(
-        user, borrowed_book_ids)
-    collaborative = get_enhanced_collaborative_recommendations(
-        user, borrowed_book_ids)
+    # ALWAYS return books - multiple fallback strategies
+    all_books = []
+    
+    # Strategy 1: Try personalized recommendations
+    try:
+        # Simple but effective: books from genres user borrowed before
+        user_books = Transaction.objects.filter(user=user).select_related('book')
+        if user_books.exists():
+            user_genres = user_books.values_list('book__genre', flat=True).distinct()
+            if user_genres:
+                personalized = Book.objects.filter(
+                    genre__in=user_genres,
+                    available_copies__gt=0
+                ).exclude(id__in=borrowed_book_ids).distinct()[:6]
+                all_books.extend(list(personalized))
+                print(f"✅ Added {len(personalized)} personalized books")
+    except Exception as e:
+        print(f"⚠️ Personalized failed: {e}")
 
-    # Combine and deduplicate
-    all_recommendations = list(content_based)
-    seen_ids = set(book.id for book in all_recommendations)
+    # Strategy 2: Always include popular books
+    try:
+        popular = Book.objects.filter(
+            available_copies__gt=0
+        ).exclude(id__in=borrowed_book_ids).annotate(
+            borrow_count=Count('transaction')
+        ).order_by('-borrow_count')[:8]
+        
+        # Add only new books
+        existing_ids = [b.id for b in all_books]
+        for book in popular:
+            if book.id not in existing_ids and len(all_books) < 12:
+                all_books.append(book)
+        print(f"✅ Added {len(popular)} popular books")
+    except Exception as e:
+        print(f"⚠️ Popular books failed: {e}")
 
-    for book in collaborative:
-        if book.id not in seen_ids and len(all_recommendations) < 10:
-            all_recommendations.append(book)
-            seen_ids.add(book.id)
+    # Strategy 3: FINAL FALLBACK - any available books
+    if not all_books:
+        print("🆘 Using final fallback - any available books")
+        all_books = Book.objects.filter(available_copies__gt=0).exclude(
+            id__in=borrowed_book_ids
+        )[:12]
 
-    # If still not enough, add popular books
-    if len(all_recommendations) < 10:
-        popular_books = get_popular_books_queryset(borrowed_book_ids)
-        for book in popular_books:
-            if book.id not in seen_ids and len(all_recommendations) < 10:
-                all_recommendations.append(book)
-                seen_ids.add(book.id)
+    # Ensure we have books
+    if not all_books:
+        print("🚨 CRITICAL: No books found at all!")
+        all_books = Book.objects.all()[:12]  # Last resort
 
-    # Cache for 1 hour
-    cache.set(cache_key, all_recommendations, 3600)
-    return all_recommendations
+    print(f"🎉 Final: {len(all_books)} books for recommendations")
+    
+    # Cache for 15 minutes (shorter for testing)
+    cache.set(cache_key, all_books, 900)
+    return all_books
+
+def filter_out_user_reservations(books, user):
+    """
+    Simple filter to remove books that user has already reserved or borrowed
+    """
+    # Get books user has active reservations for
+    reserved_books = Transaction.objects.filter(
+        user=user,
+        status__in=['pending', 'borrowed']  # Both reserved and currently borrowed
+    ).values_list('book_id', flat=True)
+    
+    # Filter out reserved books
+    available_books = [book for book in books if book.id not in reserved_books]
+    
+    print(f"📚 Filtered {len(books)} -> {len(available_books)} books (removed {len(books) - len(available_books)} reserved books)")
+    return available_books
 
 
 @api_view(['GET'])
@@ -1148,6 +1199,7 @@ def recommendation_insights(request):
 @permission_classes([IsAuthenticated])
 def book_recommendations(request):
     """Enhanced context-based book recommendations with caching"""
+    start_time = timezone.now()
     try:
         # Get user's borrowing history
         user_transactions = Transaction.objects.filter(user=request.user)
@@ -1177,18 +1229,28 @@ def book_recommendations(request):
             all_recommendations = get_popular_books_queryset(borrowed_book_ids)
             strategy = "fallback-popular"
 
+        all_recommendations = filter_out_user_reservations(all_recommendations, request.user)
+
         serializer = BookSerializer(
             all_recommendations, many=True, context={'request': request})
+
+        end_time = timezone.now()
+        processing_time = (end_time - start_time).total_seconds()
+        print(f"⏱️ Recommendations generated in {processing_time:.2f}s for {request.user.username}")
 
         return Response({
             'success': True,
             'recommendations': serializer.data,
             'strategy': strategy,
             'total_recommendations': len(all_recommendations),
+            'processing_time': processing_time,
             'message': 'Personalized recommendations based on your reading preferences'
         })
 
     except Exception as e:
+        end_time = timezone.now()
+        processing_time = (end_time - start_time).total_seconds()
+        print(f"❌ Recommendation failed after {processing_time:.2f}s: {e}")
         logger.error(f"Error generating recommendations: {str(e)}")
         # Fallback to popular books
         fallback_books = get_popular_books_queryset([], limit=10)

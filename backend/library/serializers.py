@@ -172,6 +172,10 @@ class BookSerializer(serializers.ModelSerializer):
     average_rating = serializers.SerializerMethodField()
     rating_count = serializers.SerializerMethodField()
     user_rating = serializers.SerializerMethodField()
+    # ✅ ADD these new fields for reservation system
+    effectively_available = serializers.ReadOnlyField()
+    can_be_reserved = serializers.ReadOnlyField()
+    reserved_copies = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Book
@@ -194,14 +198,16 @@ class BookSerializer(serializers.ModelSerializer):
         return None
 
     def get_average_rating(self, obj):
-        """Calculate average rating for the book"""
+        """Calculate average rating for the book - FIXED to always return a number"""
         from django.db.models import Avg
         result = BookRating.objects.filter(book=obj).aggregate(Avg('rating'))
-        return round(result['rating__avg'] or 0, 1)  # Round to 1 decimal
+        avg_rating = result['rating__avg'] or 0
+        return round(avg_rating, 1)  # Always return a number, never None
 
     def get_rating_count(self, obj):
-        """Get total number of ratings"""
-        return BookRating.objects.filter(book=obj).count()
+        """Get total number of ratings - FIXED to always return a number"""
+        count = BookRating.objects.filter(book=obj).count()
+        return count  # Always return a number, never None
 
     def get_user_rating(self, obj):
         """Get current user's rating for this book"""

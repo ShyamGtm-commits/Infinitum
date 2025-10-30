@@ -1,5 +1,5 @@
-// Recommendations.js - Fixed infinite loop issue
-import React, { useState, useEffect, useCallback } from 'react';
+// Recommendations.js - Complete with Fix 2 (Retry Mechanism)
+import React, { useState, useEffect } from 'react';
 import ConfirmationModal from './ConfirmationModal';
 import ErrorModal from './ErrorModal';
 import useBorrow from './useBorrow';
@@ -13,6 +13,7 @@ const Recommendations = ({ user }) => {
   const [showBorrowedItems, setShowBorrowedItems] = useState(false);
   const [borrowedBookIds, setBorrowedBookIds] = useState(new Set());
   const [insights, setInsights] = useState(null);
+  const [showInsights, setShowInsights] = useState(false);
 
   // Use the borrow hook
   const {
@@ -26,8 +27,8 @@ const Recommendations = ({ user }) => {
     setShowErrorModal
   } = useBorrow();
 
-  // Wrap fetchBorrowedBooks in useCallback with empty dependencies
-  const fetchBorrowedBooks = useCallback(async () => {
+  // Fetch borrowed books
+  const fetchBorrowedBooks = async () => {
     try {
       const response = await fetch('http://localhost:8000/api/user/active-borrows/', {
         credentials: 'include',
@@ -41,54 +42,87 @@ const Recommendations = ({ user }) => {
     } catch (error) {
       console.error('Error fetching borrowed books:', error);
     }
-  }, []); // Empty dependencies - this function doesn't depend on any state
+  };
 
-  // Wrap fetchRecommendations in useCallback with empty dependencies
-  const fetchRecommendations = useCallback(async () => {
+  // Fetch recommendations
+  const fetchRecommendations = async () => {
     try {
       setLoading(true);
+      setError(''); // Clear previous errors
       const response = await fetch('http://localhost:8000/api/recommendations/', {
         credentials: 'include',
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch recommendations');
+        throw new Error('Failed to fetch recommendations. Using popular books instead.');
       }
 
       const data = await response.json();
       
       if (data.success) {
-        // Don't filter here - let the frontend handle filtering
         setRecommendations(data.recommendations || []);
         setStrategy(data.strategy);
         setMessage(data.message);
       } else {
         setRecommendations(data.recommendations || []);
-        setError(data.error || 'No recommendations available');
+        setError(data.error || 'No recommendations available. Showing popular books instead.');
       }
     } catch (error) {
       console.error('Error fetching recommendations:', error);
-      setError('Error loading recommendations');
+      setError('Unable to load personalized recommendations. Showing popular books instead.');
     } finally {
       setLoading(false);
     }
-  }, []); // Empty dependencies - this function doesn't depend on any state
+  };
 
-  const fetchInsights = async () => {
+  // FIX 2: Retry Mechanism with Simple Recommendations
+  const retryWithSimpleRecommendations = async () => {
+    setLoading(true);
+    setError('');
     try {
-        const response = await fetch('http://localhost:8000/api/recommendations/insights/', {
-            credentials: 'include',
-        });
-        if (response.ok) {
-            const data = await response.json();
-            setInsights(data.user_insights);
-        }
+      console.log('🔄 Trying simple popular books as fallback...');
+      
+      // Try the simple popular books endpoint as fallback
+      const response = await fetch('http://localhost:8000/api/books/popular/', {
+        credentials: 'include',
+      });
+      
+      if (response.ok) {
+        const popularBooks = await response.json();
+        setRecommendations(popularBooks);
+        setStrategy('popular-fallback');
+        setMessage('Showing popular books from our collection');
+        console.log('✅ Loaded popular books successfully');
+      } else {
+        throw new Error('Could not load any books');
+      }
     } catch (error) {
-        console.error('Error fetching insights:', error);
+      console.error('❌ Simple recommendations also failed:', error);
+      setError('Unable to load any books. Please try again later or contact support.');
+    } finally {
+      setLoading(false);
     }
   };
+
+  // Fetch insights function
+  const fetchInsights = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/recommendations/insights/', {
+        credentials: 'include',
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setInsights(data.user_insights);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching insights:', error);
+    }
+  };
+
+  // Load data on component mount
   useEffect(() => {
-    // Initial data fetch - only run once on mount
     const loadData = async () => {
       await fetchBorrowedBooks();
       await fetchRecommendations();
@@ -96,22 +130,14 @@ const Recommendations = ({ user }) => {
     };
     
     loadData();
-  }, [fetchBorrowedBooks, fetchRecommendations]); // These are now stable
+  }, []);
 
   const handleBorrowClick = async (bookId) => {
     const result = await handleBorrow(bookId);
     
     if (result && result.success) {
-      // Add to borrowed books set
       setBorrowedBookIds(prev => new Set([...prev, bookId]));
-      
-      // Also trigger refresh for other components if needed
-      if (window.refreshTransactions) {
-        window.refreshTransactions();
-      }
-      if (window.refreshBorrows) {
-        window.refreshBorrows();
-      }
+      await fetchBorrowedBooks();
     }
   };
 
@@ -119,16 +145,8 @@ const Recommendations = ({ user }) => {
     const result = await handleConfirmBorrow();
     
     if (result && result.success && confirmBorrow) {
-      // Add to borrowed books set
       setBorrowedBookIds(prev => new Set([...prev, confirmBorrow.bookId]));
-      
-      // Also trigger refresh for other components if needed
-      if (window.refreshTransactions) {
-        window.refreshTransactions();
-      }
-      if (window.refreshBorrows) {
-        window.refreshBorrows();
-      }
+      await fetchBorrowedBooks();
     }
   };
 
@@ -137,65 +155,155 @@ const Recommendations = ({ user }) => {
     showBorrowedItems ? true : !borrowedBookIds.has(book.id)
   );
 
-  // Group recommendations by strategy for better UI
-  const groupRecommendationsByStrategy = (recs) => {
-    const grouped = {
-      personalized: [],
-      collaborative: [],
-      popular: []
-    };
-
-    recs.forEach(book => {
-      // Simplified grouping logic
-      if (book.genre && (book.genre.includes('Fiction') || book.genre.includes('Romance'))) {
-        grouped.collaborative.push(book);
-      } else if (book.borrow_count > 3) {
-        grouped.popular.push(book);
-      } else {
-        grouped.personalized.push(book);
-      }
-    });
-
-    return grouped;
-  };
-
-  const groupedRecommendations = groupRecommendationsByStrategy(filteredRecommendations);
-
-  if (loading) {
+  // Enhanced Loading State
+  if (loading && recommendations.length === 0) {
     return (
-      <div className="text-center mt-4">
-        <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Loading...</span>
+      <div className="container mt-4">
+        <div className="text-center">
+          <div className="spinner-border text-primary mb-3" style={{width: '3rem', height: '3rem'}} role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+          <h4>Finding Your Next Favorite Book...</h4>
+          <p className="text-muted">Analyzing your reading preferences and history</p>
+          
+          {/* Skeleton Loading Cards */}
+          <div className="row">
+            {[1, 2, 3, 4, 5, 6].map(i => (
+              <div key={i} className="col-md-4 mb-4">
+                <div className="card h-100">
+                  {/* Skeleton Image */}
+                  <div 
+                    className="card-img-top bg-light placeholder-wave" 
+                    style={{height: '200px'}}
+                  ></div>
+                  
+                  <div className="card-body">
+                    <div className="placeholder-glow">
+                      {/* Skeleton Title */}
+                      <span className="placeholder col-8 mb-2"></span>
+                      {/* Skeleton Author */}
+                      <span className="placeholder col-6 mb-2"></span>
+                      {/* Skeleton Genre */}
+                      <span className="placeholder col-4 mb-3"></span>
+                      {/* Skeleton Description */}
+                      <span className="placeholder col-12 mb-1"></span>
+                      <span className="placeholder col-10 mb-1"></span>
+                      <span className="placeholder col-11"></span>
+                    </div>
+                  </div>
+                  
+                  <div className="card-footer bg-transparent">
+                    <div className="placeholder col-12" style={{height: '38px'}}></div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-        <p>Analyzing your reading preferences...</p>
       </div>
     );
   }
 
+  // Insights Panel Component
+  const InsightsPanel = () => {
+    if (!insights) return null;
+
+    return (
+      <div className="card mb-4">
+        <div className="card-header bg-primary text-white">
+          <h5 className="mb-0">
+            <i className="fas fa-chart-bar me-2"></i>
+            Your Reading Profile
+          </h5>
+        </div>
+        <div className="card-body">
+          <div className="row mb-3">
+            <div className="col-md-6">
+              <h6>Reading Level</h6>
+              <span className={`badge ${
+                insights.reading_level === 'diverse-reader' ? 'bg-success' :
+                insights.reading_level === 'genre-explorer' ? 'bg-warning' : 'bg-info'
+              }`}>
+                {insights.reading_level === 'diverse-reader' ? '📚 Diverse Reader' :
+                 insights.reading_level === 'genre-explorer' ? '🔍 Genre Explorer' : '👋 New Reader'}
+              </span>
+            </div>
+            <div className="col-md-6">
+              <h6>Genres Explored</h6>
+              <span className="badge bg-secondary">
+                {insights.total_genres_explored} genres
+              </span>
+            </div>
+          </div>
+
+          {insights.top_genres && insights.top_genres.length > 0 && (
+            <div className="mb-3">
+              <h6>Your Favorite Genres</h6>
+              <div className="d-flex flex-wrap gap-2">
+                {insights.top_genres.map((genre, index) => (
+                  <span key={index} className="badge bg-info text-dark">
+                    {genre.name} ({Math.round(genre.score * 100)}%)
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {insights.top_authors && insights.top_authors.length > 0 && (
+            <div className="mb-3">
+              <h6>Favorite Authors</h6>
+              <div className="d-flex flex-wrap gap-2">
+                {insights.top_authors.map((author, index) => (
+                  <span key={index} className="badge bg-light text-dark border">
+                    {author.name}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {insights.recent_interest_genres && insights.recent_interest_genres.length > 0 && (
+            <div>
+              <h6>Recent Interests</h6>
+              <div className="d-flex flex-wrap gap-2">
+                {insights.recent_interest_genres.map((genre, index) => (
+                  <span key={index} className="badge bg-warning text-dark">
+                    {genre}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="container mt-4">
-      <div className="d-flex justify-content-between align-items-center mb-4 recommendation-header">
+      {/* Header Section */}
+      <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
           <h2>Book Recommendations</h2>
           {message && (
             <p className="text-muted">
-              <small>
-                {message}
-                <span className={`strategy-badge ${
-                  strategy === 'context-based' ? 'badge-personalized' :
-                  strategy === 'popular' ? 'badge-popular' :
-                  'badge-fallback'
-                }`}>
-                  {strategy === 'context-based' ? 'Personalized' :
-                   strategy === 'popular' ? 'Popular' :
-                   'Fallback'}
-                </span>
-              </small>
+              <small>{message}</small>
             </p>
           )}
         </div>
-        <div className="d-flex align-items-center">
-          <div className="form-check form-switch me-3 recommendation-toggle">
+        <div className="d-flex align-items-center gap-3">
+          {/* Insights Toggle Button */}
+          {insights && (
+            <button
+              className={`btn ${showInsights ? 'btn-info' : 'btn-outline-info'}`}
+              onClick={() => setShowInsights(!showInsights)}
+            >
+              <i className="fas fa-chart-bar me-2"></i>
+              {showInsights ? 'Hide Insights' : 'Show Insights'}
+            </button>
+          )}
+          
+          <div className="form-check form-switch">
             <input
               className="form-check-input"
               type="checkbox"
@@ -203,15 +311,17 @@ const Recommendations = ({ user }) => {
               checked={showBorrowedItems}
               onChange={() => setShowBorrowedItems(!showBorrowedItems)}
             />
-            <label className="form-check-label toggle-label" htmlFor="showBorrowedToggle">
-              Show Borrowed Items
+            <label className="form-check-label" htmlFor="showBorrowedToggle">
+              Show Borrowed
             </label>
           </div>
+          
           <button 
-            className="btn btn-outline-primary refresh-btn"
+            className="btn btn-outline-primary"
             onClick={() => {
               fetchRecommendations();
               fetchBorrowedBooks();
+              fetchInsights();
             }}
             disabled={loading}
           >
@@ -230,102 +340,117 @@ const Recommendations = ({ user }) => {
         </div>
       </div>
 
+      {/* FIX 2: Enhanced Error Handling with Retry Button */}
       {error && (
         <div className="alert alert-warning">
-          <i className="fas fa-info-circle me-2"></i>
-          {error}
+          <div className="d-flex align-items-center justify-content-between">
+            <div className="d-flex align-items-center">
+              <i className="fas fa-exclamation-triangle me-2 fs-5"></i>
+              <div>
+                <strong>Having trouble loading recommendations</strong>
+                <p className="mb-0 small">{error}</p>
+              </div>
+            </div>
+            <button 
+              className="btn btn-sm btn-outline-primary"
+              onClick={retryWithSimpleRecommendations}
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <span className="spinner-border spinner-border-sm me-1" role="status"></span>
+                  Loading...
+                </>
+              ) : (
+                <>
+                  <i className="fas fa-redo me-1"></i>
+                  Try Again
+                </>
+              )}
+            </button>
+          </div>
         </div>
       )}
 
+      {/* Insights Panel */}
+      {showInsights && <InsightsPanel />}
+
+      {/* Loading State for Refresh */}
+      {loading && recommendations.length > 0 && (
+        <div className="text-center mb-3">
+          <div className="spinner-border spinner-border-sm text-primary me-2" role="status">
+            <span className="visually-hidden">Refreshing...</span>
+          </div>
+          <small className="text-muted">Updating recommendations...</small>
+        </div>
+      )}
+
+      {/* Books Grid */}
       {filteredRecommendations.length === 0 ? (
-        <div className="recommendations-empty">
-          <i className="fas fa-book-open"></i>
-          <h4>No recommendations available</h4>
-          <p>Start borrowing books to get personalized recommendations!</p>
-          <button className="btn btn-primary mt-2" onClick={() => window.location.href = '/books'}>
-            Browse Books
-          </button>
+        <div className="text-center py-5">
+          <i className="fas fa-book-open fa-3x text-muted mb-3"></i>
+          <h4 className="text-muted">No books available</h4>
+          <p className="text-muted">
+            {error ? 'Unable to load recommendations at this time.' : 'No books match your current filters.'}
+          </p>
+          <div className="d-flex justify-content-center gap-2">
+            <button 
+              className="btn btn-primary" 
+              onClick={() => {
+                setShowBorrowedItems(true);
+                fetchRecommendations();
+              }}
+            >
+              Show All Books
+            </button>
+            <button className="btn btn-outline-secondary" onClick={retryWithSimpleRecommendations}>
+              Try Popular Books
+            </button>
+            <button className="btn btn-outline-secondary" onClick={() => window.location.href = '/books'}>
+              Browse Library
+            </button>
+          </div>
         </div>
       ) : (
-        <>
-          {/* Personalized Recommendations */}
-          {groupedRecommendations.personalized.length > 0 && (
-            <div className="recommendation-section mb-4">
-              <h4 className="mb-3 text-primary">
-                <i className="fas fa-heart me-2"></i>
-                Personalized For You
-              </h4>
-              <div className="row">
-                {groupedRecommendations.personalized.map(book => (
-                  <BookCard 
-                    key={book.id} 
-                    book={book} 
-                    borrowedBookIds={borrowedBookIds}
-                    onBorrow={handleBorrowClick}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Collaborative Filtering Recommendations */}
-          {groupedRecommendations.collaborative.length > 0 && (
-            <div className="recommendation-section mb-4">
-              <h4 className="mb-3 text-info">
-                <i className="fas fa-users me-2"></i>
-                Recommended by Similar Readers
-              </h4>
-              <div className="row">
-                {groupedRecommendations.collaborative.map(book => (
-                  <BookCard 
-                    key={book.id} 
-                    book={book} 
-                    borrowedBookIds={borrowedBookIds}
-                    onBorrow={handleBorrowClick}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Popular Recommendations */}
-          {groupedRecommendations.popular.length > 0 && (
-            <div className="recommendation-section mb-4">
-              <h4 className="mb-3 text-warning">
-                <i className="fas fa-fire me-2"></i>
-                Popular Choices
-              </h4>
-              <div className="row">
-                {groupedRecommendations.popular.map(book => (
-                  <BookCard 
-                    key={book.id} 
-                    book={book} 
-                    borrowedBookIds={borrowedBookIds}
-                    onBorrow={handleBorrowClick}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div className="how-it-works">
-            <h6>How recommendations work:</h6>
-            <p className="text-muted small mb-0">
-              Our system combines <strong>personalized suggestions</strong> based on your reading history, 
-              <strong> collaborative filtering</strong> from similar readers, and <strong>popular choices</strong> 
-              to bring you the best recommendations.
-            </p>
-          </div>
-        </>
+        <div className="row">
+          {filteredRecommendations.map(book => (
+            <BookCard 
+              key={book.id} 
+              book={book} 
+              borrowedBookIds={borrowedBookIds}
+              onBorrow={handleBorrowClick}
+            />
+          ))}
+        </div>
       )}
+
+      {/* How Recommendations Work Section */}
+      <div className="card mt-4">
+        <div className="card-body">
+          <h5 className="card-title">
+            <i className="fas fa-lightbulb me-2 text-warning"></i>
+            How Recommendations Work
+          </h5>
+          <p className="card-text text-muted mb-0">
+            {strategy === 'popular-fallback' ? 
+              'Currently showing popular books from our collection. Personalized recommendations will be available once you start reading more books.' :
+              strategy === 'context-based' ? 'These recommendations are personalized based on your reading patterns.' :
+              strategy === 'popular' ? 'These are popular books loved by our community.' :
+              strategy === 'enhanced-hybrid' ? 'We combine multiple methods to find the perfect books for you.' :
+              'Our system analyzes your reading history, ratings, and preferences to suggest books you\'ll love.'
+            }
+            {error && ' Currently showing popular books due to technical issues.'}
+          </p>
+        </div>
+      </div>
 
       {/* Confirmation Modal */}
       <ConfirmationModal
         show={showConfirmation}
-        title="Confirm Borrow"
+        title="Confirm Reservation"
         message={confirmBorrow?.message}
         details={confirmBorrow?.bookDetails || {}}
-        confirmText="Yes, Borrow Book"
+        confirmText="Yes, Reserve Book"
         cancelText="Cancel"
         onConfirm={handleConfirmBorrowClick}
         onCancel={() => setShowConfirmation(false)}
@@ -341,17 +466,18 @@ const Recommendations = ({ user }) => {
   );
 };
 
-// Separate BookCard component
+// BookCard Component
 const BookCard = ({ book, borrowedBookIds, onBorrow }) => {
   const isBorrowed = borrowedBookIds.has(book.id);
+  const canReserve = book.can_be_reserved && book.effectively_available > 0;
   
   return (
     <div className="col-md-4 mb-4">
-      <div className={`card h-100 book-card ${isBorrowed ? 'borrowed' : ''}`}>
+      <div className={`card h-100 ${isBorrowed ? 'border-success' : ''}`}>
         <div 
           className="book-cover"
           style={{
-            backgroundImage: book.cover_image_url ? `url(http://localhost:8000${book.cover_image_url})` : 'none',
+            backgroundImage: book.cover_image_url ? `url(${book.cover_image_url})` : 'none',
             backgroundColor: book.cover_image_url ? 'transparent' : '#f8f9fa',
             height: '200px',
             backgroundSize: 'cover',
@@ -359,12 +485,21 @@ const BookCard = ({ book, borrowedBookIds, onBorrow }) => {
           }}
         >
           {!book.cover_image_url && (
-            <div className="book-placeholder d-flex align-items-center justify-content-center h-100">
+            <div className="d-flex align-items-center justify-content-center h-100">
               <i className="fas fa-book fa-3x text-muted"></i>
             </div>
           )}
           {isBorrowed && (
-            <span className="borrowed-badge">Already Borrowed</span>
+            <div className="position-absolute top-0 start-0 m-2">
+              <span className="badge bg-success">Already Borrowed</span>
+            </div>
+          )}
+          {book.average_rating > 0 && (
+            <div className="position-absolute top-0 end-0 m-2">
+              <span className="badge bg-warning text-dark">
+                ⭐ {book.average_rating} ({book.rating_count})
+              </span>
+            </div>
           )}
         </div>
         
@@ -379,9 +514,15 @@ const BookCard = ({ book, borrowedBookIds, onBorrow }) => {
             )}
           </div>
 
-          <p className="card-text">
-            <strong>Available:</strong> {book.available_copies} of {book.total_copies}
-          </p>
+          {/* Reservation Status */}
+          <div className="mb-2">
+            <small className="text-muted">
+              <strong>Available for reservation:</strong> {book.effectively_available} of {book.total_copies}
+              {book.reserved_copies > 0 && (
+                <span className="text-warning"> ({book.reserved_copies} reserved)</span>
+              )}
+            </small>
+          </div>
           
           {book.description && (
             <p className="card-text text-muted small">
@@ -392,12 +533,16 @@ const BookCard = ({ book, borrowedBookIds, onBorrow }) => {
         
         <div className="card-footer bg-transparent">
           <button
-            className={`btn ${isBorrowed ? 'btn-success' : 'btn-primary'} w-100`}
+            className={`btn ${
+              isBorrowed ? 'btn-success' : 
+              canReserve ? 'btn-primary' : 'btn-secondary'
+            } w-100`}
             onClick={() => onBorrow(book.id)}
-            disabled={isBorrowed || book.available_copies === 0}
+            disabled={isBorrowed || !canReserve}
           >
-            {isBorrowed ? 'Already Borrowed' : 
-             book.available_copies === 0 ? 'Out of Stock' : 'Borrow Now'}
+            {isBorrowed ? '✓ Already Borrowed' : 
+             canReserve ? 'Reserve for Pickup' : 
+             'Not Available'}
           </button>
         </div>
       </div>
