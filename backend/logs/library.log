@@ -19958,3 +19958,46 @@ INFO 2025-10-30 20:17:53,381 basehttp 18776 2328 "GET /api/notifications/?limit=
 INFO 2025-10-30 20:18:53,386 basehttp 18776 17640 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9654
 INFO 2025-10-30 20:19:53,384 basehttp 18776 1520 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9654
 INFO 2025-10-30 20:20:53,383 basehttp 18776 17460 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9655
+INFO 2025-10-30 20:21:53,389 basehttp 18776 17740 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9655
+INFO 2025-10-30 20:22:53,391 basehttp 18776 16468 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9652
+INFO 2025-10-30 20:23:53,376 basehttp 18776 8248 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9664
+INFO 2025-10-30 20:24:23,387 basehttp 18776 16060 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9653
+INFO 2025-10-30 20:24:53,395 basehttp 18776 11684 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9655
+INFO 2025-10-30 20:25:53,408 basehttp 18776 13860 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9666
+INFO 2025-10-30 20:26:53,392 basehttp 18776 15160 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9654
+INFO 2025-10-30 20:27:53,387 basehttp 18776 1096 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9639
+INFO 2025-10-30 20:28:53,407 basehttp 18776 15596 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9662
+INFO 2025-10-30 20:29:53,397 basehttp 18776 3976 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9625
+INFO 2025-10-30 20:30:53,395 basehttp 18776 17560 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9658
+INFO 2025-10-30 20:31:53,398 basehttp 18776 384 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9661
+INFO 2025-10-30 20:32:53,410 basehttp 18776 13684 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9649
+INFO 2025-10-30 20:33:53,397 basehttp 18776 17928 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9660
+INFO 2025-10-30 20:34:20,840 autoreload 18776 10940 C:\Users\Victus\Documents\Final_Year_Project\infinitum_library\backend\library\views.py changed, reloading.
+INFO 2025-10-30 20:34:23,478 apps 13188 14324 Library signals loaded successfully
+ERROR 2025-10-30 20:34:23,569 apps 13188 14324 Error scheduling background tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 20:34:23,593 apps 13188 14324 Error starting automated tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 20:34:23,616 apps 13188 14324 Error scheduling waitlist task: name 'check_reservation_expiry' is not defined
+INFO 2025-10-30 20:34:23,682 autoreload 13188 14324 Watching for file changes with StatReloader
+INFO 2025-10-30 20:34:53,409 basehttp 13188 16352 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9662
+INFO 2025-10-30 20:35:25,008 basehttp 13188 8288 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 20:35:25,093 basehttp 13188 8288 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9662
+INFO 2025-10-30 20:35:25,118 basehttp 13188 6444 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 20:35:25,118 basehttp 13188 12584 "GET /api/fines/ HTTP/1.1" 200 50
+INFO 2025-10-30 20:35:25,122 basehttp 13188 3752 "GET /api/csrf/ HTTP/1.1" 200 28
+INFO 2025-10-30 20:35:25,145 basehttp 13188 6444 "GET /api/user/reservations/count/ HTTP/1.1" 200 11
+INFO 2025-10-30 20:35:25,147 basehttp 13188 12584 "GET /api/fines/ HTTP/1.1" 200 50
+INFO 2025-10-30 20:35:25,182 basehttp 13188 8288 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9662
+INFO 2025-10-30 20:35:55,413 basehttp 13188 11620 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9662
+INFO 2025-10-30 20:36:25,411 basehttp 13188 12532 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9662
+INFO 2025-10-30 20:36:55,390 basehttp 13188 4224 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9663
+INFO 2025-10-30 20:37:25,404 basehttp 13188 12964 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9665
+INFO 2025-10-30 20:37:55,399 basehttp 13188 12540 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9665
+INFO 2025-10-30 20:38:25,396 basehttp 13188 19120 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9665
+INFO 2025-10-30 20:38:55,387 basehttp 13188 8932 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9665
+INFO 2025-10-30 20:39:53,434 basehttp 13188 10740 "GET /api/notifications/?limit=5 HTTP/1.1" 200 9668
+INFO 2025-10-30 20:40:50,185 autoreload 13188 14324 C:\Users\Victus\Documents\Final_Year_Project\infinitum_library\backend\library\views.py changed, reloading.
+INFO 2025-10-30 20:40:51,875 apps 16744 18792 Library signals loaded successfully
+ERROR 2025-10-30 20:40:51,932 apps 16744 18792 Error scheduling background tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 20:40:51,955 apps 16744 18792 Error starting automated tasks: name 'check_reservation_expiry' is not defined
+ERROR 2025-10-30 20:40:51,986 apps 16744 18792 Error scheduling waitlist task: name 'check_reservation_expiry' is not defined
+INFO 2025-10-30 20:40:52,036 autoreload 16744 18792 Watching for file changes with StatReloader

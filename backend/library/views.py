@@ -697,6 +697,20 @@ def borrow_book(request, book_id):
         if book.effectively_available <= 0:
             return Response({'error': 'No copies available for reservation'}, status=status.HTTP_400_BAD_REQUEST)
 
+        # 🆕 ENHANCED: Check for unpaid fines before allowing reservation
+        unpaid_fines = Transaction.objects.filter(
+            user=request.user,
+            fine_amount__gt=0,
+            fine_paid=False
+        ).aggregate(Sum('fine_amount'))['fine_amount__sum'] or 0
+
+        if unpaid_fines > 0:
+            return Response({
+                'error': f'You have outstanding fines of ₹{unpaid_fines}. Please pay before reserving more books.',
+                'unpaid_fines': unpaid_fines,  # 🆕 Send fine amount to frontend
+                'block_reservation': True  # 🆕 Flag for frontend
+            }, status=status.HTTP_400_BAD_REQUEST)
+
         # Check 2: Already has active reservation or borrow for this book
         existing_transaction = Transaction.objects.filter(
             book=book,
@@ -721,18 +735,6 @@ def borrow_book(request, book_id):
         if current_active >= user_profile.borrowing_limit:
             return Response({
                 'error': f'Borrowing limit reached. You can only have {user_profile.borrowing_limit} active books (including reservations) at a time.'
-            }, status=status.HTTP_400_BAD_REQUEST)
-        
-        # Check 4: Outstanding fines
-        unpaid_fines = Transaction.objects.filter(
-            user=request.user,
-            fine_amount__gt=0,
-            fine_paid=False
-        ).aggregate(Sum('fine_amount'))['fine_amount__sum'] or 0
-
-        if unpaid_fines > 0:
-            return Response({
-                'error': f'You have outstanding fines of ₹{unpaid_fines}. Please pay before reserving more books.'
             }, status=status.HTTP_400_BAD_REQUEST)
 
         # Calculate due date based on user type (will start from actual borrow date)
@@ -767,14 +769,19 @@ def borrow_book(request, book_id):
             'borrowing_period_days': user_profile.borrowing_period,
             'transaction': serializer.data,
             'type': 'reservation',
-            'effective_availability': book.effectively_available  # Return updated availability
+            'effective_availability': book.effectively_available,  # Return updated availability
+            'fine_policy_info': {  # �NEW: Send fine policy info to frontend
+                'grace_period_days': 2,
+                'fine_rate_per_day': 5,
+                'fine_currency': '₹'
+            }
         }, status=status.HTTP_201_CREATED)
 
     except Book.DoesNotExist:
         return Response({'error': 'Book not found'}, status=status.HTTP_404_NOT_FOUND)
     except UserProfile.DoesNotExist:
         return Response({'error': 'User profile not found'}, status=status.HTTP_404_NOT_FOUND)
-
+    
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def return_book(request, transaction_id):
@@ -792,12 +799,24 @@ def return_book(request, transaction_id):
         today = timezone.now().date()
         due_date = transaction.due_date.date()
 
+        # 🎯 ENHANCED FINE CALCULATION (SAFE UPDATE)
         if today > due_date:
-            days_overdue = (today - due_date).days
+            total_days_overdue = (today - due_date).days
+            grace_period_days = 2  # 🆕 2-day grace period
+            effective_overdue_days = max(0, total_days_overdue - grace_period_days)
             fine_per_day = 5  # ₹5 per day fine
-            transaction.fine_amount = days_overdue * fine_per_day
+            transaction.fine_amount = effective_overdue_days * fine_per_day
+            
+            # 🆕 Store fine details for notifications
+            fine_details = {
+                'total_days_overdue': total_days_overdue,
+                'grace_period_used': min(grace_period_days, total_days_overdue),
+                'effective_overdue_days': effective_overdue_days,
+                'fine_rate': fine_per_day
+            }
         else:
             transaction.fine_amount = 0.00
+            fine_details = None
 
         transaction.return_date = timezone.now()
         transaction.save()
@@ -806,7 +825,7 @@ def return_book(request, transaction_id):
         book.available_copies += 1
         book.save()
 
-        # ADD THIS NOTIFICATION CODE:
+        # 🎯 ENHANCED NOTIFICATIONS (SAFE UPDATE)
         from .notification_utils import NotificationManager
 
         # Notification for successful return
@@ -814,17 +833,36 @@ def return_book(request, transaction_id):
         notification_message = f'You returned "{book.title}"'
 
         if transaction.fine_amount > 0:
+            # 🆕 Enhanced fine message with details
             notification_message += f'. Fine applied: ₹{transaction.fine_amount}'
-            # Also send fine notification
+            
+            # 🆕 Detailed fine notification
+            fine_breakdown = (
+                f'Fine Breakdown:\n'
+                f'• Due Date: {due_date.strftime("%b %d, %Y")}\n'
+                f'• Return Date: {today.strftime("%b %d, %Y")}\n'
+                f'• Days Overdue: {fine_details["total_days_overdue"]}\n'
+                f'• Grace Period: {fine_details["grace_period_used"]} days\n'
+                f'• Chargeable Days: {fine_details["effective_overdue_days"]}\n'
+                f'• Rate: ₹{fine_details["fine_rate"]}/day\n'
+                f'• Total Fine: ₹{transaction.fine_amount}'
+            )
+            
             NotificationManager.create_notification(
                 user=request.user,
                 notification_type='fine',
                 title='💰 Fine Applied',
-                message=f'Fine of ₹{transaction.fine_amount} applied for overdue return of "{book.title}"',
+                message=f'Fine of ₹{transaction.fine_amount} applied for overdue return of "{book.title}"\n\n{fine_breakdown}',
                 related_book=book,
                 related_transaction=transaction,
                 action_url='/fines'
             )
+        else:
+            # 🆕 Enhanced on-time return message
+            if fine_details and fine_details['total_days_overdue'] > 0:
+                notification_message += f'. Returned within grace period - no fine! ✅'
+            else:
+                notification_message += f'. Returned on time! ✅'
 
         NotificationManager.create_notification(
             user=request.user,
@@ -836,7 +874,7 @@ def return_book(request, transaction_id):
             action_url='/my-transactions'
         )
 
-        # ✅ ADD THIS: Automatically check achievements after book return
+        # ✅ KEEP EXISTING ACHIEVEMENT CHECK (NO CHANGES)
         try:
             from .reading_utils import check_achievements_on_book_return
             awarded_achievements = check_achievements_on_book_return(
@@ -847,11 +885,26 @@ def return_book(request, transaction_id):
         except Exception as e:
             logger.error(f"Error in achievement check after return: {e}")
 
-        serializer = TransactionSerializer(transaction)
-        return Response({'success': 'Book returned successfully', 'transaction': serializer.data})
+        # 🆕 ENHANCED RESPONSE (SAFE UPDATE)
+        response_data = {
+            'success': 'Book returned successfully!',
+            'transaction': TransactionSerializer(transaction).data,
+        }
+        
+        # 🆕 Add fine details to response if fine applied
+        if transaction.fine_amount > 0:
+            response_data['fine_breakdown'] = {
+                'total_days_overdue': fine_details['total_days_overdue'],
+                'grace_period_days': 2,
+                'chargeable_days': fine_details['effective_overdue_days'],
+                'rate_per_day': fine_details['fine_rate'],
+                'total_fine': float(transaction.fine_amount)
+            }
+
+        return Response(response_data, status=status.HTTP_200_OK)
+        
     except Transaction.DoesNotExist:
         return Response({'error': 'Transaction not found'}, status=status.HTTP_404_NOT_FOUND)
-
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
