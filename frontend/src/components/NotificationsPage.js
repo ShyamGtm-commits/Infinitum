@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import NotificationFilters from './NotificationFilters';
 import BulkActionsPanel from './BulkActionsPanel';
 
@@ -29,8 +29,78 @@ const NotificationsPage = ({ user }) => {
         category: 'all',
         date_range: 'all'
     });
+    
+    // Sound system state
+    const [soundEnabled, setSoundEnabled] = useState(true);
+    const audioRef = useRef(null);
+    const prevNotificationsRef = useRef([]);
 
-    // Build API URL with filters - UPDATED for reservation categories
+    // Initialize audio - USING WORKING PATH
+    useEffect(() => {
+        audioRef.current = new Audio('/notification-sound.mp3.mp3');
+        audioRef.current.volume = 0.5;
+        audioRef.current.preload = 'auto';
+        
+        // Load sound preference from localStorage
+        const savedSoundPreference = localStorage.getItem('notificationPageSoundEnabled');
+        if (savedSoundPreference !== null) {
+            setSoundEnabled(JSON.parse(savedSoundPreference));
+        }
+
+        // Test audio loading
+        audioRef.current.addEventListener('canplaythrough', () => {
+            console.log('NotificationsPage sound loaded successfully');
+        });
+
+        audioRef.current.addEventListener('error', (e) => {
+            console.error('NotificationsPage sound loading error:', e);
+        });
+
+        return () => {
+            if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current = null;
+            }
+        };
+    }, []);
+
+    // Play sound for new notifications - IMPROVED LOGIC
+    useEffect(() => {
+        if (notifications.length > 0 && soundEnabled && audioRef.current) {
+            const currentUnreadCount = notifications.filter(n => !n.is_read).length;
+            const prevUnreadCount = prevNotificationsRef.current.filter(n => !n.is_read).length;
+            
+            // Play sound if new unread notifications appear
+            if (currentUnreadCount > prevUnreadCount) {
+                console.log(`New unread notifications! Playing sound. Current: ${currentUnreadCount}, Previous: ${prevUnreadCount}`);
+                playNotificationSound();
+            }
+            
+            prevNotificationsRef.current = notifications;
+        }
+    }, [notifications, soundEnabled]);
+
+    const playNotificationSound = async () => {
+        if (!audioRef.current || !soundEnabled) return;
+        
+        try {
+            // Reset audio to start from beginning
+            audioRef.current.currentTime = 0;
+            await audioRef.current.play();
+            console.log('NotificationsPage sound played successfully');
+        } catch (error) {
+            console.log('NotificationsPage sound play failed:', error);
+        }
+    };
+
+    const toggleSound = () => {
+        const newSoundState = !soundEnabled;
+        setSoundEnabled(newSoundState);
+        localStorage.setItem('notificationPageSoundEnabled', JSON.stringify(newSoundState));
+        console.log(`NotificationsPage sound ${newSoundState ? 'enabled' : 'disabled'}`);
+    };
+
+    // Build API URL with filters
     const buildApiUrl = (pageNum = 1) => {
         const params = new URLSearchParams({
             page: pageNum,
@@ -39,16 +109,13 @@ const NotificationsPage = ({ user }) => {
             date_range: filters.date_range
         });
 
-        // ENHANCED: Handle category filter with backend type mapping
         if (filters.category !== 'all') {
             const backendTypes = getNotificationTypesForCategory(filters.category);
             if (backendTypes.length > 0) {
-                // Add each notification type as a separate category parameter
                 backendTypes.forEach(type => {
                     params.append('category', type);
                 });
             } else {
-                // Fallback to original behavior
                 params.append('category', filters.category);
             }
         }
@@ -71,14 +138,11 @@ const NotificationsPage = ({ user }) => {
                 const data = await response.json();
 
                 if (append) {
-                    // Append to existing notifications
                     setNotifications(prev => [...prev, ...data.notifications]);
                 } else {
-                    // Replace notifications
                     setNotifications(data.notifications);
                 }
 
-                // Check if there are more pages
                 setHasMore(data.pagination.has_next);
                 setPage(pageNum);
             }
@@ -132,7 +196,6 @@ const NotificationsPage = ({ user }) => {
                 endpoint = 'bulk/mark-read/';
                 break;
             case 'mark_unread':
-                // We'll handle this locally since we don't have a backend for mark unread
                 setNotifications(prev =>
                     prev.map(notif =>
                         selectedNotifications.includes(notif.id)
@@ -170,14 +233,11 @@ const NotificationsPage = ({ user }) => {
             if (response.ok) {
                 const result = await response.json();
 
-                // Update local state based on action
                 if (action === 'delete') {
-                    // Remove deleted notifications
                     setNotifications(prev =>
                         prev.filter(notif => !selectedNotifications.includes(notif.id))
                     );
                 } else if (action === 'mark_read' || action === 'archive') {
-                    // Mark as read
                     setNotifications(prev =>
                         prev.map(notif =>
                             selectedNotifications.includes(notif.id)
@@ -187,13 +247,9 @@ const NotificationsPage = ({ user }) => {
                     );
                 }
 
-                // Clear selection
                 setSelectedNotifications([]);
-
-                // Show success message
                 alert(`✅ ${result.success}`);
 
-                // Refresh if we deleted items and list is empty
                 if (action === 'delete' && notifications.length === selectedNotifications.length) {
                     fetchNotifications(1);
                 }
@@ -264,10 +320,9 @@ const NotificationsPage = ({ user }) => {
         }
     };
 
-    // NEW: Enhanced notification icon with reservation support
+    // Enhanced notification icon with reservation support
     const getNotificationIcon = (type) => {
         switch (type) {
-            // RESERVATION NOTIFICATIONS - NEW
             case 'reservation_confirmation':
                 return 'fas fa-calendar-check text-success';
             case 'reservation_ready':
@@ -276,8 +331,6 @@ const NotificationsPage = ({ user }) => {
                 return 'fas fa-clock text-warning';
             case 'pickup_reminder':
                 return 'fas fa-book text-info';
-
-            // EXISTING NOTIFICATIONS
             case 'due_reminder':
                 return 'fas fa-clock text-warning';
             case 'overdue':
@@ -293,10 +346,9 @@ const NotificationsPage = ({ user }) => {
         }
     };
 
-    // NEW: Enhanced notification badge with reservation support
+    // Enhanced notification badge with reservation support
     const getNotificationBadge = (type) => {
         switch (type) {
-            // RESERVATION NOTIFICATIONS - NEW
             case 'reservation_confirmation':
                 return 'bg-success';
             case 'reservation_ready':
@@ -305,8 +357,6 @@ const NotificationsPage = ({ user }) => {
                 return 'bg-warning';
             case 'pickup_reminder':
                 return 'bg-info';
-
-            // EXISTING NOTIFICATIONS
             case 'due_reminder':
                 return 'bg-warning';
             case 'overdue':
@@ -322,17 +372,14 @@ const NotificationsPage = ({ user }) => {
         }
     };
 
-    // NEW: Safe notification click handler using only your existing routes
+    // Safe notification click handler
     const handleNotificationClick = (notification) => {
-        // Mark as read if unread
         if (!notification.is_read) {
             markAsRead(notification.id);
         }
 
-        // Define safe routes based on your actual app structure
         const getSafeRoute = (notification) => {
             switch (notification.type) {
-                // BOOK-RELATED NOTIFICATIONS - Go to book details
                 case 'reservation_confirmation':
                 case 'reservation_ready':
                 case 'pickup_reminder':
@@ -342,21 +389,14 @@ const NotificationsPage = ({ user }) => {
                         return `/books/${notification.related_book_id}`;
                     }
                     return null;
-
-                // BORROWING NOTIFICATIONS - Go to my-borrows (you have this route)
                 case 'due_reminder':
                 case 'overdue':
                     return '/my-borrows';
-
-                // FINE NOTIFICATIONS - Go to fines page (you have this route)
                 case 'fine':
                     return '/fines';
-
-                // SYSTEM NOTIFICATIONS - Use action_url if it's a safe route
                 case 'system':
                 case 'welcome':
                     if (notification.action_url) {
-                        // Only allow navigation to routes that exist in your app
                         const safeRoutes = [
                             '/books/', '/my-borrows', '/fines', '/my-reservations',
                             '/notifications', '/profile', '/dashboard', '/search'
@@ -367,33 +407,25 @@ const NotificationsPage = ({ user }) => {
                         return isSafe ? notification.action_url : null;
                     }
                     return null;
-
-                // ACHIEVEMENTS & OTHER TYPES - No navigation (route doesn't exist)
                 case 'achievement':
                 default:
                     return null;
             }
         };
 
-        // Get the safe route
         const targetUrl = getSafeRoute(notification);
-
         if (targetUrl) {
             window.location.href = targetUrl;
         }
-        // If no targetUrl, just stay on notifications page (already marked as read)
     };
 
-    // NEW: Format notification type for display
+    // Format notification type for display
     const formatNotificationType = (type) => {
         const typeMap = {
-            // RESERVATION NOTIFICATIONS
             reservation_confirmation: 'Reservation Confirmed',
             reservation_ready: 'Ready for Pickup',
             reservation_expiring: 'Reservation Expiring',
             pickup_reminder: 'Pickup Reminder',
-
-            // EXISTING NOTIFICATIONS
             due_reminder: 'Due Reminder',
             overdue: 'Overdue',
             achievement: 'Achievement',
@@ -410,7 +442,7 @@ const NotificationsPage = ({ user }) => {
 
     return (
         <div className="container mt-4">
-            {/* Header */}
+            {/* Header with Sound Control */}
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <h2>
                     <i className="fas fa-bell me-2"></i>
@@ -426,15 +458,28 @@ const NotificationsPage = ({ user }) => {
                         </span>
                     )}
                 </h2>
-                {unreadCountInView > 0 && (
+                
+                <div className="d-flex align-items-center gap-3">
+                    {/* Sound Control */}
                     <button
-                        className="btn btn-outline-primary"
-                        onClick={markAllAsRead}
+                        className={`btn ${soundEnabled ? 'btn-success' : 'btn-outline-secondary'}`}
+                        onClick={toggleSound}
+                        title={soundEnabled ? 'Mute notification sounds' : 'Enable notification sounds'}
                     >
-                        <i className="fas fa-check-double me-2"></i>
-                        Mark All as Read
+                        <i className={`fas ${soundEnabled ? 'fa-volume-up' : 'fa-volume-mute'} me-2`}></i>
+                        {soundEnabled ? 'Sound On' : 'Sound Off'}
                     </button>
-                )}
+                    
+                    {unreadCountInView > 0 && (
+                        <button
+                            className="btn btn-outline-primary"
+                            onClick={markAllAsRead}
+                        >
+                            <i className="fas fa-check-double me-2"></i>
+                            Mark All as Read
+                        </button>
+                    )}
+                </div>
             </div>
 
             {/* Advanced Filters */}
@@ -443,7 +488,7 @@ const NotificationsPage = ({ user }) => {
                 onFiltersChange={handleFiltersChange}
             />
 
-            {/* Bulk Actions Panel - KEEP YOUR ELEGANT DESIGN */}
+            {/* Bulk Actions Panel */}
             <BulkActionsPanel
                 selectedCount={selectedNotifications.length}
                 totalCount={notifications.length}
@@ -483,7 +528,6 @@ const NotificationsPage = ({ user }) => {
             ) : (
                 <div className="row">
                     <div className="col-12">
-                        {/* Enhanced notification item mapping */}
                         {notifications.map(notification => {
                             const isSelected = selectedNotifications.includes(notification.id);
                             const notificationClass = `card mb-3 notification-item ${isSelected ? 'selected' : ''} ${!notification.is_read ? 'border-primary bg-light unread' : 'read'}`;
@@ -499,7 +543,6 @@ const NotificationsPage = ({ user }) => {
                                 >
                                     <div className="card-body">
                                         <div className="d-flex align-items-start">
-                                            {/* Selection Checkbox */}
                                             <div className="me-3">
                                                 <input
                                                     type="checkbox"
@@ -512,12 +555,10 @@ const NotificationsPage = ({ user }) => {
                                                 />
                                             </div>
 
-                                            {/* UPDATED: Notification Icon with reservation support */}
                                             <div className="me-3">
                                                 <i className={`${getNotificationIcon(notification.type)} fa-lg ${isSelected ? 'text-primary' : ''}`}></i>
                                             </div>
 
-                                            {/* Notification Content */}
                                             <div className="flex-grow-1">
                                                 <div className="d-flex justify-content-between align-items-start">
                                                     <h5 className={`card-title mb-1 ${isSelected ? 'text-primary' : ''}`}>
@@ -532,7 +573,6 @@ const NotificationsPage = ({ user }) => {
                                                                 New
                                                             </span>
                                                         )}
-                                                        {/* UPDATED: Use enhanced badge with reservation support */}
                                                         <span className={`badge ${getNotificationBadge(notification.type)} ${isSelected ? 'border border-white' : ''}`}>
                                                             {formatNotificationType(notification.type)}
                                                         </span>
@@ -540,7 +580,6 @@ const NotificationsPage = ({ user }) => {
                                                 </div>
                                                 <p className="card-text">{notification.message}</p>
 
-                                                {/* Book cover if available */}
                                                 {notification.related_book_cover && (
                                                     <div className="mb-2">
                                                         <img

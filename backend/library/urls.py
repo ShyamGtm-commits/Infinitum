@@ -41,6 +41,10 @@ urlpatterns = [
          views.handle_book_review, name='handle_book_review'),
     path('books/<int:book_id>/reviews/',
          views.get_book_reviews, name='get_book_reviews'),
+    path('user/reservations/', views.user_reservations, name='user_reservations'),
+    path('user/reservations/count/', views.user_reservations_count, name='user_reservations_count'),
+    path('reservations/<int:transaction_id>/cancel/',
+         views.cancel_reservation, name='cancel_reservation'),
 
     # ===== QR SYSTEM =====
     path('books/<int:book_id>/generate_borrow_qr/',
@@ -148,6 +152,7 @@ urlpatterns = [
          views.decode_qr_image, name='decode_qr_image'),
     path('librarian/validate-return-qr/',
          views.validate_return_qr, name='validate_return_qr'),
-    path('librarian/process-book-return/', views.process_book_return, name='process_book_return')  # Unified return processing
+    path('librarian/process-book-return/', views.process_book_return,
+         name='process_book_return')  # Unified return processing
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

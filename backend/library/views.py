@@ -502,12 +502,163 @@ def user_active_borrows(request):
     serializer = TransactionSerializer(transactions, many=True)
     return Response(serializer.data)
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def user_reservations(request):
+    """
+    Get user's active reservations - SIMPLIFIED VERSION
+    """
+    print(f"🔍 user_reservations called for user: {request.user.username}")
+    
+    try:
+        # Simple test - just return basic data without complex logic
+        from django.utils import timezone
+        from datetime import timedelta
+        
+        reservations = Transaction.objects.filter(
+            user=request.user,
+            status='pending'
+        ).select_related('book')
+        
+        print(f"📚 Found {reservations.count()} reservations")
+        
+        reservations_data = []
+        for reservation in reservations:
+            # Simple data without complex calculations
+            reservation_data = {
+                'id': reservation.id,
+                'book_title': reservation.book.title,
+                'book_author': reservation.book.author,
+                'qr_generated_at': reservation.qr_generated_at.isoformat() if reservation.qr_generated_at else None,
+                'qr_data': reservation.qr_data
+            }
+            
+            # Try to add cover image safely
+            try:
+                if reservation.book.cover_image:
+                    reservation_data['book_cover'] = request.build_absolute_uri(reservation.book.cover_image.url)
+                else:
+                    reservation_data['book_cover'] = None
+            except Exception as e:
+                print(f"⚠️ Error with cover image for book {reservation.book.id}: {e}")
+                reservation_data['book_cover'] = None
+            
+            # Try to add expiry time safely
+            try:
+                if hasattr(reservation, 'get_qr_expiry_time') and callable(reservation.get_qr_expiry_time):
+                    expiry_time = reservation.get_qr_expiry_time()
+                    if expiry_time:
+                        time_remaining = expiry_time - timezone.now()
+                        hours_remaining = max(0, time_remaining.total_seconds() / 3600)
+                        reservation_data.update({
+                            'expiry_time': expiry_time.isoformat(),
+                            'hours_remaining': round(hours_remaining, 1),
+                            'is_expired': hours_remaining <= 0
+                        })
+            except Exception as e:
+                print(f"⚠️ Error calculating expiry for reservation {reservation.id}: {e}")
+                # Set default values if calculation fails
+                reservation_data.update({
+                    'expiry_time': None,
+                    'hours_remaining': 0,
+                    'is_expired': True
+                })
+            
+            reservations_data.append(reservation_data)
+        
+        print("✅ Successfully prepared response data")
+        return Response(reservations_data)
+        
+    except Exception as e:
+        print(f"❌ CRITICAL ERROR in user_reservations: {str(e)}")
+        import traceback
+        traceback.print_exc()  # This will show the full error in console
+        
+        return Response(
+            {'error': f'Server error: {str(e)}'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+    
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def user_reservations_count(request):
+    """
+    Get count of user's active reservations for the notification bell
+    """
+    try:
+        # Use the same filtering logic as user_reservations
+        count = Transaction.objects.filter(
+            user=request.user,
+            status='pending'
+        ).count()
+        
+        return Response({'count': count})
+        
+    except Exception as e:
+        logger.error(f"Error counting user reservations: {e}")
+        return Response({'count': 0})
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def cancel_reservation(request, transaction_id):
+    """
+    Allow users to cancel their own reservations
+    """
+    try:
+        # Get the reservation
+        reservation = Transaction.objects.get(
+            id=transaction_id,
+            user=request.user,
+            status='pending'  # Only allow cancellation of pending reservations
+        )
+        
+        book = reservation.book
+        
+        # Free up the reserved copy
+        book.reserved_copies -= 1
+        book.save()
+        
+        # Update reservation status
+        reservation.status = 'cancelled'
+        reservation.save()
+        
+        # Send cancellation notification to user
+        from .notification_utils import NotificationManager
+        NotificationManager.create_notification(
+            user=request.user,
+            notification_type='system',
+            title='❌ Reservation Cancelled',
+            message=f'Your reservation for "{book.title}" has been cancelled successfully.',
+            related_book=book,
+            action_url='/my-reservations'
+        )
+        
+        # ✅ Automatically notify next user in waitlist
+        from .utils import notify_waitlist_users
+        waitlist_notified = notify_waitlist_users(book)
+        
+        return Response({
+            'success': 'Reservation cancelled successfully',
+            'book_freed': True,
+            'waitlist_notified': waitlist_notified
+        })
+        
+    except Transaction.DoesNotExist:
+        return Response({
+            'error': 'Reservation not found or already processed'
+        }, status=404)
+    except Exception as e:
+        logger.error(f"Reservation cancellation error: {e}")
+        return Response({
+            'error': 'Failed to cancel reservation'
+        }, status=500)
+
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def borrow_book(request, book_id):
     """
-    Allows an authenticated user to borrow a book with confirmation.
+    Allows an authenticated user to reserve a book (creates reservation, not actual borrow)
     """
     try:
         # Check if this is a confirmation request
@@ -521,45 +672,46 @@ def borrow_book(request, book_id):
             book_details = {
                 'title': book.title,
                 'author': book.author,
+                'available_copies': book.effectively_available,  # Use effective availability
                 'due_date': (timezone.now() + timedelta(weeks=2)).strftime('%Y-%m-%d')
             }
 
             return Response({
                 'requires_confirmation': True,
-                # CHANGED
                 'message': f'Do you want to reserve "{book.title}" by {book.author} for library pickup?',
                 'book_details': book_details
             }, status=status.HTTP_200_OK)
 
-        # If confirmed, proceed with borrowing
+        # If confirmed, proceed with RESERVATION (not borrowing)
         user_profile = UserProfile.objects.get(user=request.user)
         book = Book.objects.get(id=book_id)
 
-        # Check 1: Available copies
-        if book.available_copies <= 0:
-            return Response({'error': 'No copies available'}, status=status.HTTP_400_BAD_REQUEST)
+        # ✅ UPDATED: Check effective availability (available - reserved)
+        if book.effectively_available <= 0:
+            return Response({'error': 'No copies available for reservation'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Check 2: Already borrowed this book
+        # Check 2: Already has active reservation or borrow for this book
         existing_transaction = Transaction.objects.filter(
             book=book,
             user=request.user,
             return_date__isnull=True
         ).exists()
+        
         if existing_transaction:
             return Response({
-                'error': 'You have already borrowed this book. Please return it before borrowing again.',
-                'already_borrowed': True  # ⭐ Add this flag
+                'error': 'You already have an active reservation or borrow for this book.',
+                'already_borrowed': True
             }, status=status.HTTP_400_BAD_REQUEST)
 
-        # Check 3: Borrowing limit reached
-        current_borrows = Transaction.objects.filter(
+        # Check 3: Borrowing limit reached (count both borrowed AND reserved books)
+        current_active = Transaction.objects.filter(
             user=request.user,
             return_date__isnull=True
         ).count()
 
-        if current_borrows >= user_profile.borrowing_limit:
+        if current_active >= user_profile.borrowing_limit:
             return Response({
-                'error': f'Borrowing limit reached. You can only borrow {user_profile.borrowing_limit} books at a time.'
+                'error': f'Borrowing limit reached. You can only have {user_profile.borrowing_limit} active books (including reservations) at a time.'
             }, status=status.HTTP_400_BAD_REQUEST)
 
         # Check 4: Outstanding fines
@@ -571,68 +723,48 @@ def borrow_book(request, book_id):
 
         if unpaid_fines > 0:
             return Response({
-                'error': f'You have outstanding fines of ₹{unpaid_fines}. Please pay before borrowing more books.'
+                'error': f'You have outstanding fines of ₹{unpaid_fines}. Please pay before reserving more books.'
             }, status=status.HTTP_400_BAD_REQUEST)
 
-        # Calculate due date based on user type
+        # Calculate due date based on user type (will start from actual borrow date)
         due_date = timezone.now() + timedelta(days=user_profile.borrowing_period)
 
-        # Create transaction
+        # ✅ Create RESERVATION (not borrow) - status is 'pending'
         transaction = Transaction.objects.create(
             book=book,
             user=request.user,
-            due_date=due_date
+            due_date=due_date,  # This will be updated when book is actually issued
+            status='pending'
         )
 
-        # Update available copies
-        book.available_copies -= 1
+        # ✅ INCREASE reserved copies (but don't decrease available copies yet)
+        book.reserved_copies += 1
         book.save()
 
+        # ✅ Send ONLY reservation confirmation
         from .notification_utils import NotificationManager
-        # Notification for successful borrow
-        NotificationManager.create_notification(
-            user=request.user,
-            notification_type='system',
-            title='📚 Book Borrowed Successfully!',
-            message=f'You borrowed "{book.title}" by {book.author}. Due date: {due_date.strftime("%B %d, %Y")}',
-            related_book=book,
-            related_transaction=transaction,
-            action_url='/my-borrows'
-        )
         NotificationManager.send_reservation_confirmation(
             user=request.user,
             book=book,
             transaction=transaction
         )
 
-        # Also create a due date reminder (7 days before)
-        NotificationManager.create_due_date_reminder(transaction)
-
-        # ✅ OPTIONAL: Check for "first book borrowed" type achievements
-        try:
-            from .reading_utils import check_and_award_achievements
-            awarded = check_and_award_achievements(request.user)
-            if awarded:
-                print(f"🎉 Achievements after borrow: {awarded}")
-        except Exception as e:
-            logger.error(f"Error in achievement check after borrow: {e}")
-
         serializer = TransactionSerializer(transaction)
 
-        # ✅ UPDATED: Return accurate success message and type
+        # ✅ Return reservation success message
         return Response({
-            'success': 'Book reserved for pickup! Show QR code to librarian.',  # CHANGED
+            'success': 'Book reserved for pickup! Generate QR code to complete borrowing.',
             'due_date': due_date.strftime('%Y-%m-%d'),
             'borrowing_period_days': user_profile.borrowing_period,
             'transaction': serializer.data,
-            'type': 'qr_pending'  # CHANGED: Indicates pending pickup
+            'type': 'reservation',
+            'effective_availability': book.effectively_available  # Return updated availability
         }, status=status.HTTP_201_CREATED)
 
     except Book.DoesNotExist:
         return Response({'error': 'Book not found'}, status=status.HTTP_404_NOT_FOUND)
     except UserProfile.DoesNotExist:
         return Response({'error': 'User profile not found'}, status=status.HTTP_404_NOT_FOUND)
-
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -1648,88 +1780,63 @@ def get_genre_trends():
 @permission_classes([IsAuthenticated])
 def generate_borrow_qr(request, book_id):
     """
-    IMPROVED: Generate QR for borrowing with waitlist support
+    Generate QR for reserved book - book is already reserved, just generating QR
     """
     try:
         book = Book.objects.get(id=book_id)
         user = request.user
 
-        # Check if user already has active QR for this book
-        existing_qr = Transaction.objects.filter(
+        # Find the user's reservation for this book
+        reservation = Transaction.objects.filter(
+            book=book,
+            user=user,
+            status='pending'
+        ).first()
+
+        if not reservation:
+            return Response({'error': 'No active reservation found for this book. Please reserve it first.'}, status=400)
+
+        # Check if user already has active QR for this reservation
+        existing_active_qr = Transaction.objects.filter(
             book=book,
             user=user,
             status='pending',
             qr_generated_at__gte=timezone.now() - timedelta(hours=24)
         ).first()
 
-        if existing_qr:
-            # If QR data is missing, generate it
-            if not existing_qr.qr_data:
-                qr_payload = f"BORROW:{existing_qr.id}:{book.id}:{user.id}"
-                existing_qr.qr_data = generate_base64_qr(qr_payload)
-                existing_qr.save()
-
-            # Return existing QR with PROPER DATE FORMAT
+        if existing_active_qr and existing_active_qr.qr_data:
             return Response({
                 'success': 'Using existing QR code',
-                'qr_data': existing_qr.qr_data,
-                'transaction_id': existing_qr.id,
-                'expires_at': existing_qr.get_qr_expiry_time().isoformat() if existing_qr.get_qr_expiry_time() else None,
-                'type': 'qr_pending'  # CHANGED
+                'qr_data': existing_active_qr.qr_data,
+                'transaction_id': existing_active_qr.id,
+                'expires_at': existing_active_qr.get_qr_expiry_time().isoformat() if existing_active_qr.get_qr_expiry_time() else None,
+                'type': 'qr_pending'
             })
 
-        # Check book availability
-        if book.available_copies > 0:
-            # BOOK AVAILABLE - Generate QR immediately
-            user_profile = UserProfile.objects.get(user=user)
-            due_date = timezone.now() + timedelta(days=user_profile.borrowing_period)
+        # Generate QR data
+        qr_payload = f"BORROW:{reservation.id}:{book.id}:{user.id}"
+        qr_data = generate_base64_qr(qr_payload)
 
-            # Create transaction
-            transaction = Transaction.objects.create(
-                book=book,
-                user=user,
-                due_date=due_date,
-                status='pending'
-            )
+        # Save QR data to reservation
+        reservation.qr_data = qr_data
+        reservation.qr_generated_at = timezone.now()
+        reservation.save()
 
-            # Generate QR data
-            qr_payload = f"BORROW:{transaction.id}:{book.id}:{user.id}"
-            qr_data = generate_base64_qr(qr_payload)
+        # ✅ Send QR ready notification
+        from .notification_utils import NotificationManager
+        NotificationManager.send_reservation_ready(
+            user=user,
+            book=book,
+            transaction=reservation
+        )
 
-            # Save QR data to transaction
-            transaction.qr_data = qr_data
-            transaction.save()
-
-            # Reduce available copies
-            book.available_copies -= 1
-            book.save()
-
-            # ✅ UPDATED: Send QR ready notification
-            from .notification_utils import NotificationManager
-            NotificationManager.send_reservation_ready(
-                user=user,
-                book=book,
-                transaction=transaction
-            )
-
-            return Response({
-                'success': 'QR code generated for library pickup!',  # CHANGED
-                'qr_data': qr_data,
-                'transaction_id': transaction.id,
-                'expires_at': transaction.get_qr_expiry_time().isoformat(),
-                'type': 'qr_pending'  # CHANGED
-            })
-
-        else:
-            # BOOK UNAVAILABLE - Add to waitlist
-            waitlist_entry = add_to_waitlist(user, book)
-
-            return Response({
-                'success': f'Added to waitlist. Position: #{waitlist_entry.position}',
-                'waitlist_position': waitlist_entry.position,
-                'estimated_wait': estimate_wait_time(waitlist_entry.position),
-                'type': 'waitlist'
-            })
+        return Response({
+            'success': 'QR code generated for library pickup!',
+            'qr_data': qr_data,
+            'transaction_id': reservation.id,
+            'expires_at': reservation.get_qr_expiry_time().isoformat(),
+            'type': 'qr_pending'
+        })
 
     except Book.DoesNotExist:
         return Response({'error': 'Book not found'}, status=404)
@@ -2135,7 +2242,7 @@ def get_my_qr(request, book_id):
 @permission_classes([IsLibrarianUser])
 def issue_book_via_qr(request):
     """
-    Issue book after QR validation
+    Issue book after QR validation - convert reservation to actual borrow
     """
     try:
         transaction_id = request.data.get('transaction_id')
@@ -2145,32 +2252,44 @@ def issue_book_via_qr(request):
 
         transaction = Transaction.objects.select_related('book', 'user').get(
             id=transaction_id,
-            status='pending'
+            status='pending'  # Only process pending reservations
         )
 
         # Final validation
         if not transaction.is_qr_valid():
             return Response({'error': 'QR expired'}, status=400)
 
-        if transaction.book.available_copies <= 0:
-            return Response({'error': 'Book no longer available'}, status=400)
+        book = transaction.book
 
-        # Update transaction status
+        # ✅ UPDATE: Convert reservation to actual borrow
+        # Reduce available copies (was already reserved)
+        book.available_copies -= 1
+        # Reduce reserved copies (reservation is being converted to borrow)
+        book.reserved_copies -= 1
+        book.save()
+
+        # Update transaction status to BORROWED and set actual issue date
         transaction.status = 'borrowed'
         transaction.issued_at = timezone.now()
+        # ✅ Set actual due date from today (not from reservation date)
+        user_profile = UserProfile.objects.get(user=transaction.user)
+        transaction.due_date = timezone.now() + timedelta(days=user_profile.borrowing_period)
         transaction.save()
 
-        # Send notification to user
+        # ✅ NOW send the borrow success notification (after QR scan)
         from .notification_utils import NotificationManager
         NotificationManager.create_notification(
             user=transaction.user,
             notification_type='system',
-            title='📚 Book Issued Successfully!',
-            message=f'Your book "{transaction.book.title}" has been issued. Due date: {transaction.due_date.strftime("%B %d, %Y")}',
+            title='📚 Book Borrowed Successfully!',
+            message=f'You borrowed "{transaction.book.title}" by {transaction.book.author}. Due date: {transaction.due_date.strftime("%B %d, %Y")}',
             related_book=transaction.book,
             related_transaction=transaction,
             action_url='/my-borrows'
         )
+
+        # ✅ Also create a due date reminder (7 days before)
+        NotificationManager.create_due_date_reminder(transaction)
 
         return Response({
             'success': f'Book issued to {transaction.user.username}',
@@ -2179,11 +2298,10 @@ def issue_book_via_qr(request):
         })
 
     except Transaction.DoesNotExist:
-        return Response({'error': 'Transaction not found'}, status=404)
+        return Response({'error': 'Transaction not found or already processed'}, status=404)
     except Exception as e:
         logger.error(f"Book issuance error: {e}")
         return Response({'error': 'Failed to issue book'}, status=400)
-
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])

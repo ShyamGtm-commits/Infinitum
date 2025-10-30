@@ -6,11 +6,12 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class NotificationManager:
     """
     Enhanced Notification Manager with reservation support
     """
-    
+
     # Notification templates for different types
     NOTIFICATION_TEMPLATES = {
         # RESERVATION NOTIFICATIONS - NEW
@@ -30,7 +31,7 @@ class NotificationManager:
             'title': '📚 Pickup Reminder',
             'message': 'Remember to pick up "{book_title}" from the library using your QR code.'
         },
-        
+
         # EXISTING NOTIFICATIONS
         'book_available': {
             'title': '🎉 Book Available!',
@@ -63,29 +64,34 @@ class NotificationManager:
     }
 
     @staticmethod
-    def create_notification(user, notification_type, title=None, message=None, 
-                          related_book=None, related_transaction=None, action_url=None):
+    def create_notification(user, notification_type, title=None, message=None,
+                            related_book=None, related_transaction=None, action_url=None):
         """
         Create a notification with enhanced reservation support
         """
         try:
             # Check user preferences
-            preferences = UserNotificationPreference.objects.filter(user=user).first()
-            
+            preferences = UserNotificationPreference.objects.filter(
+                user=user).first()
+
             # If no preferences exist, create default ones
             if not preferences:
-                preferences = UserNotificationPreference.objects.create(user=user)
-            
+                preferences = UserNotificationPreference.objects.create(
+                    user=user)
+
             # Check if user wants this type of notification
             if not NotificationManager._should_send_notification(notification_type, preferences):
-                logger.info(f"Notification {notification_type} skipped due to user preferences for {user.username}")
+                logger.info(
+                    f"Notification {notification_type} skipped due to user preferences for {user.username}")
                 return None
 
             # Use template if no custom title/message provided
             if not title or not message:
-                template = NotificationManager.NOTIFICATION_TEMPLATES.get(notification_type, {})
+                template = NotificationManager.NOTIFICATION_TEMPLATES.get(
+                    notification_type, {})
                 title = title or template.get('title', 'Notification')
-                message = message or template.get('message', 'You have a new notification.')
+                message = message or template.get(
+                    'message', 'You have a new notification.')
 
             # Create the notification
             notification = Notification.objects.create(
@@ -98,11 +104,13 @@ class NotificationManager:
                 action_url=action_url
             )
 
-            logger.info(f"Notification created for {user.username}: {notification_type}")
+            logger.info(
+                f"Notification created for {user.username}: {notification_type}")
             return notification
 
         except Exception as e:
-            logger.error(f"Error creating notification for {user.username}: {e}")
+            logger.error(
+                f"Error creating notification for {user.username}: {e}")
             return None
 
     @staticmethod
@@ -116,7 +124,7 @@ class NotificationManager:
             'reservation_ready': preferences.email_book_available,  # Use existing preference
             'reservation_expiring': preferences.email_due_reminders,  # Use existing preference
             'pickup_reminder': preferences.email_due_reminders,  # Use existing preference
-            
+
             # Existing notifications
             'due_reminder': preferences.email_due_reminders,
             'overdue': preferences.email_overdue_alerts,
@@ -126,17 +134,21 @@ class NotificationManager:
             'system': True,  # Always send system notifications
             'welcome': True,  # Always send welcome notifications
         }
-        
+
         return preference_map.get(notification_type, True)
 
     # RESERVATION-SPECIFIC NOTIFICATION METHODS - NEW
 
     @staticmethod
     def send_reservation_confirmation(user, book, transaction=None):
-        """Send confirmation when user reserves a book"""
+        """Send confirmation when user reserves a book - QUICK FIX"""
+        message = f'Your reservation for "{book.title}" is confirmed. Generate QR code for pickup.'
+
         return NotificationManager.create_notification(
             user=user,
             notification_type='reservation_confirmation',
+            title='📋 Reservation Confirmed!',
+            message=message,  # Manually formatted message
             related_book=book,
             related_transaction=transaction,
             action_url=f'/books/{book.id}'
@@ -185,7 +197,7 @@ class NotificationManager:
         book = transaction.book
         due_date = transaction.due_date.strftime('%B %d, %Y')
         message = f'Your book "{book.title}" is due on {due_date}. Please return it soon.'
-        
+
         return NotificationManager.create_notification(
             user=transaction.user,
             notification_type='due_reminder',

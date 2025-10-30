@@ -26,7 +26,7 @@ import NotificationsPage from './components/NotificationsPage';
 import NotificationPreferences from './components/NotificationPreferences';
 import RouteGuard from './components/Security/RouteGuard';
 import SecurityDashboard from './components/Admin/SecurityDashboard';
-
+import UserReservations from './components/UserReservations';
 // import PermissionWrapper from './components/Security/PermissionWrapper';
 
 
@@ -185,6 +185,7 @@ function AppContent() {
             </RouteGuard>
           }
         />
+        <Route path="/my-reservations" element={<UserReservations />} />
       </Routes>
     </div>
   );

@@ -129,6 +129,7 @@ class Book(models.Model):
     description = models.TextField(blank=True, null=True)
     total_copies = models.IntegerField(default=1)
     available_copies = models.IntegerField(default=1)
+    reserved_copies = models.IntegerField(default=0)
     cover_image = models.ImageField(
         upload_to='book_covers/', blank=True, null=True)
     qr_code = models.ImageField(upload_to='qr_codes/', blank=True, null=True)
@@ -142,6 +143,7 @@ class Book(models.Model):
         # Set available copies for new books
         if not self.pk:
             self.available_copies = self.total_copies
+            self.reserved_copies = 0
 
         # First save to get the ID (for new books)
         super().save(*args, **kwargs)
@@ -200,6 +202,16 @@ class Book(models.Model):
         if self.qr_code and hasattr(self.qr_code, 'url'):
             return self.qr_code.url
         return None
+    
+    @property
+    def effectively_available(self):
+        """Books that can be reserved (available - reserved)"""
+        return max(0, self.available_copies - self.reserved_copies)
+
+    @property
+    def can_be_reserved(self):
+        """Check if book can be reserved"""
+        return self.effectively_available > 0
 
 # models.py - KEEP THIS (UserProfile model)
 # models.py - KEEP THIS (it's correct)

@@ -78,33 +78,49 @@ cleanup_waitlist_task(repeat=3600)  # Every hour
 
 # Add to existing tasks.py
 @background(schedule=60)  # Run every hour
-def check_reservation_expiry():
+def cleanup_expired_reservations():
     """
-    Check for reservations expiring soon and send notifications
+    Automatically cancel expired reservations and free up copies
     """
     from .models import Transaction
-    from .notification_utils import NotificationManager
     
-    # Find reservations expiring in the next 6 hours
-    expiry_threshold = timezone.now() + timedelta(hours=6)
-    expiring_reservations = Transaction.objects.filter(
+    expired_reservations = Transaction.objects.filter(
         status='pending',
-        qr_generated_at__isnull=False,
-        qr_generated_at__lte=expiry_threshold
-    ).select_related('book', 'user')
+        qr_generated_at__lte=timezone.now() - timedelta(hours=24)
+    ).select_related('book')
     
-    for transaction in expiring_reservations:
-        hours_remaining = int((transaction.get_qr_expiry_time() - timezone.now()).total_seconds() / 3600)
-        if 1 <= hours_remaining <= 6:  # Only notify if between 1-6 hours left
-            NotificationManager.send_reservation_expiring(
-                user=transaction.user,
-                book=transaction.book,
-                hours_remaining=hours_remaining,
-                transaction=transaction
-            )
+    count = 0
+    for reservation in expired_reservations:
+        # Free up the reserved copy
+        book = reservation.book
+        book.reserved_copies -= 1
+        book.save()
+        
+        # Mark as expired
+        reservation.status = 'expired'
+        reservation.save()
+        
+        # Notify user about expiry
+        from .notification_utils import NotificationManager
+        NotificationManager.create_notification(
+            user=reservation.user,
+            notification_type='system',
+            title='⏰ Reservation Expired',
+            message=f'Your reservation for "{book.title}" has expired. You can reserve it again if needed.',
+            related_book=book,
+            action_url='/books'
+        )
+        
+        # Notify next waitlist user
+        from .utils import notify_waitlist_users
+        notify_waitlist_users(book)
+        
+        count += 1
     
-    print(f"✅ Reservation expiry check: {expiring_reservations.count()} reservations expiring soon")
+    if count > 0:
+        print(f'✅ Auto-cancelled {count} expired reservations')
 
+        
 @background(schedule=3600)  # Run every hour
 def send_pickup_reminders():
     """
@@ -133,3 +149,4 @@ def send_pickup_reminders():
 # Schedule the new tasks
 check_reservation_expiry(repeat=3600)  # Every hour
 send_pickup_reminders(repeat=7200)     # Every 2 hours
+

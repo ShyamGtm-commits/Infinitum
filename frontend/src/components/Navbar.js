@@ -1,5 +1,5 @@
 // Navbar.js (Updated with PermissionWrapper)
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './Navbar.css';
 import NotificationBell from './NotificationBell';
@@ -7,6 +7,27 @@ import PermissionWrapper from './Security/PermissionWrapper';
 
 const Navbar = ({ user, onLogout }) => {
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
+  const [reservationsCount, setReservationsCount] = useState(0);
+
+  useEffect(() => {
+    if (user) {
+      fetchReservationsCount();
+    }
+  }, [user]);
+
+  const fetchReservationsCount = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/user/reservations/count/', {
+        credentials: 'include',
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setReservationsCount(data.count);
+      }
+    } catch (error) {
+      console.error('Error fetching reservations count:', error);
+    }
+  };
 
   const toggleSidebar = () => {
     setIsSidebarVisible(!isSidebarVisible);
@@ -34,6 +55,16 @@ const Navbar = ({ user, onLogout }) => {
           {user && (
             <div className="nav-user-section">
               <NotificationBell user={user} />
+              {/* Add Reservations Badge */}
+              {user && user.user_type !== 'admin' && reservationsCount > 0 && (
+                <Link to="/my-reservations" className="btn btn-outline-warning position-relative me-2">
+                  <i className="fas fa-clock"></i>
+                  <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    {reservationsCount}
+                  </span>
+                </Link>
+              )}
+
               <div className="user-info">
                 {/* ... existing user info code ... */}
               </div>
@@ -66,6 +97,7 @@ const Navbar = ({ user, onLogout }) => {
                 {user.user_type !== 'admin' && (
                   <>
                     <li className="nav-item">
+
                       <Link to="/my-transactions" className="nav-link" onClick={closeSidebar}>
                         <i className="fas fa-history"></i>
                         <span>My Transactions</span>
@@ -76,6 +108,7 @@ const Navbar = ({ user, onLogout }) => {
                         <i className="fas fa-book"></i>
                         <span>My Borrows</span>
                       </Link>
+                
                     </li>
                   </>
                 )}

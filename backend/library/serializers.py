@@ -24,10 +24,15 @@ class UserProfileSerializer(serializers.ModelSerializer):
 class BookSerializer(serializers.ModelSerializer):
     cover_image_url = serializers.SerializerMethodField()
     qr_code_url = serializers.SerializerMethodField()
+    # ✅ ADD these new fields for reservation system
+    effectively_available = serializers.ReadOnlyField()
+    can_be_reserved = serializers.ReadOnlyField()
+    reserved_copies = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Book
         fields = '__all__'
+        
 
     def get_cover_image_url(self, obj):
         if obj.cover_image:
@@ -45,6 +50,21 @@ class BookSerializer(serializers.ModelSerializer):
                 return request.build_absolute_uri(obj.qr_code.url)
             return obj.qr_code.url
         return None
+
+    # ✅ OPTIONAL: Add validation to ensure reserved_copies doesn't exceed available_copies
+    def validate(self, data):
+        """
+        Validate that reserved_copies doesn't exceed available_copies
+        """
+        reserved_copies = data.get('reserved_copies', self.instance.reserved_copies if self.instance else 0)
+        available_copies = data.get('available_copies', self.instance.available_copies if self.instance else 0)
+        
+        if reserved_copies > available_copies:
+            raise serializers.ValidationError({
+                'reserved_copies': 'Reserved copies cannot exceed available copies'
+            })
+        
+        return data
 
 
 class TransactionSerializer(serializers.ModelSerializer):

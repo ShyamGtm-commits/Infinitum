@@ -7,9 +7,36 @@ const NotificationBell = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [showDropdown, setShowDropdown] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
   const dropdownRef = useRef(null);
-  const navigate = useNavigate();
   const audioRef = useRef(null);
+  const navigate = useNavigate();
+  
+  // Track previous unread count for sound detection
+  const prevUnreadCountRef = useRef(0);
+
+  // Initialize audio - USING WORKING PATH FROM DEBUG
+  useEffect(() => {
+    audioRef.current = new Audio('/notification-sound.mp3.mp3');
+    audioRef.current.volume = 0.5;
+    audioRef.current.preload = 'auto';
+    
+    // Load mute preference from localStorage
+    const savedMutePreference = localStorage.getItem('notificationSoundMuted');
+    if (savedMutePreference) {
+      setIsMuted(JSON.parse(savedMutePreference));
+    }
+
+    // Test if audio loads properly
+    audioRef.current.addEventListener('canplaythrough', () => {
+      console.log('Notification sound loaded successfully');
+    });
+
+    audioRef.current.addEventListener('error', (e) => {
+      console.error('Sound loading error:', e);
+    });
+  }, []);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -32,10 +59,11 @@ const NotificationBell = () => {
       
       if (response.ok) {
         const data = await response.json();
-        setNotifications(data.notifications || []);
+        const newNotifications = data.notifications || [];
+        setNotifications(newNotifications);
         
         // Calculate unread count
-        const unread = data.notifications.filter(n => !n.is_read).length;
+        const unread = newNotifications.filter(n => !n.is_read).length;
         setUnreadCount(unread);
       }
     } catch (error) {
@@ -52,6 +80,47 @@ const NotificationBell = () => {
     const interval = setInterval(fetchNotifications, 30000);
     return () => clearInterval(interval);
   }, []);
+
+  // Play sound when new notifications arrive - IMPROVED LOGIC
+  useEffect(() => {
+    if (unreadCount > prevUnreadCountRef.current && !isMuted && audioRef.current) {
+      console.log(`New notification! Playing sound. Unread: ${unreadCount}, Previous: ${prevUnreadCountRef.current}`);
+      playNotificationSound();
+    }
+    prevUnreadCountRef.current = unreadCount;
+  }, [unreadCount, isMuted]);
+
+  // Sound management functions
+  const playNotificationSound = async () => {
+    if (!audioRef.current || isPlaying || isMuted) return;
+    
+    try {
+      setIsPlaying(true);
+      // Reset audio to start from beginning
+      audioRef.current.currentTime = 0;
+      await audioRef.current.play();
+      console.log('Notification sound played successfully');
+      
+      audioRef.current.onended = () => {
+        setIsPlaying(false);
+      };
+
+      audioRef.current.onerror = (e) => {
+        console.error('Sound playback error:', e);
+        setIsPlaying(false);
+      };
+    } catch (error) {
+      console.log('Sound play failed:', error);
+      setIsPlaying(false);
+    }
+  };
+
+  const toggleMute = () => {
+    const newMutedState = !isMuted;
+    setIsMuted(newMutedState);
+    localStorage.setItem('notificationSoundMuted', JSON.stringify(newMutedState));
+    console.log(`Sound ${newMutedState ? 'muted' : 'unmuted'}`);
+  };
 
   const markAsRead = async (notificationId) => {
     try {
@@ -90,7 +159,7 @@ const NotificationBell = () => {
     }
   };
 
-  // NEW: Get appropriate icon for each notification type
+  // Get appropriate icon for each notification type
   const getNotificationIcon = (type) => {
     switch (type) {
       // Reservation notifications
@@ -123,7 +192,7 @@ const NotificationBell = () => {
     }
   };
 
-  // NEW: Get color class for notification type
+  // Get color class for notification type
   const getNotificationColor = (type) => {
     const colors = {
       // Reservation notifications
@@ -144,7 +213,7 @@ const NotificationBell = () => {
     return colors[type] || 'text-secondary';
   };
 
-  // NEW: Handle notification click with appropriate actions
+  // Handle notification click with appropriate actions
   const handleNotificationClick = async (notification) => {
     // Mark as read first
     if (!notification.is_read) {
@@ -217,7 +286,7 @@ const NotificationBell = () => {
     <div className="notification-bell position-relative" ref={dropdownRef}>
       {/* Bell Icon */}
       <button
-        className="btn btn-outline-secondary position-relative"
+        className={`btn btn-outline-secondary position-relative ${isPlaying ? 'sound-playing' : ''}`}
         onClick={() => setShowDropdown(!showDropdown)}
         aria-label="Notifications"
       >
@@ -225,6 +294,12 @@ const NotificationBell = () => {
         {unreadCount > 0 && (
           <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
             {unreadCount > 9 ? '9+' : unreadCount}
+          </span>
+        )}
+        {/* Sound status indicator */}
+        {isMuted && (
+          <span className="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-warning text-dark">
+            <i className="fas fa-volume-mute" style={{fontSize: '0.6rem'}}></i>
           </span>
         )}
       </button>
@@ -235,15 +310,30 @@ const NotificationBell = () => {
           <div className="dropdown-header p-3 border-bottom">
             <div className="d-flex justify-content-between align-items-center">
               <h6 className="mb-0">Notifications</h6>
-              {unreadCount > 0 && (
+              <div className="d-flex gap-2">
+                {/* Mute toggle button */}
                 <button
-                  className="btn btn-sm btn-outline-primary"
-                  onClick={markAllAsRead}
+                  className="btn btn-sm btn-outline-warning"
+                  onClick={toggleMute}
+                  title={isMuted ? 'Unmute notification sounds' : 'Mute notification sounds'}
                 >
-                  Mark all read
+                  <i className={`fas ${isMuted ? 'fa-volume-mute' : 'fa-volume-up'}`}></i>
                 </button>
-              )}
+                {unreadCount > 0 && (
+                  <button
+                    className="btn btn-sm btn-outline-primary"
+                    onClick={markAllAsRead}
+                  >
+                    Mark all read
+                  </button>
+                )}
+              </div>
             </div>
+            {/* Sound status text */}
+            <small className="text-muted">
+              <i className={`fas ${isMuted ? 'fa-volume-mute text-warning' : 'fa-volume-up text-success'} me-1`}></i>
+              Sound {isMuted ? 'muted' : 'enabled'}
+            </small>
           </div>
 
           <div className="dropdown-body" style={{ maxHeight: '400px', overflowY: 'auto', width: '350px' }}>
